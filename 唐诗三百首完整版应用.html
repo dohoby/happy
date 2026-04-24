@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>唐诗三百首</title>
+<script src="https://unpkg.com/pinyin-pro@3.20.0/dist/index.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:#faf8f5;color:#333;min-height:100vh;padding-bottom:80px;line-height:1.6}
+.container{max-width:100%;margin:0 auto;padding:12px}
+@media(min-width:768px){.container{max-width:700px}}
+
+header{background:linear-gradient(135deg,#2c3e50 0%,#34495e 100%);color:white;padding:16px;border-radius:0 0 16px 16px;margin:-12px -12px 16px -12px}
+.header-content{display:flex;align-items:center;justify-content:space-between}
+.menu-toggle{background:none;border:none;color:white;font-size:1.3em;cursor:pointer}
+.page-title{font-size:1.1em;font-weight:600}
+
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0 0}
+.stat-item{background:rgba(255,255,255,0.12);padding:10px;border-radius:10px;text-align:center}
+.stat-value{font-size:1.2em;font-weight:bold}
+.stat-label{font-size:.75em;opacity:.85}
+@media(min-width:768px){.stats{grid-template-columns:repeat(4,1fr)}}
+
+.search-box{margin:12px 0;position:relative}
+#search-input{width:100%;padding:12px 40px 12px 16px;border:none;border-radius:25px;font-size:.95em;background:rgba(255,255,255,0.95);color:#333}
+.search-icon{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:#999}
+
+.card{background:white;padding:18px;border-radius:14px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,0.06)}
+
+#search-results{display:none}
+#search-results.active{display:block}
+.result-section{margin-bottom:14px}
+.result-section h3{font-size:.85em;color:#888;margin-bottom:8px;padding-left:4px;text-transform:uppercase;letter-spacing:1px}
+.result-poem-item,.result-poet-item{background:white;padding:14px;border-radius:10px;margin-bottom:8px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.05);transition:transform .15s,box-shadow .15s}
+.result-poem-item:hover,.result-poet-item:hover{transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,0.1)}
+.result-poem-title{font-weight:600;color:#2c3e50;margin-bottom:4px}
+.result-poem-meta{font-size:.85em;color:#888}
+.result-poem-snippet{font-size:.9em;color:#555;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.result-poet-name{font-weight:600;color:#2c3e50}
+.result-poet-bio{font-size:.85em;color:#888;margin-top:2px}
+
+#side-nav{position:fixed;top:0;left:0;width:280px;height:100vh;background:white;box-shadow:2px 0 20px rgba(0,0,0,0.1);transform:translateX(-100%);transition:transform .3s ease;z-index:1000;display:flex;flex-direction:column}
+#side-nav.active{transform:translateX(0)}
+.nav-header{background:linear-gradient(135deg,#2c3e50 0%,#34495e 100%);padding:20px;color:white}
+.nav-header h2{font-size:1.15em;margin-bottom:4px}
+.nav-header p{font-size:.8em;opacity:.8}
+.nav-content{flex:1;overflow-y:auto;padding:10px}
+.nav-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:999;display:none}
+.nav-overlay.active{display:block}
+
+.poet-list{list-style:none}
+.poet-item{padding:14px 12px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background .2s;display:flex;justify-content:space-between;align-items:center}
+.poet-item:hover{background:#f8f9fa}
+.poet-name{font-weight:500}
+.poet-count{background:#e9ecef;padding:2px 8px;border-radius:10px;font-size:.75em;color:#666}
+
+.page{display:none}
+.page.active{display:block}
+
+.welcome-card{text-align:center}
+.welcome-icon{font-size:2.5em;color:#c0392b;margin-bottom:10px}
+.welcome-card h1{color:#2c3e50;margin-bottom:8px;font-size:1.3em}
+.welcome-card p{color:#666;line-height:1.6;margin-bottom:10px;font-size:.9em}
+
+.poem-header{text-align:center;padding-bottom:4px}
+.poem-title{color:#2c3e50;font-size:1.35em;margin-bottom:6px;font-weight:600}
+.poem-author{color:#7f8c8d;font-size:.9em;display:flex;align-items:center;justify-content:center;gap:6px}
+
+.nav-buttons{display:flex;gap:10px;margin:14px 0;justify-content:center;align-items:center}
+.nav-poem-btn{background:#34495e;color:white;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:.9em}
+.nav-poem-btn:disabled{opacity:.4;cursor:not-allowed}
+.nav-poem-btn.prev{background:#95a5a6}
+.position-indicator{padding:0 12px;color:#7f8c8d;font-size:.9em;font-weight:500}
+
+.poem-content-card{position:relative}
+.display-toggle{position:absolute;top:10px;right:14px;background:#ecf0f1;border:none;padding:4px 10px;border-radius:12px;font-size:.75em;color:#555;cursor:pointer}
+.poem-text{font-size:1.25em;line-height:2.2;text-align:center}
+.pinyin-ruby{display:inline-block;margin:0 2px;vertical-align:top}
+.pinyin-text{display:block;font-size:.6em;color:#c0392b;font-weight:600;line-height:1.2}
+.hanzi-text{display:block;font-size:1.1em;line-height:1.2}
+.no-pinyin .pinyin-text{display:none}
+.no-pinyin .hanzi-text{font-size:1.25em}
+
+.tabs{display:flex;gap:0;border-bottom:2px solid #ecf0f1;margin-bottom:14px}
+.tab-btn{flex:1;background:none;border:none;padding:10px;font-size:.9em;color:#7f8c8d;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
+.tab-btn.active{color:#2c3e50;border-bottom-color:#2c3e50;font-weight:600}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.tab-pane{font-size:.95em;line-height:1.8;color:#444}
+.tab-pane p{margin-bottom:8px}
+.tab-empty{color:#999;text-align:center;padding:20px;font-style:italic}
+
+.voice-controls{padding-top:4px}
+.voice-title{display:flex;align-items:center;gap:8px;margin-bottom:12px;color:#2c3e50;font-size:.95em}
+.voice-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+@media(min-width:768px){.voice-buttons{grid-template-columns:repeat(5,1fr)}}
+.voice-btn{background:#2c3e50;color:white;border:none;padding:12px 4px;border-radius:8px;font-size:.9em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px}
+.voice-btn:disabled{opacity:.4;cursor:not-allowed}
+.voice-btn.pause{background:#2980b9}
+.voice-btn.stop{background:#27ae60}
+.voice-btn.loop,.voice-btn.list-loop{background:#8e44ad}
+.voice-btn.loop.active,.voice-btn.list-loop.active{background:#e74c3c}
+.voice-status{text-align:center;color:#7f8c8d;font-size:.85em;padding:10px;background:#f8f9fa;border-radius:8px}
+
+.poet-info h3{color:#2c3e50;margin-bottom:8px;font-size:1em}
+.poet-info p{color:#555;font-size:.9em;line-height:1.7}
+
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:white;display:grid;grid-template-columns:repeat(2,1fr);padding:10px;box-shadow:0 -2px 10px rgba(0,0,0,0.08);z-index:100}
+.nav-btn{display:flex;flex-direction:column;align-items:center;color:#7f8c8d;background:none;border:none;padding:6px;cursor:pointer;font-size:.75em;gap:4px}
+.nav-btn.active{color:#2c3e50}
+.nav-btn i{font-size:1.3em}
+
+.back-btn{display:inline-flex;align-items:center;gap:6px;background:#34495e;color:white;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;margin-bottom:14px;font-size:.9em}
+
+.loading{text-align:center;padding:30px;display:none}
+.loading.active{display:block}
+.spinner{width:36px;height:36px;border:3px solid #f3f3f3;border-top:3px solid #2c3e50;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 10px}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+
+.wechat-tip{background:#fff3cd;color:#856404;padding:10px 14px;border-radius:8px;font-size:.85em;margin-bottom:12px;display:none}
+.wechat-tip.active{display:block}
+.empty-message{text-align:center;padding:30px;color:#999}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<div class="header-content">
+<button class="menu-toggle" id="menu-toggle"><i class="fas fa-bars"></i></button>
+<div class="page-title" id="page-title">唐诗三百首</div>
+<div style="width:32px"></div>
+</div>
+<div class="stats">
+<div class="stat-item"><div class="stat-value" id="poet-count">0</div><div class="stat-label">位诗人</div></div>
+<div class="stat-item"><div class="stat-value" id="poem-count">0</div><div class="stat-label">首诗歌</div></div>
+<div class="stat-item"><div class="stat-value" id="pinyin-status">-</div><div class="stat-label">拼音标注</div></div>
+<div class="stat-item"><div class="stat-value" id="voice-status">-</div><div class="stat-label">语音朗读</div></div>
+</div>
+<div class="search-box">
+<input type="text" id="search-input" placeholder="搜索诗人、诗名或诗句...">
+<span class="search-icon"><i class="fas fa-search"></i></span>
+</div>
+</header>
+
+<div class="nav-overlay" id="nav-overlay"></div>
+<nav id="side-nav">
+<div class="nav-header">
+<h2><i class="fas fa-book-open"></i> 诗人列表</h2>
+<p>按诗人姓氏排序</p>
+</div>
+<div class="nav-content">
+<ul id="poet-list" class="poet-list"></ul>
+</div>
+</nav>
+
+<main class="main-content">
+<div id="search-results"></div>
+
+<div id="home-page" class="page active">
+<div class="card welcome-card">
+<div class="welcome-icon"><i class="fas fa-book-reader"></i></div>
+<h1>唐诗三百首</h1>
+<p>精选唐代代表诗人的经典作品，配有拼音标注、注释译文与语音朗读功能。</p>
+</div>
+</div>
+
+<div id="poet-poems-page" class="page">
+<div class="card" style="background:linear-gradient(135deg,#34495e,#2c3e50);color:white;">
+<div style="display:flex;align-items:center;gap:12px;">
+<button id="back-to-poet-list" style="background:none;border:none;color:white;font-size:1.2em;cursor:pointer;"><i class="fas fa-arrow-left"></i></button>
+<div>
+<h2 id="current-poet-name" style="font-size:1.2em;">李白</h2>
+<p id="current-poet-count" style="font-size:.85em;opacity:.85;">10首作品</p>
+</div>
+</div>
+</div>
+<div id="poet-poems-list"></div>
+</div>
+
+<div id="poem-page" class="page">
+<button class="back-btn" id="back-btn"><i class="fas fa-arrow-left"></i> 返回</button>
+
+<div class="card poem-header">
+<h2 id="detail-title" class="poem-title"></h2>
+<div class="poem-author"><i class="fas fa-user"></i><span id="poet-name"></span></div>
+</div>
+
+<div class="nav-buttons">
+<button id="prev-poem" class="nav-poem-btn prev"><i class="fas fa-chevron-left"></i> 上一首</button>
+<div class="position-indicator" id="current-position">0/0</div>
+<button id="next-poem" class="nav-poem-btn">下一首 <i class="fas fa-chevron-right"></i></button>
+</div>
+
+<div class="card poem-content-card">
+<button class="display-toggle" id="toggle-pinyin">隐藏拼音</button>
+<div id="detail-content" class="poem-text"></div>
+</div>
+
+<div class="card">
+<div class="tabs">
+<button class="tab-btn active" data-tab="content">正文</button>
+<button class="tab-btn" data-tab="notes">注释</button>
+<button class="tab-btn" data-tab="translation">译文</button>
+<button class="tab-btn" data-tab="analysis">赏析</button>
+</div>
+<div class="tab-content active" id="tab-content"><div class="tab-pane" id="tab-pane"></div></div>
+</div>
+
+<div class="card voice-controls" id="voice-panel">
+<div class="wechat-tip" id="wechat-tip"><i class="fas fa-info-circle"></i> 微信内不支持语音朗读，请在系统浏览器中打开</div>
+<div class="voice-title"><i class="fas fa-volume-up"></i><span>语音朗读</span></div>
+<div class="voice-buttons">
+<button id="play-btn" class="voice-btn"><i class="fas fa-play"></i> 朗读</button>
+<button id="pause-btn" class="voice-btn pause" disabled><i class="fas fa-pause"></i> 暂停</button>
+<button id="stop-btn" class="voice-btn stop" disabled><i class="fas fa-stop"></i> 停止</button>
+<button id="loop-btn" class="voice-btn loop"><i class="fas fa-redo"></i> 循环</button>
+<button id="list-loop-btn" class="voice-btn list-loop"><i class="fas fa-list"></i> 连播</button>
+</div>
+<div class="voice-status" id="current-status"><i class="fas fa-info-circle"></i> 点击「朗读」播放语音</div>
+</div>
+
+<div class="card poet-info">
+<h3><i class="fas fa-user"></i> 诗人简介</h3>
+<p id="poet-bio"></p>
+</div>
+</div>
+</main>
+
+<nav class="bottom-nav" id="bottom-nav">
+<button id="nav-home" class="nav-btn active"><i class="fas fa-home"></i><span>首页</span></button>
+<button id="nav-random" class="nav-btn"><i class="fas fa-random"></i><span>随机</span></button>
+</nav>
+</div>
+
+<script>
+// ===== 内嵌数据：300首唐诗 =====
+const tangPoetryData=[
+  {"id":"libai","name":"李白","bio":"李白（701年－762年），字太白，号青莲居士，唐代伟大的浪漫主义诗人，被后人誉为'诗仙'。与杜甫并称'李杜'。","poems":[
+    {"title":"静夜思","content":"床前明月光，疑是地上霜。\n举头望明月，低头思故乡。"},
+    {"title":"望庐山瀑布","content":"日照香炉生紫烟，遥看瀑布挂前川。\n飞流直下三千尺，疑是银河落九天。"},
+    {"title":"赠汪伦","content":"李白乘舟将欲行，忽闻岸上踏歌声。\n桃花潭水深千尺，不及汪伦送我情。"},
+    {"title":"早发白帝城","content":"朝辞白帝彩云间，千里江陵一日还。\n两岸猿声啼不住，轻舟已过万重山。"},
+    {"title":"黄鹤楼送孟浩然之广陵","content":"故人西辞黄鹤楼，烟花三月下扬州。\n孤帆远影碧空尽，唯见长江天际流。"},
+    {"title":"月下独酌","content":"花间一壶酒，独酌无相亲。\n举杯邀明月，对影成三人。"},
+    {"title":"行路难","content":"金樽清酒斗十千，玉盘珍羞直万钱。\n停杯投箸不能食，拔剑四顾心茫然。"},
+    {"title":"将进酒","content":"君不见黄河之水天上来，奔流到海不复回。\n君不见高堂明镜悲白发，朝如青丝暮成雪。"},
+    {"title":"夜宿山寺","content":"危楼高百尺，手可摘星辰。\n不敢高声语，恐惊天上人。"},
+    {"title":"独坐敬亭山","content":"众鸟高飞尽，孤云独去闲。\n相看两不厌，只有敬亭山。"},
+    {"title":"秋浦歌十七首·其十五","content":"白发三千丈，缘愁似个长。\n不知明镜里，何处得秋霜。"},
+    {"title":"古朗月行","content":"小时不识月，呼作白玉盘。\n又疑瑶台镜，飞在青云端。"},
+    {"title":"春夜洛城闻笛","content":"谁家玉笛暗飞声，散入春风满洛城。\n此夜曲中闻折柳，何人不起故园情。"},
+    {"title":"望天门山","content":"天门中断楚江开，碧水东流至此回。\n两岸青山相对出，孤帆一片日边来。"},
+    {"title":"闻王昌龄左迁龙标遥有此寄","content":"杨花落尽子规啼，闻道龙标过五溪。\n我寄愁心与明月，随君直到夜郎西。"},
+    {"title":"峨眉山月歌","content":"峨眉山月半轮秋，影入平羌江水流。\n夜发清溪向三峡，思君不见下渝州。"},
+    {"title":"渡荆门送别","content":"渡远荆门外，来从楚国游。\n山随平野尽，江入大荒流。"},
+    {"title":"送友人","content":"青山横北郭，白水绕东城。\n此地一为别，孤蓬万里征。"},
+    {"title":"宣州谢朓楼饯别校书叔云","content":"弃我去者，昨日之日不可留；\n乱我心者，今日之日多烦忧。"},
+    {"title":"长相思","content":"长相思，在长安。\n络纬秋啼金井阑，微霜凄凄簟色寒。"}
+  ]},
+  {"id":"dufu","name":"杜甫","bio":"杜甫（712年－770年），字子美，自号少陵野老，唐代伟大的现实主义诗人，被后人誉为'诗圣'。","poems":[
+    {"title":"春望","content":"国破山河在，城春草木深。\n感时花溅泪，恨别鸟惊心。\n烽火连三月，家书抵万金。\n白头搔更短，浑欲不胜簪。"},
+    {"title":"春夜喜雨","content":"好雨知时节，当春乃发生。\n随风潜入夜，润物细无声。\n野径云俱黑，江船火独明。\n晓看红湿处，花重锦官城。"},
+    {"title":"望岳","content":"岱宗夫如何？齐鲁青未了。\n造化钟神秀，阴阳割昏晓。\n荡胸生曾云，决眦入归鸟。\n会当凌绝顶，一览众山小。"},
+    {"title":"绝句","content":"两个黄鹂鸣翠柳，一行白鹭上青天。\n窗含西岭千秋雪，门泊东吴万里船。"},
+    {"title":"登高","content":"风急天高猿啸哀，渚清沙白鸟飞回。\n无边落木萧萧下，不尽长江滚滚来。"},
+    {"title":"江畔独步寻花","content":"黄四娘家花满蹊，千朵万朵压枝低。\n留连戏蝶时时舞，自在娇莺恰恰啼。"},
+    {"title":"月夜忆舍弟","content":"戍鼓断人行，边秋一雁声。\n露从今夜白，月是故乡明。"},
+    {"title":"蜀相","content":"丞相祠堂何处寻？锦官城外柏森森。\n映阶碧草自春色，隔叶黄鹂空好音。"},
+    {"title":"赠花卿","content":"锦城丝管日纷纷，半入江风半入云。\n此曲只应天上有，人间能得几回闻。"},
+    {"title":"江南逢李龟年","content":"岐王宅里寻常见，崔九堂前几度闻。\n正是江南好风景，落花时节又逢君。"},
+    {"title":"旅夜书怀","content":"细草微风岸，危樯独夜舟。\n星垂平野阔，月涌大江流。"},
+    {"title":"八阵图","content":"功盖三分国，名成八阵图。\n江流石不转，遗恨失吞吴。"},
+    {"title":"前出塞九首·其六","content":"挽弓当挽强，用箭当用长。\n射人先射马，擒贼先擒王。"},
+    {"title":"绝句二首","content":"迟日江山丽，春风花草香。\n泥融飞燕子，沙暖睡鸳鸯。"},
+    {"title":"茅屋为秋风所破歌","content":"八月秋高风怒号，卷我屋上三重茅。\n茅飞渡江洒江郊，高者挂罥长林梢，下者飘转沉塘坳。"},
+    {"title":"石壕吏","content":"暮投石壕村，有吏夜捉人。\n老翁逾墙走，老妇出门看。"},
+    {"title":"兵车行","content":"车辚辚，马萧萧，行人弓箭各在腰。\n爷娘妻子走相送，尘埃不见咸阳桥。"},
+    {"title":"丽人行","content":"三月三日天气新，长安水边多丽人。\n态浓意远淑且真，肌理细腻骨肉匀。"},
+    {"title":"哀江头","content":"少陵野老吞声哭，春日潜行曲江曲。\n江头宫殿锁千门，细柳新蒲为谁绿？"},
+    {"title":"哀王孙","content":"长安城头头白乌，夜飞延秋门上呼。\n又向人家啄大屋，屋底达官走避胡。"}
+  ]},
+  {"id":"wangwei","name":"王维","bio":"王维（701年－761年），字摩诘，号摩诘居士，唐代著名诗人、画家，被誉为'诗佛'。","poems":[
+    {"title":"相思","content":"红豆生南国，春来发几枝。\n愿君多采撷，此物最相思。"},
+    {"title":"鹿柴","content":"空山不见人，但闻人语响。\n返景入深林，复照青苔上。"},
+    {"title":"竹里馆","content":"独坐幽篁里，弹琴复长啸。\n深林人不知，明月来相照。"},
+    {"title":"送元二使安西","content":"渭城朝雨浥轻尘，客舍青青柳色新。\n劝君更尽一杯酒，西出阳关无故人。"},
+    {"title":"九月九日忆山东兄弟","content":"独在异乡为异客，每逢佳节倍思亲。\n遥知兄弟登高处，遍插茱萸少一人。"},
+    {"title":"山居秋暝","content":"空山新雨后，天气晚来秋。\n明月松间照，清泉石上流。"},
+    {"title":"鸟鸣涧","content":"人闲桂花落，夜静春山空。\n月出惊山鸟，时鸣春涧中。"},
+    {"title":"画","content":"远看山有色，近听水无声。\n春去花还在，人来鸟不惊。"},
+    {"title":"杂诗","content":"君自故乡来，应知故乡事。\n来日绮窗前，寒梅著花未？"},
+    {"title":"终南别业","content":"中岁颇好道，晚家南山陲。\n兴来每独往，胜事空自知。"},
+    {"title":"使至塞上","content":"单车欲问边，属国过居延。\n征蓬出汉塞，归雁入胡天。"},
+    {"title":"渭川田家","content":"斜阳照墟落，穷巷牛羊归。\n野老念牧童，倚杖候荆扉。"},
+    {"title":"青溪","content":"言入黄花川，每逐青溪水。\n随山将万转，趣途无百里。"},
+    {"title":"老将行","content":"少年十五二十时，步行夺得胡马骑。\n射杀山中白额虎，肯数邺下黄须儿！"},
+    {"title":"桃源行","content":"渔舟逐水爱山春，两岸桃花夹古津。\n坐看红树不知远，行尽青溪不见人。"},
+    {"title":"陇西行","content":"十里一走马，五里一扬鞭。\n都护军书至，匈奴围酒泉。"},
+    {"title":"少年行","content":"新丰美酒斗十千，咸阳游侠多少年。\n相逢意气为君饮，系马高楼垂柳边。"},
+    {"title":"观猎","content":"风劲角弓鸣，将军猎渭城。\n草枯鹰眼疾，雪尽马蹄轻。"},
+    {"title":"汉江临眺","content":"楚塞三湘接，荆门九派通。\n江流天地外，山色有无中。"},
+    {"title":"积雨辋川庄作","content":"积雨空林烟火迟，蒸藜炊黍饷东菑。\n漠漠水田飞白鹭，阴阴夏木啭黄鹂。"}
+  ]},
+  {"id":"baijuyi","name":"白居易","bio":"白居易（772年－846年），字乐天，号香山居士，唐代伟大的现实主义诗人，有'诗魔'之称。","poems":[
+    {"title":"赋得古原草送别","content":"离离原上草，一岁一枯荣。\n野火烧不尽，春风吹又生。"},
+    {"title":"忆江南","content":"江南好，风景旧曾谙。\n日出江花红胜火，春来江水绿如蓝。\n能不忆江南？"},
+    {"title":"暮江吟","content":"一道残阳铺水中，半江瑟瑟半江红。\n可怜九月初三夜，露似真珠月似弓。"},
+    {"title":"池上","content":"小娃撑小艇，偷采白莲回。\n不解藏踪迹，浮萍一道开。"},
+    {"title":"钱塘湖春行","content":"孤山寺北贾亭西，水面初平云脚低。\n几处早莺争暖树，谁家新燕啄春泥。"},
+    {"title":"问刘十九","content":"绿蚁新醅酒，红泥小火炉。\n晚来天欲雪，能饮一杯无？"},
+    {"title":"大林寺桃花","content":"人间四月芳菲尽，山寺桃花始盛开。\n长恨春归无觅处，不知转入此中来。"},
+    {"title":"夜雪","content":"已讶衾枕冷，复见窗户明。\n夜深知雪重，时闻折竹声。"},
+    {"title":"卖炭翁","content":"卖炭翁，伐薪烧炭南山中。\n满面尘灰烟火色，两鬓苍苍十指黑。"},
+    {"title":"长恨歌（节选）","content":"汉皇重色思倾国，御宇多年求不得。\n杨家有女初长成，养在深闺人未识。"},
+    {"title":"琵琶行（节选）","content":"浔阳江头夜送客，枫叶荻花秋瑟瑟。\n主人下马客在船，举酒欲饮无管弦。"},
+    {"title":"观刈麦","content":"田家少闲月，五月人倍忙。\n夜来南风起，小麦覆陇黄。"},
+    {"title":"白云泉","content":"天平山上白云泉，云自无心水自闲。\n何必奔冲山下去，更添波浪向人间。"},
+    {"title":"后宫词","content":"泪湿罗巾梦不成，夜深前殿按歌声。\n红颜未老恩先断，斜倚薰笼坐到明。"},
+    {"title":"花非花","content":"花非花，雾非雾。\n夜半来，天明去。\n来如春梦几多时？\n去似朝云无觅处。"},
+    {"title":"放言五首·其三","content":"赠君一法决狐疑，不用钻龟与祝蓍。\n试玉要烧三日满，辨材须待七年期。"},
+    {"title":"与梦得沽酒闲饮且约后期","content":"少时犹不忧生计，老后谁能惜酒钱？\n共把十千沽一斗，相看七十欠三年。"},
+    {"title":"邯郸冬至夜思家","content":"邯郸驿里逢冬至，抱膝灯前影伴身。\n想得家中夜深坐，还应说着远行人。"},
+    {"title":"秋雨夜眠","content":"凉冷三秋夜，安闲一老翁。\n卧迟灯灭后，睡美雨声中。"},
+    {"title":"舟中读元九诗","content":"把君诗卷灯前读，诗尽灯残天未明。\n眼痛灭灯犹暗坐，逆风吹浪打船声。"}
+  ]},
+  {"id":"lisan","name":"李商隐","bio":"李商隐（约813年－约858年），字义山，号玉溪生，晚唐著名诗人，与杜牧合称'小李杜'。","poems":[
+    {"title":"夜雨寄北","content":"君问归期未有期，巴山夜雨涨秋池。\n何当共剪西窗烛，却话巴山夜雨时。"},
+    {"title":"登乐游原","content":"向晚意不适，驱车登古原。\n夕阳无限好，只是近黄昏。"},
+    {"title":"锦瑟","content":"锦瑟无端五十弦，一弦一柱思华年。\n庄生晓梦迷蝴蝶，望帝春心托杜鹃。"},
+    {"title":"无题","content":"相见时难别亦难，东风无力百花残。\n春蚕到死丝方尽，蜡炬成灰泪始干。"},
+    {"title":"嫦娥","content":"云母屏风烛影深，长河渐落晓星沉。\n嫦娥应悔偷灵药，碧海青天夜夜心。"},
+    {"title":"贾生","content":"宣室求贤访逐臣，贾生才调更无伦。\n可怜夜半虚前席，不问苍生问鬼神。"},
+    {"title":"霜月","content":"初闻征雁已无蝉，百尺楼高水接天。\n青女素娥俱耐冷，月中霜里斗婵娟。"},
+    {"title":"宿骆氏亭寄怀崔雍崔衮","content":"竹坞无尘水槛清，相思迢递隔重城。\n秋阴不散霜飞晚，留得枯荷听雨声。"},
+    {"title":"风雨","content":"凄凉宝剑篇，羁泊欲穷年。\n黄叶仍风雨，青楼自管弦。"},
+    {"title":"落花","content":"高阁客竟去，小园花乱飞。\n参差连曲陌，迢递送斜晖。"},
+    {"title":"凉思","content":"客去波平槛，蝉休露满枝。\n永怀当此节，倚立自移时。"},
+    {"title":"北青萝","content":"残阳西入崦，茅屋访孤僧。\n落叶人何在，寒云路几层。"},
+    {"title":"蝉","content":"本以高难饱，徒劳恨费声。\n五更疏欲断，一树碧无情。"},
+    {"title":"无题二首·其一","content":"昨夜星辰昨夜风，画楼西畔桂堂东。\n身无彩凤双飞翼，心有灵犀一点通。"},
+    {"title":"隋宫","content":"紫泉宫殿锁烟霞，欲取芜城作帝家。\n玉玺不缘归日角，锦帆应是到天涯。"},
+    {"title":"马嵬","content":"海外徒闻更九州，他生未卜此生休。\n空闻虎旅传宵柝，无复鸡人报晓筹。"},
+    {"title":"为有","content":"为有云屏无限娇，凤城寒尽怕春宵。\n无端嫁得金龟婿，辜负香衾事早朝。"},
+    {"title":"瑶池","content":"瑶池阿母绮窗开，黄竹歌声动地哀。\n八骏日行三万里，穆王何事不重来。"},
+    {"title":"重过圣女祠","content":"白石岩扉碧藓滋，上清沦谪得归迟。\n一春梦雨常飘瓦，尽日灵风不满旗。"},
+    {"title":"韩碑","content":"元和天子神武姿，彼何人哉轩与羲。\n誓将上雪列圣耻，坐法宫中朝四夷。"}
+  ]},
+  {"id":"duomu","name":"杜牧","bio":"杜牧（803年－852年），字牧之，号樊川居士，唐代著名诗人，与李商隐并称'小李杜'。","poems":[
+    {"title":"清明","content":"清明时节雨纷纷，路上行人欲断魂。\n借问酒家何处有？牧童遥指杏花村。"},
+    {"title":"山行","content":"远上寒山石径斜，白云生处有人家。\n停车坐爱枫林晚，霜叶红于二月花。"},
+    {"title":"江南春","content":"千里莺啼绿映红，水村山郭酒旗风。\n南朝四百八十寺，多少楼台烟雨中。"},
+    {"title":"泊秦淮","content":"烟笼寒水月笼沙，夜泊秦淮近酒家。\n商女不知亡国恨，隔江犹唱后庭花。"},
+    {"title":"秋夕","content":"银烛秋光冷画屏，轻罗小扇扑流萤。\n天阶夜色凉如水，卧看牵牛织女星。"},
+    {"title":"赤壁","content":"折戟沉沙铁未销，自将磨洗认前朝。\n东风不与周郎便，铜雀春深锁二乔。"},
+    {"title":"赠别","content":"娉娉袅袅十三余，豆蔻梢头二月初。\n春风十里扬州路，卷上珠帘总不如。"},
+    {"title":"寄扬州韩绰判官","content":"青山隐隐水迢迢，秋尽江南草未凋。\n二十四桥明月夜，玉人何处教吹箫？"},
+    {"title":"题乌江亭","content":"胜败兵家事不期，包羞忍耻是男儿。\n江东子弟多才俊，卷土重来未可知。"},
+    {"title":"过华清宫","content":"长安回望绣成堆，山顶千门次第开。\n一骑红尘妃子笑，无人知是荔枝来。"},
+    {"title":"金谷园","content":"繁华事散逐香尘，流水无情草自春。\n日暮东风怨啼鸟，落花犹似坠楼人。"},
+    {"title":"遣怀","content":"落魄江湖载酒行，楚腰纤细掌中轻。\n十年一觉扬州梦，赢得青楼薄幸名。"},
+    {"title":"叹花","content":"自是寻春去校迟，不须惆怅怨芳时。\n狂风落尽深红色，绿叶成阴子满枝。"},
+    {"title":"紫薇花","content":"晓迎秋露一枝新，不占园中最上春。\n桃李无言又何在，向风偏笑艳阳人。"},
+    {"title":"齐安郡后池绝句","content":"菱透浮萍绿锦池，夏莺千啭弄蔷薇。\n尽日无人看微雨，鸳鸯相对浴红衣。"},
+    {"title":"题齐安城楼","content":"呜轧江楼角一声，微阳潋潋落寒汀。\n不用凭栏苦回首，故乡七十五长亭。"},
+    {"title":"初冬夜饮","content":"淮阳多病偶求欢，客袖侵霜与烛盘。\n砌下梨花一堆雪，明年谁此凭阑干？"},
+    {"title":"屏风绝句","content":"屏风周昉画纤腰，岁久丹青色半销。\n斜倚玉窗鸾发女，拂尘犹自妒娇娆。"},
+    {"title":"念昔游三首·其一","content":"十载飘然绳检外，樽前自献自为酬。\n秋山春雨闲吟处，倚遍江南寺寺楼。"},
+    {"title":"题木兰庙","content":"弯弓征战作男儿，梦里曾经与画眉。\n几度思归还把酒，拂云堆上祝明妃。"}
+  ]},
+  {"id":"meng","name":"孟浩然","bio":"孟浩然（689年－740年），唐代著名的山水田园诗人，与王维并称'王孟'。","poems":[
+    {"title":"春晓","content":"春眠不觉晓，处处闻啼鸟。\n夜来风雨声，花落知多少。"},
+    {"title":"过故人庄","content":"故人具鸡黍，邀我至田家。\n绿树村边合，青山郭外斜。"},
+    {"title":"宿建德江","content":"移舟泊烟渚，日暮客愁新。\n野旷天低树，江清月近人。"},
+    {"title":"望洞庭湖赠张丞相","content":"八月湖水平，涵虚混太清。\n气蒸云梦泽，波撼岳阳城。"},
+    {"title":"夜归鹿门歌","content":"山寺钟鸣昼已昏，渔梁渡头争渡喧。\n人随沙岸向江村，余亦乘舟归鹿门。"},
+    {"title":"与诸子登岘山","content":"人事有代谢，往来成古今。\n江山留胜迹，我辈复登临。"},
+    {"title":"夏日南亭怀辛大","content":"山光忽西落，池月渐东上。\n散发乘夕凉，开轩卧闲敞。"},
+    {"title":"岁暮归南山","content":"北阙休上书，南山归敝庐。\n不才明主弃，多病故人疏。"},
+    {"title":"留别王维","content":"寂寂竟何待，朝朝空自归。\n欲寻芳草去，惜与故人违。"},
+    {"title":"秋登兰山寄张五","content":"北山白云里，隐者自怡悦。\n相望试登高，心随雁飞灭。"},
+    {"title":"宿桐庐江寄广陵旧游","content":"山暝听猿愁，沧江急夜流。\n风鸣两岸叶，月照一孤舟。"},
+    {"title":"早寒江上有怀","content":"木落雁南渡，北风江上寒。\n我家襄水曲，遥隔楚云端。"},
+    {"title":"题大禹寺义公禅房","content":"义公习禅寂，结宇依空林。\n户外一峰秀，阶前众壑深。"},
+    {"title":"宿业师山房期丁大不至","content":"夕阳度西岭，群壑倏已暝。\n松月生夜凉，风泉满清听。"},
+    {"title":"秦中寄远上人","content":"一丘常欲卧，三径苦无资。\n北土非吾愿，东林怀我师。"},
+    {"title":"洛中访袁拾遗不遇","content":"洛阳访才子，江岭作流人。\n闻说梅花早，何如北地春。"},
+    {"title":"送杜十四之江南","content":"荆吴相接水为乡，君去春江正渺茫。\n日暮征帆何处泊？天涯一望断人肠。"},
+    {"title":"渡浙江问舟中人","content":"潮落江平未有风，扁舟共济与君同。\n时时引领望天末，何处青山是越中？"},
+    {"title":"送朱大入秦","content":"游人五陵去，宝剑值千金。\n分手脱相赠，平生一片心。"},
+    {"title":"送友人之京","content":"君登青云去，予望青山归。\n云山从此别，泪湿薜萝衣。"}
+  ]},
+  {"id":"wangzhihuan","name":"王之涣","bio":"王之涣（688年－742年），唐代著名边塞诗人，以《登鹳雀楼》和《凉州词》闻名。","poems":[
+    {"title":"登鹳雀楼","content":"白日依山尽，黄河入海流。\n欲穷千里目，更上一层楼。"},
+    {"title":"凉州词","content":"黄河远上白云间，一片孤城万仞山。\n羌笛何须怨杨柳，春风不度玉门关。"},
+    {"title":"送别","content":"杨柳东风树，青青夹御河。\n近来攀折苦，应为别离多。"},
+    {"title":"宴词","content":"长堤春水绿悠悠，畎入漳河一道流。\n莫听声声催去棹，桃溪浅处不胜舟。"},
+    {"title":"九日送别","content":"蓟庭萧瑟故人稀，何处登高且送归。\n今日暂同芳菊酒，明朝应作断蓬飞。"}
+  ]},
+  {"id":"hezhizhang","name":"贺知章","bio":"贺知章（约659年－约744年），字季真，唐代诗人、书法家。","poems":[
+    {"title":"咏柳","content":"碧玉妆成一树高，万条垂下绿丝绦。\n不知细叶谁裁出，二月春风似剪刀。"},
+    {"title":"回乡偶书","content":"少小离家老大回，乡音无改鬓毛衰。\n儿童相见不相识，笑问客从何处来。"},
+    {"title":"回乡偶书·其二","content":"离别家乡岁月多，近来人事半消磨。\n惟有门前镜湖水，春风不改旧时波。"},
+    {"title":"采莲曲","content":"稽山云雾郁嵯峨，镜水无风也自波。\n莫言春度芳菲尽，别有中流采芰荷。"},
+    {"title":"答朝士","content":"鈒镂银盘盛蛤蜊，镜湖莼菜乱如丝。\n乡曲近来佳此味，遮渠不道是吴儿。"}
+  ]},
+  {"id":"wangchangling","name":"王昌龄","bio":"王昌龄（698年－757年），字少伯，盛唐著名边塞诗人，被誉为'诗家夫子'、'七绝圣手'。","poems":[
+    {"title":"出塞","content":"秦时明月汉时关，万里长征人未还。\n但使龙城飞将在，不教胡马度阴山。"},
+    {"title":"芙蓉楼送辛渐","content":"寒雨连江夜入吴，平明送客楚山孤。\n洛阳亲友如相问，一片冰心在玉壶。"},
+    {"title":"从军行","content":"青海长云暗雪山，孤城遥望玉门关。\n黄沙百战穿金甲，不破楼兰终不还。"},
+    {"title":"闺怨","content":"闺中少妇不知愁，春日凝妆上翠楼。\n忽见陌头杨柳色，悔教夫婿觅封侯。"},
+    {"title":"长信怨","content":"奉帚平明金殿开，暂将团扇共徘徊。\n玉颜不及寒鸦色，犹带昭阳日影来。"},
+    {"title":"采莲曲","content":"荷叶罗裙一色裁，芙蓉向脸两边开。\n乱入池中看不见，闻歌始觉有人来。"},
+    {"title":"塞下曲","content":"饮马渡秋水，水寒风似刀。\n平沙日未没，黯黯见临洮。"},
+    {"title":"送柴侍御","content":"沅水通波接武冈，送君不觉有离伤。\n青山一道同云雨，明月何曾是两乡。"},
+    {"title":"西宫春怨","content":"西宫夜静百花香，欲卷珠帘春恨长。\n斜抱云和深见月，朦胧树色隐昭阳。"},
+    {"title":"春宫曲","content":"昨夜风开露井桃，未央前殿月轮高。\n平阳歌舞新承宠，帘外春寒赐锦袍。"}
+  ]},
+  {"id":"gaoshi","name":"高适","bio":"高适（704年－765年），字达夫，盛唐著名边塞诗人，与岑参并称'高岑'。","poems":[
+    {"title":"别董大","content":"千里黄云白日曛，北风吹雁雪纷纷。\n莫愁前路无知己，天下谁人不识君。"},
+    {"title":"燕歌行","content":"汉家烟尘在东北，汉将辞家破残贼。\n男儿本自重横行，天子非常赐颜色。"},
+    {"title":"塞上听吹笛","content":"雪净胡天牧马还，月明羌笛戍楼间。\n借问梅花何处落，风吹一夜满关山。"},
+    {"title":"除夜作","content":"旅馆寒灯独不眠，客心何事转凄然。\n故乡今夜思千里，霜鬓明朝又一年。"},
+    {"title":"送李少府贬峡中王少府贬长沙","content":"嗟君此别意何如，驻马衔杯问谪居。\n巫峡啼猿数行泪，衡阳归雁几封书。"},
+    {"title":"营州歌","content":"营州少年厌原野，狐裘蒙茸猎城下。\n虏酒千钟不醉人，胡儿十岁能骑马。"},
+    {"title":"和王七玉门关听吹笛","content":"胡人吹笛戍楼间，楼上萧条海月闲。\n借问落梅凡几曲，从风一夜满关山。"},
+    {"title":"送李侍御赴安西","content":"行子对飞蓬，金鞭指铁骢。\n功名万里外，心事一杯中。"},
+    {"title":"醉后赠张九旭","content":"世上漫相识，此翁殊不然。\n兴来书自圣，醉后语尤颠。"},
+    {"title":"人日寄杜二拾遗","content":"人日题诗寄草堂，遥怜故人思故乡。\n柳条弄色不忍见，梅花满枝空断肠。"}
+  ]},
+  {"id":"cencan","name":"岑参","bio":"岑参（715年－770年），唐代著名边塞诗人，与高适并称'高岑'。","poems":[
+    {"title":"白雪歌送武判官归京","content":"北风卷地白草折，胡天八月即飞雪。\n忽如一夜春风来，千树万树梨花开。"},
+    {"title":"逢入京使","content":"故园东望路漫漫，双袖龙钟泪不干。\n马上相逢无纸笔，凭君传语报平安。"},
+    {"title":"走马川行奉送出师西征","content":"君不见走马川行雪海边，平沙莽莽黄入天。\n轮台九月风夜吼，一川碎石大如斗。"},
+    {"title":"碛中作","content":"走马西来欲到天，辞家见月两回圆。\n今夜不知何处宿，平沙万里绝人烟。"},
+    {"title":"山房春事","content":"梁园日暮乱飞鸦，极目萧条三两家。\n庭树不知人去尽，春来还发旧时花。"},
+    {"title":"春梦","content":"洞房昨夜春风起，故人尚隔湘江水。\n枕上片时春梦中，行尽江南数千里。"},
+    {"title":"寄左省杜拾遗","content":"联步趋丹陛，分曹限紫微。\n晓随天仗入，暮惹御香归。"},
+    {"title":"和贾舍人早朝大明宫之作","content":"鸡鸣紫陌曙光寒，莺啭皇州春色阑。\n金阙晓钟开万户，玉阶仙仗拥千官。"},
+    {"title":"轮台歌奉送封大夫出师西征","content":"轮台城头夜吹角，轮台城北旄头落。\n羽书昨夜过渠黎，单于已在金山西。"},
+    {"title":"热海行送崔侍御还京","content":"侧闻阴山胡儿语，西头热海水如煮。\n海上众鸟不敢飞，中有鲤鱼长且肥。"}
+  ]},
+  {"id":"liu","name":"刘禹锡","bio":"刘禹锡（772年－842年），字梦得，唐代文学家、哲学家，有'诗豪'之称。","poems":[
+    {"title":"秋词","content":"自古逢秋悲寂寥，我言秋日胜春朝。\n晴空一鹤排云上，便引诗情到碧霄。"},
+    {"title":"乌衣巷","content":"朱雀桥边野草花，乌衣巷口夕阳斜。\n旧时王谢堂前燕，飞入寻常百姓家。"},
+    {"title":"竹枝词","content":"杨柳青青江水平，闻郎江上唱歌声。\n东边日出西边雨，道是无晴却有晴。"},
+    {"title":"酬乐天扬州初逢席上见赠","content":"巴山楚水凄凉地，二十三年弃置身。\n怀旧空吟闻笛赋，到乡翻似烂柯人。"},
+    {"title":"浪淘沙","content":"九曲黄河万里沙，浪淘风簸自天涯。\n如今直上银河去，同到牵牛织女家。"},
+    {"title":"望洞庭","content":"湖光秋月两相和，潭面无风镜未磨。\n遥望洞庭山水翠，白银盘里一青螺。"},
+    {"title":"石头城","content":"山围故国周遭在，潮打空城寂寞回。\n淮水东边旧时月，夜深还过女墙来。"},
+    {"title":"蜀先主庙","content":"天地英雄气，千秋尚凛然。\n势分三足鼎，业复五铢钱。"},
+    {"title":"再游玄都观","content":"百亩庭中半是苔，桃花净尽菜花开。\n种桃道士归何处，前度刘郎今又来。"},
+    {"title":"赏牡丹","content":"庭前芍药妖无格，池上芙蕖净少情。\n唯有牡丹真国色，花开时节动京城。"}
+  ]},
+  {"id":"liuhe","name":"柳宗元","bio":"柳宗元（773年－819年），字子厚，唐代文学家、哲学家，唐宋八大家之一。","poems":[
+    {"title":"江雪","content":"千山鸟飞绝，万径人踪灭。\n孤舟蓑笠翁，独钓寒江雪。"},
+    {"title":"渔翁","content":"渔翁夜傍西岩宿，晓汲清湘燃楚竹。\n烟销日出不见人，欸乃一声山水绿。"},
+    {"title":"登柳州城楼寄漳汀封连四州刺史","content":"城上高楼接大荒，海天愁思正茫茫。\n惊风乱飐芙蓉水，密雨斜侵薜荔墙。"},
+    {"title":"与浩初上人同看山寄京华亲故","content":"海畔尖山似剑铓，秋来处处割愁肠。\n若为化得身千亿，散上峰头望故乡。"},
+    {"title":"别舍弟宗一","content":"零落残魂倍黯然，双垂别泪越江边。\n一身去国六千里，万死投荒十二年。"},
+    {"title":"岭南江行","content":"瘴江南去入云烟，望尽黄茆是海边。\n山腹雨晴添象迹，潭心日暖长蛟涎。"},
+    {"title":"溪居","content":"久为簪组累，幸此南夷谪。\n闲依农圃邻，偶似山林客。"},
+    {"title":"晨诣超师院读禅经","content":"汲井漱寒齿，清心拂尘服。\n闲持贝叶书，步出东斋读。"},
+    {"title":"酬曹侍御过象县见寄","content":"破额山前碧玉流，骚人遥驻木兰舟。\n春风无限潇湘意，欲采蘋花不自由。"},
+    {"title":"柳州二月榕叶落尽偶题","content":"宦情羁思共凄凄，春半如秋意转迷。\n山城过雨百花尽，榕叶满庭莺乱啼。"}
+  ]},
+  {"id":"hanshan","name":"韩愈","bio":"韩愈（768年－824年），字退之，唐代文学家、哲学家，唐宋八大家之首。","poems":[
+    {"title":"早春呈水部张十八员外","content":"天街小雨润如酥，草色遥看近却无。\n最是一年春好处，绝胜烟柳满皇都。"},
+    {"title":"春雪","content":"新年都未有芳华，二月初惊见草芽。\n白雪却嫌春色晚，故穿庭树作飞花。"},
+    {"title":"左迁至蓝关示侄孙湘","content":"一封朝奏九重天，夕贬潮州路八千。\n欲为圣明除弊事，肯将衰朽惜残年！"},
+    {"title":"晚春","content":"草树知春不久归，百般红紫斗芳菲。\n杨花榆荚无才思，惟解漫天作雪飞。"},
+    {"title":"题榴花","content":"五月榴花照眼明，枝间时见子初成。\n可怜此地无车马，颠倒青苔落绛英。"},
+    {"title":"湘中","content":"猿愁鱼踊水翻波，自古流传是汨罗。\n蘋藻满盘无处奠，空闻渔父扣舷歌。"},
+    {"title":"答张十一","content":"山净江空水见沙，哀猿啼处两三家。\n筼筜竞长纤纤笋，踯躅闲开艳艳花。"},
+    {"title":"题木居士二首·其一","content":"火透波穿不计春，根如头面干如身。\n偶然题作木居士，便有无穷求福人。"},
+    {"title":"听颖师弹琴","content":"昵昵儿女语，恩怨相尔汝。\n划然变轩昂，勇士赴敌场。"},
+    {"title":"山石","content":"山石荦确行径微，黄昏到寺蝙蝠飞。\n升堂坐阶新雨足，芭蕉叶大栀子肥。"}
+  ]}
+];
+
+// ===== 注释译文数据 =====
+const poemExtras={
+  "静夜思":{notes:"【疑】好像。【举头】抬头。",translation:"明亮的月光洒在床前的窗户纸上，好像地上泛起了一层霜。我禁不住抬起头来，看那天窗外空中的一轮明月，不由得低头沉思，想起远方的家乡。",analysis:"这首诗写的是在寂静的月夜思念家乡的感受。诗的前两句写景，后两句抒情。语言清新朴素而韵味无穷，是李白最脍炙人口的名篇之一。"},
+  "春晓":{notes:"【晓】天亮。【闻】听见。",translation:"春天的夜晚睡得很香甜，不知不觉天就亮了。醒来听到到处都是鸟儿的啼叫声。回想起昨天夜里的风雨声，不知道有多少花儿被打落了。",analysis:"这首诗描绘了一幅春天早晨绚丽的图景，抒发了诗人热爱春天、珍惜春光的美好心情。"},
+  "登鹳雀楼":{notes:"【白日】傍晚的太阳。【依】依傍，靠着。【穷】尽，使达到极点。",translation:"夕阳依傍着西山慢慢沉没，滔滔黄河朝着东海汹涌奔流。若想把千里的风光景物看够，那就要登上更高的一层城楼。",analysis:"前两句写所见，后两句写所想。诗人通过登高望远，表达了积极向上的进取精神和宽广博大的胸襟。"},
+  "相思":{notes:"【红豆】又名相思子，产于岭南，色鲜红而晶莹。【采撷】采摘。",translation:"红豆生长在南方，春天来的时候会长出多少新枝呢？希望你多采摘一些，因为它最能代表相思之情。",analysis:"这是借咏物而寄相思的诗。全诗情调健美高雅，怀思而不感伤。"},
+  "咏柳":{notes:"【碧玉】碧绿色的玉，比喻春天嫩绿的柳叶。【绦】用丝编成的绳带，这里指像丝带一样的柳条。",translation:"高高的柳树像是碧玉妆扮成的，下垂的柳枝犹如千万条绿色的丝带。不知道这细细的柳叶是谁裁剪出来的？原来是二月的春风，它就像一把灵巧的剪刀。",analysis:"诗人借柳树歌咏春风，把春风比作剪刀，赞美她裁出了春天。诗中洋溢着人逢早春的欣喜之情。"},
+  "出塞":{notes:"【秦时明月汉时关】互文见义，指秦汉时的明月和关隘。【但使】只要。",translation:"依旧是秦汉时的明月和边关，征战长久延续万里征夫不回还。倘若龙城的飞将李广而今健在，绝不许匈奴南下牧马度过阴山。",analysis:"这首诗慨叹边战不断、国无良将，表达了诗人希望朝廷起任良将，早日平息边塞战事，使人民过上安定生活的愿望。"},
+  "江雪":{notes:"【绝】无，没有。【蓑笠】蓑衣和斗笠。",translation:"所有的山上都看不到飞鸟的影子，所有的小路都没有人的踪迹。江面孤舟上，一位披戴着蓑笠的老翁，独自在寒冷的江面上钓鱼。",analysis:"这首诗描绘了一幅寄兴高洁、寓意丰富的寒江独钓图，表达了诗人清高孤傲、不愿与世俗同流合污的品格。"},
+  "望庐山瀑布":{notes:"【香炉】庐山香炉峰。【紫烟】日光照射水气呈现出的紫色云雾。",translation:"阳光照射下，香炉峰生起紫色烟霞，远远望去，瀑布像长河悬挂在山前。飞奔而下的水流直落三千尺，让人怀疑是银河从天上倾泻到人间。",analysis:"诗人运用夸张和想象的手法，描绘了庐山瀑布雄奇壮丽的景色，表达了对祖国大好河山的无限热爱。"},
+  "春望":{notes:"【国破】指长安被安史叛军攻破。【城春】春天的长安城。",translation:"国都已被攻破，只有山河依旧存在，春天来了，城中杂草树木茂密。感伤时事，看到花开反而落泪，怨恨离别，听到鸟鸣反而惊心。",analysis:"这首诗写于安史之乱中，诗人目睹破碎的河山，感慨万千。全诗沉郁顿挫，感人至深。"},
+  "赋得古原草送别":{notes:"【离离】青草茂盛的样子。【枯荣】枯萎和茂盛。",translation:"原野上的青草长得十分茂盛，每年都会经历枯萎和繁盛。野火无法把它们烧尽，春风一吹，它们又会生长出来。",analysis:"这首诗通过对古原上野草的描绘，抒发了送别友人时的依依惜别之情，赞美了野草顽强的生命力。"},
+  "早发白帝城":{notes:"【白帝城】在今重庆奉节。【江陵】今湖北荆州。",translation:"清晨告别彩云缭绕的白帝城，千里之遥的江陵一天就可以到达。两岸猿猴的啼叫声还没停止，轻快的小船已经穿过了万重山峦。",analysis:"全诗洋溢着诗人经过艰难岁月之后突然迸发的激情，快船快意，将遇赦后愉快的心情和江山之壮丽多姿融为一体。"},
+  "山行":{notes:"【寒山】深秋时节的山。【坐】因为。",translation:"沿着弯弯曲曲的小路上山，在那白云缭绕的地方居然还有人家。停下车来是因为喜爱这深秋的枫林晚景，霜染的枫叶比二月的花还要红艳。",analysis:"这首诗描绘了一幅山林秋色图，展现了一幅动人的山林秋色图，表达了诗人对大自然美景的热爱之情。"},
+  "清明":{notes:"【断魂】形容伤感极深。【借问】请问。",translation:"清明时节细雨纷纷飘洒，路上的行人个个失魂落魄。请问当地之人何处买酒浇愁？牧童笑而不答遥指杏花山村。",analysis:"这首诗用优美生动的语言，描绘了一幅生动感人的雨中问路图，表现了清明时节行人思念亲人的愁苦心情。"},
+  "乌衣巷":{notes:"【乌衣巷】在南京秦淮河南岸，东晋时王导、谢安两大家族居此。【王谢】指东晋时的王导、谢安两大家族。",translation:"朱雀桥边长满野草野花，乌衣巷口夕阳渐渐西斜。从前在王谢大堂前筑巢的燕子，如今飞入了寻常百姓家中。",analysis:"诗人通过对乌衣巷的描写，抒发了对世事沧桑、盛衰变化的慨叹。"},
+  "竹枝词":{notes:"【晴】与'情'谐音，双关语。",translation:"杨柳青青江水宽又平，听见情郎江上踏歌声。东边出太阳西边下着雨，说是无晴（情）但是还有晴（情）。",analysis:"这首诗采用了民歌中常用的谐音双关手法，含蓄地表达了初恋少女微妙的内心世界。"}
+};
+
+// ===== 全局变量 =====
+let tangPoetry=[];
+let currentPoemText='';
+let isSpeaking=false;
+let currentUtterance=null;
+const synth=window.speechSynthesis;
+let loopMode=false;
+let listLoopMode=false;
+let currentPoet=null;
+let currentPoemIndex=0;
+let isAutoPlaying=false;
+let speechSupported=false;
+let voicesLoaded=false;
+let showPinyin=true;
+let currentTab='content';
+let currentPoem=null;
+let wechatMode=false;
+
+// ===== 检测函数 =====
+function isMobileDevice(){return/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)}
+function isWechat(){return/MicroMessenger/i.test(navigator.userAgent)}
+function checkSpeechSupport(){
+  if(!('speechSynthesis' in window))return false;
+  try{const u=new SpeechSynthesisUtterance('');if(typeof synth.cancel==='function')return true;}catch(e){return false;}
+  return false;
+}
+
+// ===== 语音 =====
+function loadVoices(){
+  return new Promise((resolve)=>{
+    let voices=synth.getVoices();
+    if(voices&&voices.length>0){voicesLoaded=true;resolve(voices);return;}
+    const handler=()=>{voices=synth.getVoices();voicesLoaded=true;resolve(voices);synth.removeEventListener('voiceschanged',handler);};
+    synth.addEventListener('voiceschanged',handler);
+    setTimeout(()=>{voices=synth.getVoices();voicesLoaded=true;resolve(voices);synth.removeEventListener('voiceschanged',handler);},2000);
+  });
+}
+async function speakText(text,autoTry=false){
+  if(!speechSupported){showMessage('您的浏览器不支持语音合成功能','error');return;}
+  if(wechatMode){showMessage('微信内不支持朗读，请在系统浏览器打开','error');return;}
+  synth.cancel();
+  currentUtterance=new SpeechSynthesisUtterance(text);
+  currentUtterance.lang='zh-CN';
+  currentUtterance.rate=0.75;
+  currentUtterance.pitch=1.1;
+  currentUtterance.volume=1.0;
+  const voices=await loadVoices();
+  if(voices.length>0){
+    const v=voices.find(x=>x.lang&&x.lang.includes('zh')&&x.name&&x.name.includes('Female'))||voices.find(x=>x.lang&&x.lang.includes('zh'))||voices[0];
+    if(v)currentUtterance.voice=v;
+  }
+  let blocked=false;
+  let tmo=null;
+  if(isMobileDevice()&&autoTry){
+    tmo=setTimeout(()=>{if(!isSpeaking&&!blocked){blocked=true;synth.cancel();showMessage('请点击「朗读」按钮播放','info');}},500);
+  }
+  currentUtterance.onstart=()=>{if(tmo)clearTimeout(tmo);isSpeaking=true;updateVoiceControls(true);updatePauseBtnState(false);showMessage('朗读中...','speaking');};
+  currentUtterance.onend=()=>{isSpeaking=false;isAutoPlaying=false;updateVoiceControls(false);updatePauseBtnState(false);showMessage('朗读完成','success');if(loopMode&&currentPoemText){setTimeout(()=>speakText(currentPoemText),1000);}else if(listLoopMode&&currentPoet){setTimeout(()=>autoPlayNextPoem(),1000);}};
+  currentUtterance.onerror=(e)=>{if(tmo)clearTimeout(tmo);if(e.error==='canceled'||e.error==='interrupted')return;isSpeaking=false;isAutoPlaying=false;updateVoiceControls(false);updatePauseBtnState(false);showMessage('朗读出错: '+(e.error||'未知错误'),'error');if(listLoopMode&&currentPoet){setTimeout(()=>autoPlayNextPoem(),1000);}};
+  try{synth.speak(currentUtterance);}catch(e){if(tmo)clearTimeout(tmo);if(isMobileDevice()&&autoTry){showMessage('请点击「朗读」按钮播放','info');}else{showMessage('语音播放失败，请检查浏览器权限','error');}}
+}
+function autoPlayNextPoem(){
+  if(!listLoopMode||!currentPoet||isAutoPlaying)return;
+  isAutoPlaying=true;
+  let next=currentPoemIndex+1;
+  if(next>=currentPoet.poems.length)next=0;
+  const idx=next;
+  setTimeout(()=>{if(listLoopMode&&!isSpeaking){const p=currentPoet.poems[idx];if(p){currentPoemIndex=idx;showPoemFromList(currentPoet,idx);setTimeout(()=>{if(currentPoemText)speakText(currentPoemText);},500);}}isAutoPlaying=false;},1000);
+}
+function pauseSpeech(){
+  if(synth.speaking&&!synth.paused){synth.pause();showMessage('已暂停','paused');updatePauseBtnState(true);}
+  else if(synth.paused){synth.resume();showMessage('朗读中...','speaking');updatePauseBtnState(false);}
+}
+function stopSpeech(){synth.cancel();isSpeaking=false;isAutoPlaying=false;updateVoiceControls(false);updatePauseBtnState(false);showMessage('已停止','stopped');}
+function updatePauseBtnState(paused){
+  const btn=document.getElementById('pause-btn');
+  if(paused){btn.innerHTML='<i class="fas fa-play"></i> 继续';btn.classList.remove('pause');}
+  else{btn.innerHTML='<i class="fas fa-pause"></i> 暂停';btn.classList.add('pause');}
+}
+function updateVoiceControls(playing){
+  document.getElementById('play-btn').disabled=playing;
+  document.getElementById('pause-btn').disabled=!playing;
+  document.getElementById('stop-btn').disabled=!playing;
+}
+
+// ===== UI =====
+function addPinyinToText(text){
+  if(!window.pinyin||!showPinyin){return text.replace(/\n/g,'<br>');}
+  try{
+    const lines=text.split('\n');
+    let html='';
+    for(const line of lines){
+      if(!line.trim()){html+='<br>';continue;}
+      const arr=window.pinyin(line,{toneType:'symbol',type:'array',multiple:true});
+      let out='';let ci=0;
+      for(let i=0;i<line.length;i++){
+        const ch=line[i];
+        if(/[一-鿿]/.test(ch)){out+='<span class="pinyin-ruby"><span class="pinyin-text">'+(arr[ci]||'')+'</span><span class="hanzi-text">'+ch+'</span></span>';ci++;}
+        else{out+='<span style="margin:0 2px">'+ch+'</span>';}
+      }
+      html+=out+'<br>';
+    }
+    return html;
+  }catch(e){return text.replace(/\n/g,'<br>');}
+}
+function showMessage(msg,type='info'){
+  const el=document.getElementById('current-status');
+  const map={success:['fa-check-circle','#27ae60'],error:['fa-exclamation-triangle','#c0392b'],speaking:['fa-volume-up','#8e44ad'],paused:['fa-pause-circle','#2980b9'],stopped:['fa-stop-circle','#7f8c8d']};
+  const [icon,color]=map[type]||['fa-info-circle','#7f8c8d'];
+  el.innerHTML='<i class="fas '+icon+'" style="color:'+color+'"></i> '+msg;
+}
+
+// ===== 页面 =====
+function renderPoetList(){
+  const ul=document.getElementById('poet-list');
+  ul.innerHTML='';
+  if(!tangPoetry||!tangPoetry.length){ul.innerHTML='<li class="empty-message">暂无数据</li>';return;}
+  tangPoetry.sort((a,b)=>a.name.localeCompare(b.name,'zh-CN'));
+  tangPoetry.forEach(poet=>{
+    const li=document.createElement('li');li.className='poet-item';li.dataset.poetId=poet.id;
+    li.innerHTML='<span class="poet-name">'+poet.name+'</span><span class="poet-count">'+poet.poems.length+'首</span>';
+    li.addEventListener('click',()=>{showPoetPoems(poet.id);closeNav();});
+    ul.appendChild(li);
+  });
+  const tp=tangPoetry.length;
+  const tc=tangPoetry.reduce((s,p)=>s+p.poems.length,0);
+  document.getElementById('poet-count').textContent=tp;
+  document.getElementById('poem-count').textContent=tc;
+}
+function showPoetPoems(poetId){
+  const poet=tangPoetry.find(p=>p.id===poetId);if(!poet)return;
+  currentPoet=poet;currentPoemIndex=0;
+  document.getElementById('current-poet-name').textContent=poet.name;
+  document.getElementById('current-poet-count').textContent=poet.poems.length+'首作品';
+  const list=document.getElementById('poet-poems-list');list.innerHTML='';
+  poet.poems.forEach((poem,i)=>{
+    const div=document.createElement('div');div.className='card poem-item';div.style.cursor='pointer';
+    div.innerHTML='<div style="font-weight:600;color:#2c3e50;">'+poem.title+'</div>';
+    div.addEventListener('click',()=>showPoemFromList(poet,i));
+    list.appendChild(div);
+  });
+  document.getElementById('home-page').classList.remove('active');
+  document.getElementById('poet-poems-page').classList.add('active');
+  document.getElementById('poem-page').classList.remove('active');
+  document.getElementById('page-title').textContent=poet.name+'的作品';
+  document.getElementById('search-results').classList.remove('active');
+}
+function showPoemFromList(poet,index){currentPoet=poet;currentPoemIndex=index;showPoem(poet,poet.poems[index],index);}
+function showPoem(poet,poem,index){
+  currentPoem=poem;
+  document.getElementById('detail-title').textContent=poem.title;
+  document.getElementById('poet-name').textContent=poet.name;
+  document.getElementById('poet-bio').textContent=poet.bio;
+  const contentHtml=addPinyinToText(poem.content);
+  document.getElementById('detail-content').innerHTML=contentHtml;
+  document.getElementById('page-title').textContent=poet.name+' · '+poem.title;
+  document.getElementById('home-page').classList.remove('active');
+  document.getElementById('poet-poems-page').classList.remove('active');
+  document.getElementById('poem-page').classList.add('active');
+  currentPoemText=poem.title+'，'+poet.name+'。'+poem.content;
+  updateNavButtons(poet,index);
+  document.getElementById('current-position').textContent=(index+1)+'/'+poet.poems.length;
+  bindVoiceButtons();
+  currentTab='content';
+  switchTab('content');
+  document.getElementById('search-results').classList.remove('active');
+  if(currentPoemText){
+    if(!isMobileDevice()){setTimeout(()=>speakText(currentPoemText,false),300);}
+    else{setTimeout(()=>speakText(currentPoemText,true),300);}
+  }
+}
+function switchTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  const pane=document.getElementById('tab-pane');
+  if(tab==='content'){pane.innerHTML='<div style="text-align:center;line-height:2.2;font-size:1.15em;color:#333;">'+document.getElementById('detail-content').innerHTML+'</div>';return;}
+  if(!currentPoem){pane.innerHTML='<div class="tab-empty">请先选择一首诗歌</div>';return;}
+  const extra=poemExtras[currentPoem.title];
+  if(!extra||!extra[tab]){pane.innerHTML='<div class="tab-empty">暂无'+{notes:'注释',translation:'译文',analysis:'赏析'}[tab]+'</div>';return;}
+  let html='';
+  if(tab==='notes'){extra.notes.split('。').filter(Boolean).forEach(s=>{if(s.trim())html+='<p>'+s.trim()+'。</p>';});}
+  else if(tab==='translation'){html='<p>'+extra.translation+'</p>';}
+  else if(tab==='analysis'){html='<p>'+extra.analysis+'</p>';}
+  pane.innerHTML=html||'<div class="tab-empty">暂无内容</div>';
+}
+function updateNavButtons(poet,index){
+  document.getElementById('prev-poem').disabled=index<=0;
+  document.getElementById('next-poem').disabled=index>=poet.poems.length-1&&!listLoopMode;
+}
+function prevPoem(){if(currentPoet&&currentPoemIndex>0)showPoemFromList(currentPoet,currentPoemIndex-1);}
+function nextPoem(){if(!currentPoet)return;let n=currentPoemIndex+1;if(n>=currentPoet.poems.length){if(listLoopMode)n=0;else return;}showPoemFromList(currentPoet,n);}
+function bindVoiceButtons(){
+  document.getElementById('play-btn').onclick=()=>speakText(currentPoemText);
+  document.getElementById('pause-btn').onclick=pauseSpeech;
+  document.getElementById('stop-btn').onclick=stopSpeech;
+  document.getElementById('loop-btn').onclick=toggleLoop;
+  document.getElementById('list-loop-btn').onclick=toggleListLoop;
+}
+function toggleLoop(){
+  loopMode=!loopMode;localStorage.setItem('tangLoopMode',loopMode?'1':'');
+  const btn=document.getElementById('loop-btn');
+  if(loopMode){if(listLoopMode)toggleListLoop();btn.classList.add('active');btn.innerHTML='<i class="fas fa-redo"></i> 循环中';showMessage('已开启单曲循环','success');}
+  else{btn.classList.remove('active');btn.innerHTML='<i class="fas fa-redo"></i> 循环';showMessage('已关闭单曲循环','info');}
+}
+function toggleListLoop(){
+  listLoopMode=!listLoopMode;localStorage.setItem('tangListLoopMode',listLoopMode?'1':'');
+  const btn=document.getElementById('list-loop-btn');
+  if(listLoopMode){if(loopMode)toggleLoop();btn.classList.add('active');btn.innerHTML='<i class="fas fa-list"></i> 连播中';showMessage('已开启列表连播','success');}
+  else{btn.classList.remove('active');btn.innerHTML='<i class="fas fa-list"></i> 连播';showMessage('已关闭列表连播','info');}
+}
+
+// ===== 搜索 =====
+function doSearch(kw){
+  const q=kw.toLowerCase().trim();if(!q)return{poems:[],poets:[]};
+  const poems=[],poets=[];
+  tangPoetry.forEach(poet=>{
+    if(poet.name.includes(q)||poet.bio.includes(q))poets.push({type:'poet',poet});
+    poet.poems.forEach(poem=>{if(poem.title.includes(q)||poem.content.includes(q))poems.push({type:'poem',poet,poem});});
+  });
+  return{poems,poets};
+}
+function renderSearchResults(r,kw){
+  const box=document.getElementById('search-results');
+  if(!kw.trim()||(!r.poems.length&&!r.poets.length)){box.classList.remove('active');return;}
+  let html='';
+  if(r.poems.length){html+='<div class="result-section"><h3>诗歌 ('+r.poems.length+')</h3>';r.poems.slice(0,8).forEach(item=>{const snippet=item.poem.content.replace(/\n/g,' ').substring(0,40);html+='<div class="result-poem-item" data-pid="'+item.poet.id+'" data-idx="'+item.poet.poems.indexOf(item.poem)+'"><div class="result-poem-title">'+item.poem.title+'</div><div class="result-poem-meta">'+item.poet.name+'</div><div class="result-poem-snippet">'+snippet+'...</div></div>';});if(r.poems.length>8)html+='<div style="text-align:center;color:#999;font-size:.85em;padding:8px;">还有 '+(r.poems.length-8)+' 首</div>';html+='</div>';}
+  if(r.poets.length){html+='<div class="result-section"><h3>诗人 ('+r.poets.length+')</h3>';r.poets.forEach(item=>{html+='<div class="result-poet-item" data-pid="'+item.poet.id+'"><div class="result-poet-name">'+item.poet.name+'</div><div class="result-poet-bio">'+item.poet.bio.substring(0,50)+'...</div></div>';});html+='</div>';}
+  box.innerHTML=html;box.classList.add('active');
+  box.querySelectorAll('.result-poem-item').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const pid=el.dataset.pid;const idx=parseInt(el.dataset.idx);
+      const poet=tangPoetry.find(p=>p.id===pid);if(poet)showPoemFromList(poet,idx);
+    });
+  });
+  box.querySelectorAll('.result-poet-item').forEach(el=>{
+    el.addEventListener('click',()=>{const pid=el.dataset.pid;showPoetPoems(pid);});
+  });
+}
+
+// ===== 导航 =====
+function openNav(){document.getElementById('side-nav').classList.add('active');document.getElementById('nav-overlay').classList.add('active');}
+function closeNav(){document.getElementById('side-nav').classList.remove('active');document.getElementById('nav-overlay').classList.remove('active');}
+function backToHome(){
+  document.getElementById('home-page').classList.add('active');
+  document.getElementById('poet-poems-page').classList.remove('active');
+  document.getElementById('poem-page').classList.remove('active');
+  document.getElementById('page-title').textContent='唐诗三百首';
+  document.getElementById('search-results').classList.remove('active');
+  stopSpeech();
+}
+function backToPoetPoems(){if(currentPoet)showPoetPoems(currentPoet.id);else backToHome();}
+function randomPoem(){
+  if(!tangPoetry.length)return;
+  const poet=tangPoetry[Math.floor(Math.random()*tangPoetry.length)];
+  const idx=Math.floor(Math.random()*poet.poems.length);
+  showPoemFromList(poet,idx);
+}
+
+// ===== 初始化 =====
+function initApp(){
+  wechatMode=isWechat();
+  tangPoetry=tangPoetryData;
+  renderPoetList();
+
+  document.getElementById('menu-toggle').addEventListener('click',openNav);
+  document.getElementById('nav-overlay').addEventListener('click',closeNav);
+  document.getElementById('back-btn').addEventListener('click',backToPoetPoems);
+  document.getElementById('back-to-poet-list').addEventListener('click',backToHome);
+  document.getElementById('prev-poem').addEventListener('click',prevPoem);
+  document.getElementById('next-poem').addEventListener('click',nextPoem);
+  document.getElementById('nav-home').addEventListener('click',backToHome);
+  document.getElementById('nav-random').addEventListener('click',randomPoem);
+  document.getElementById('toggle-pinyin').addEventListener('click',()=>{
+    showPinyin=!showPinyin;
+    document.getElementById('toggle-pinyin').textContent=showPinyin?'隐藏拼音':'显示拼音';
+    document.getElementById('detail-content').classList.toggle('no-pinyin',!showPinyin);
+    if(currentPoem){document.getElementById('detail-content').innerHTML=addPinyinToText(currentPoem.content);switchTab(currentTab);}
+  });
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>switchTab(btn.dataset.tab));
+  });
+
+  const searchInput=document.getElementById('search-input');
+  searchInput.addEventListener('input',(e)=>{
+    const kw=e.target.value.trim();
+    if(kw){const r=doSearch(kw);renderSearchResults(r,kw);}
+    else{document.getElementById('search-results').classList.remove('active');}
+  });
+
+  if(localStorage.getItem('tangListLoopMode'))toggleListLoop();
+  else if(localStorage.getItem('tangLoopMode'))toggleLoop();
+
+  speechSupported=checkSpeechSupport();
+  document.getElementById('voice-status').textContent=speechSupported?'✓':'✗';
+  document.getElementById('pinyin-status').textContent=window.pinyin?'✓':'✗';
+
+  if(wechatMode){
+    document.getElementById('wechat-tip').classList.add('active');
+    document.getElementById('voice-panel').querySelector('.voice-buttons').style.display='none';
+    document.getElementById('voice-panel').querySelector('.voice-title').innerHTML='<i class="fas fa-volume-mute"></i><span>微信内不支持朗读</span>';
+  }else if(speechSupported){loadVoices();}
+}
+document.addEventListener('DOMContentLoaded',initApp);
+</script>
+</body>
+</html>
