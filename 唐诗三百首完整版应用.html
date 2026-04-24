@@ -21,7 +21,7 @@ header{background:linear-gradient(135deg,#2c3e50 0%,#34495e 100%);color:white;pa
 .stat-item{background:rgba(255,255,255,0.12);padding:10px;border-radius:10px;text-align:center}
 .stat-value{font-size:1.2em;font-weight:bold}
 .stat-label{font-size:.75em;opacity:.85}
-@media(min-width:768px){.stats{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:768px){.stats{grid-template-columns:repeat(2,1fr);max-width:400px;margin:14px auto 0}}
 
 .search-box{margin:12px 0;position:relative}
 #search-input{width:100%;padding:12px 40px 12px 16px;border:none;border-radius:25px;font-size:.95em;background:rgba(255,255,255,0.95);color:#333}
@@ -59,10 +59,18 @@ header{background:linear-gradient(135deg,#2c3e50 0%,#34495e 100%);color:white;pa
 .page{display:none}
 .page.active{display:block}
 
-.welcome-card{text-align:center}
+.welcome-card{text-align:center;margin-bottom:14px}
 .welcome-icon{font-size:2.5em;color:#c0392b;margin-bottom:10px}
-.welcome-card h1{color:#2c3e50;margin-bottom:8px;font-size:1.3em}
-.welcome-card p{color:#666;line-height:1.6;margin-bottom:10px;font-size:.9em}
+.welcome-card p{color:#666;line-height:1.6;font-size:.9em}
+.daily-poem{cursor:pointer;transition:transform .15s,box-shadow .15s;border-left:4px solid #c0392b;margin-bottom:14px}
+.daily-poem:active{transform:scale(.98)}
+.poet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(min-width:768px){.poet-grid{grid-template-columns:repeat(5,1fr)}}
+.poet-grid-item{background:white;padding:14px 8px;border-radius:12px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.05);transition:transform .15s}
+.poet-grid-item:active{transform:scale(.96)}
+.poet-grid-name{font-weight:600;color:#2c3e50;font-size:1em;margin-bottom:4px}
+.poet-grid-count{font-size:.75em;color:#888}
+.section-title{font-size:1em;color:#2c3e50;margin:0 0 10px;font-weight:600}
 
 .poem-header{text-align:center;padding-bottom:4px}
 .poem-title{color:#2c3e50;font-size:1.35em;margin-bottom:6px;font-weight:600}
@@ -76,7 +84,7 @@ header{background:linear-gradient(135deg,#2c3e50 0%,#34495e 100%);color:white;pa
 
 .poem-content-card{position:relative}
 .display-toggle{position:absolute;top:10px;right:14px;background:#ecf0f1;border:none;padding:4px 10px;border-radius:12px;font-size:.75em;color:#555;cursor:pointer}
-.poem-text{font-size:1.25em;line-height:2.2;text-align:center}
+.poem-text{font-size:1.25em;line-height:2.2;text-align:center;padding-top:36px}
 .pinyin-ruby{display:inline-block;margin:0 2px;vertical-align:top}
 .pinyin-text{display:block;font-size:.6em;color:#c0392b;font-weight:600;line-height:1.2}
 .hanzi-text{display:block;font-size:1.1em;line-height:1.2}
@@ -94,6 +102,14 @@ header{background:linear-gradient(135deg,#2c3e50 0%,#34495e 100%);color:white;pa
 
 .voice-controls{padding-top:4px}
 .voice-title{display:flex;align-items:center;gap:8px;margin-bottom:12px;color:#2c3e50;font-size:.95em}
+.fav-btn{background:none;border:none;color:#c0392b;font-size:.85em;cursor:pointer;display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:8px;transition:background .2s}
+.fav-btn:active{background:#f8f9fa}
+.fav-btn.active i{font-weight:900}
+.poem-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.poem-list-item{background:white;padding:12px 14px;border-radius:10px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.05);transition:transform .15s}
+.poem-list-item:active{transform:scale(.98)}
+.pl-title{font-weight:600;color:#2c3e50;font-size:.95em}
+.pl-meta{font-size:.8em;color:#888;margin-top:2px}
 .voice-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
 @media(min-width:768px){.voice-buttons{grid-template-columns:repeat(5,1fr)}}
 .voice-btn{background:#2c3e50;color:white;border:none;padding:12px 4px;border-radius:8px;font-size:.9em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px}
@@ -107,7 +123,8 @@ header{background:linear-gradient(135deg,#2c3e50 0%,#34495e 100%);color:white;pa
 .poet-info h3{color:#2c3e50;margin-bottom:8px;font-size:1em}
 .poet-info p{color:#555;font-size:.9em;line-height:1.7}
 
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:white;display:grid;grid-template-columns:repeat(2,1fr);padding:10px;box-shadow:0 -2px 10px rgba(0,0,0,0.08);z-index:100}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:white;display:grid;grid-template-columns:repeat(3,1fr);padding:10px;box-shadow:0 -2px 10px rgba(0,0,0,0.08);z-index:100}
+.nav-btn.hidden{display:none}
 .nav-btn{display:flex;flex-direction:column;align-items:center;color:#7f8c8d;background:none;border:none;padding:6px;cursor:pointer;font-size:.75em;gap:4px}
 .nav-btn.active{color:#2c3e50}
 .nav-btn i{font-size:1.3em}
@@ -135,8 +152,6 @@ header{background:linear-gradient(135deg,#2c3e50 0%,#34495e 100%);color:white;pa
 <div class="stats">
 <div class="stat-item"><div class="stat-value" id="poet-count">0</div><div class="stat-label">位诗人</div></div>
 <div class="stat-item"><div class="stat-value" id="poem-count">0</div><div class="stat-label">首诗歌</div></div>
-<div class="stat-item"><div class="stat-value" id="pinyin-status">-</div><div class="stat-label">拼音标注</div></div>
-<div class="stat-item"><div class="stat-value" id="voice-status">-</div><div class="stat-label">语音朗读</div></div>
 </div>
 <div class="search-box">
 <input type="text" id="search-input" placeholder="搜索诗人、诗名或诗句...">
@@ -151,6 +166,10 @@ header{background:linear-gradient(135deg,#2c3e50 0%,#34495e 100%);color:white;pa
 <p>按诗人姓氏排序</p>
 </div>
 <div class="nav-content">
+<div style="display:flex;gap:8px;padding:10px 0">
+<button id="nav-fav-btn" style="flex:1;background:#f8f9fa;border:none;padding:10px;border-radius:8px;font-size:.85em;color:#2c3e50;cursor:pointer"><i class="fas fa-heart" style="color:#c0392b"></i> 我的收藏</button>
+<button id="nav-recent-btn" style="flex:1;background:#f8f9fa;border:none;padding:10px;border-radius:8px;font-size:.85em;color:#2c3e50;cursor:pointer"><i class="fas fa-clock" style="color:#2980b9"></i> 最近阅读</button>
+</div>
 <ul id="poet-list" class="poet-list"></ul>
 </div>
 </nav>
@@ -161,9 +180,29 @@ header{background:linear-gradient(135deg,#2c3e50 0%,#34495e 100%);color:white;pa
 <div id="home-page" class="page active">
 <div class="card welcome-card">
 <div class="welcome-icon"><i class="fas fa-book-reader"></i></div>
-<h1>唐诗三百首</h1>
 <p>精选唐代代表诗人的经典作品，配有拼音标注、注释译文与语音朗读功能。</p>
 </div>
+
+<div class="card daily-poem" id="daily-poem">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+<span style="font-size:.8em;color:#c0392b;font-weight:600"><i class="fas fa-calendar-day"></i> 每日一首</span>
+<span style="font-size:.75em;color:#aaa" id="daily-date"></span>
+</div>
+<div style="font-weight:600;color:#2c3e50;font-size:1.1em" id="daily-title"></div>
+<div style="font-size:.85em;color:#888;margin-top:4px" id="daily-author"></div>
+<div style="font-size:.9em;color:#555;margin-top:8px;line-height:1.6" id="daily-preview"></div>
+</div>
+
+<div id="recent-section" style="display:none">
+<h3 class="section-title"><i class="fas fa-clock"></i> 最近阅读</h3>
+<div class="poem-list" id="recent-list"></div>
+</div>
+<div id="fav-section" style="display:none">
+<h3 class="section-title"><i class="fas fa-heart"></i> 我的收藏</h3>
+<div class="poem-list" id="fav-list"></div>
+</div>
+<h3 class="section-title"><i class="fas fa-users"></i> 全部诗人</h3>
+<div class="poet-grid" id="poet-grid"></div>
 </div>
 
 <div id="poet-poems-page" class="page">
@@ -200,8 +239,7 @@ header{background:linear-gradient(135deg,#2c3e50 0%,#34495e 100%);color:white;pa
 
 <div class="card">
 <div class="tabs">
-<button class="tab-btn active" data-tab="content">正文</button>
-<button class="tab-btn" data-tab="notes">注释</button>
+<button class="tab-btn active" data-tab="notes">注释</button>
 <button class="tab-btn" data-tab="translation">译文</button>
 <button class="tab-btn" data-tab="analysis">赏析</button>
 </div>
@@ -210,7 +248,10 @@ header{background:linear-gradient(135deg,#2c3e50 0%,#34495e 100%);color:white;pa
 
 <div class="card voice-controls" id="voice-panel">
 <div class="wechat-tip" id="wechat-tip"><i class="fas fa-info-circle"></i> 微信内不支持语音朗读，请在系统浏览器中打开</div>
-<div class="voice-title"><i class="fas fa-volume-up"></i><span>语音朗读</span></div>
+<div class="voice-title" style="justify-content:space-between">
+<div style="display:flex;align-items:center;gap:8px"><i class="fas fa-volume-up"></i><span>语音朗读</span></div>
+<button class="fav-btn" id="fav-btn"><i class="far fa-heart"></i> 收藏</button>
+</div>
 <div class="voice-buttons">
 <button id="play-btn" class="voice-btn"><i class="fas fa-play"></i> 朗读</button>
 <button id="pause-btn" class="voice-btn pause" disabled><i class="fas fa-pause"></i> 暂停</button>
@@ -231,6 +272,7 @@ header{background:linear-gradient(135deg,#2c3e50 0%,#34495e 100%);color:white;pa
 <audio id="audio-player" style="display:none"></audio>
 <nav class="bottom-nav" id="bottom-nav">
 <button id="nav-home" class="nav-btn active"><i class="fas fa-home"></i><span>首页</span></button>
+<button id="nav-back" class="nav-btn hidden"><i class="fas fa-arrow-left"></i><span>返回</span></button>
 <button id="nav-random" class="nav-btn"><i class="fas fa-random"></i><span>随机</span></button>
 </nav>
 </div>
@@ -608,6 +650,94 @@ function renderPoetList(){
   document.getElementById('poet-count').textContent=tp;
   document.getElementById('poem-count').textContent=tc;
 }
+function renderPoetGrid(){
+  const grid=document.getElementById('poet-grid');
+  if(!grid)return;
+  grid.innerHTML='';
+  if(!tangPoetry||!tangPoetry.length)return;
+  tangPoetry.sort((a,b)=>a.name.localeCompare(b.name,'zh-CN'));
+  tangPoetry.forEach(poet=>{
+    const div=document.createElement('div');div.className='poet-grid-item';
+    div.innerHTML='<div class="poet-grid-name">'+poet.name+'</div><div class="poet-grid-count">'+poet.poems.length+'首</div>';
+    div.addEventListener('click',()=>showPoetPoems(poet.id));
+    grid.appendChild(div);
+  });
+}
+function renderDailyPoem(){
+  const el=document.getElementById('daily-poem');if(!el)return;
+  if(!tangPoetry||!tangPoetry.length)return;
+  const total=tangPoetry.reduce((s,p)=>s+p.poems.length,0);
+  const today=new Date();
+  const daySeed=Math.floor(today.getTime()/86400000);
+  const idx=daySeed%total;
+  let remain=idx;
+  for(const poet of tangPoetry){
+    if(remain<poet.poems.length){
+      const poem=poet.poems[remain];
+      document.getElementById('daily-title').textContent=poem.title;
+      document.getElementById('daily-author').textContent=poet.name;
+      document.getElementById('daily-preview').textContent=poem.content.split('\n')[0];
+      document.getElementById('daily-date').textContent=(today.getMonth()+1)+'月'+today.getDate()+'日';
+      el.onclick=()=>showPoemFromList(poet,remain);
+      return;
+    }
+    remain-=poet.poems.length;
+  }
+}
+
+// ===== 收藏与最近阅读 =====
+function loadFavorites(){try{return JSON.parse(localStorage.getItem('tangFavorites')||'[]');}catch(e){return[];}}
+function saveFavorites(list){localStorage.setItem('tangFavorites',JSON.stringify(list));}
+function loadRecent(){try{return JSON.parse(localStorage.getItem('tangRecent')||'[]');}catch(e){return[];}}
+function saveRecent(list){localStorage.setItem('tangRecent',JSON.stringify(list.slice(0,20)));}
+function isFavorite(title){return loadFavorites().some(f=>f.title===title);}
+function toggleFavorite(){
+  if(!currentPoem||!currentPoet)return;
+  let list=loadFavorites();
+  const idx=list.findIndex(f=>f.title===currentPoem.title);
+  if(idx>=0){list.splice(idx,1);showMessage('已取消收藏','info');}
+  else{list.unshift({title:currentPoem.title,poetName:currentPoet.name,poetId:currentPoet.id,poemIndex:currentPoemIndex});showMessage('已收藏','success');}
+  saveFavorites(list);
+  updateFavBtn();
+  renderFavorites();
+}
+function updateFavBtn(){
+  const btn=document.getElementById('fav-btn');if(!btn)return;
+  const active=isFavorite(currentPoem?currentPoem.title:'');
+  btn.classList.toggle('active',active);
+  btn.innerHTML=active?'<i class="fas fa-heart"></i> 已收藏':'<i class="far fa-heart"></i> 收藏';
+}
+function addRecent(poet,poem,index){
+  let list=loadRecent().filter(r=>r.title!==poem.title);
+  list.unshift({title:poem.title,poetName:poet.name,poetId:poet.id,poemIndex:index});
+  saveRecent(list);
+  renderRecent();
+}
+function renderPoemList(container,list,emptyMsg){
+  container.innerHTML='';
+  if(!list||!list.length){container.innerHTML='<div class="tab-empty" style="padding:16px">'+(emptyMsg||'暂无内容')+'</div>';return;}
+  list.slice(0,10).forEach(item=>{
+    const div=document.createElement('div');div.className='poem-list-item';
+    div.innerHTML='<div class="pl-title">'+item.title+'</div><div class="pl-meta">'+item.poetName+'</div>';
+    div.addEventListener('click',()=>{const poet=tangPoetry.find(p=>p.id===item.poetId);if(poet)showPoemFromList(poet,item.poemIndex);});
+    container.appendChild(div);
+  });
+}
+function renderFavorites(){
+  const section=document.getElementById('fav-section');
+  if(!section)return;
+  const list=loadFavorites();
+  section.style.display=list.length?'block':'none';
+  renderPoemList(document.getElementById('fav-list'),list,'暂无收藏诗歌');
+}
+function renderRecent(){
+  const section=document.getElementById('recent-section');
+  if(!section)return;
+  const list=loadRecent();
+  section.style.display=list.length?'block':'none';
+  renderPoemList(document.getElementById('recent-list'),list,'暂无阅读记录');
+}
+
 function showPoetPoems(poetId){
   const poet=tangPoetry.find(p=>p.id===poetId);if(!poet)return;
   currentPoet=poet;currentPoemIndex=0;
@@ -616,7 +746,8 @@ function showPoetPoems(poetId){
   const list=document.getElementById('poet-poems-list');list.innerHTML='';
   poet.poems.forEach((poem,i)=>{
     const div=document.createElement('div');div.className='card poem-item';div.style.cursor='pointer';
-    div.innerHTML='<div style="font-weight:600;color:#2c3e50;">'+poem.title+'</div>';
+    const preview=poem.content.split('\n')[0].substring(0,14)+(poem.content.split('\n')[0].length>14?'...':'');
+    div.innerHTML='<div style="font-weight:600;color:#2c3e50;">'+poem.title+'</div><div style="font-size:.85em;color:#888;margin-top:4px;">'+preview+'</div>';
     div.addEventListener('click',()=>showPoemFromList(poet,i));
     list.appendChild(div);
   });
@@ -625,6 +756,8 @@ function showPoetPoems(poetId){
   document.getElementById('poem-page').classList.remove('active');
   document.getElementById('page-title').textContent=poet.name+'的作品';
   document.getElementById('search-results').classList.remove('active');
+  document.getElementById('nav-home').classList.remove('active');
+  document.getElementById('nav-back').classList.remove('hidden');
 }
 function showPoemFromList(poet,index){currentPoet=poet;currentPoemIndex=index;showPoem(poet,poet.poems[index],index);}
 function showPoem(poet,poem,index){
@@ -642,20 +775,18 @@ function showPoem(poet,poem,index){
   updateNavButtons(poet,index);
   document.getElementById('current-position').textContent=(index+1)+'/'+poet.poems.length;
   bindVoiceButtons();
-  currentTab='content';
-  switchTab('content');
+  currentTab='notes';
+  switchTab('notes');
   document.getElementById('search-results').classList.remove('active');
-  const audioUrl=getAudioUrl(poet,index);
-  if(audioUrl){
-    if(!isMobileDevice()){setTimeout(()=>playAudio(audioUrl,false),300);}
-    else{setTimeout(()=>playAudio(audioUrl,true),300);}
-  }
+  document.getElementById('nav-home').classList.remove('active');
+  document.getElementById('nav-back').classList.remove('hidden');
+  addRecent(poet,poem,index);
+  updateFavBtn();
 }
 function switchTab(tab){
   currentTab=tab;
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
   const pane=document.getElementById('tab-pane');
-  if(tab==='content'){pane.innerHTML='<div style="text-align:center;line-height:2.2;font-size:1.15em;color:#333;">'+document.getElementById('detail-content').innerHTML+'</div>';return;}
   if(!currentPoem){pane.innerHTML='<div class="tab-empty">请先选择一首诗歌</div>';return;}
   const extra=poemExtras[currentPoem.title];
   if(!extra||!extra[tab]){pane.innerHTML='<div class="tab-empty">暂无'+{notes:'注释',translation:'译文',analysis:'赏析'}[tab]+'</div>';return;}
@@ -677,6 +808,7 @@ function bindVoiceButtons(){
   document.getElementById('stop-btn').onclick=stopAudio;
   document.getElementById('loop-btn').onclick=toggleLoop;
   document.getElementById('list-loop-btn').onclick=toggleListLoop;
+  document.getElementById('fav-btn').onclick=toggleFavorite;
 }
 function toggleLoop(){
   loopMode=!loopMode;localStorage.setItem('tangLoopMode',loopMode?'1':'');
@@ -729,6 +861,8 @@ function backToHome(){
   document.getElementById('page-title').textContent='唐诗三百首';
   document.getElementById('search-results').classList.remove('active');
   stopAudio();
+  document.getElementById('nav-home').classList.add('active');
+  document.getElementById('nav-back').classList.add('hidden');
 }
 function backToPoetPoems(){if(currentPoet)showPoetPoems(currentPoet.id);else backToHome();}
 function randomPoem(){
@@ -742,14 +876,21 @@ function randomPoem(){
 function initApp(){
   tangPoetry=tangPoetryData;
   renderPoetList();
+  renderPoetGrid();
+  renderDailyPoem();
+  renderFavorites();
+  renderRecent();
 
   document.getElementById('menu-toggle').addEventListener('click',openNav);
   document.getElementById('nav-overlay').addEventListener('click',closeNav);
   document.getElementById('back-btn').addEventListener('click',backToPoetPoems);
   document.getElementById('back-to-poet-list').addEventListener('click',backToHome);
+  document.getElementById('nav-fav-btn').addEventListener('click',()=>{closeNav();backToHome();document.getElementById('fav-list').scrollIntoView({behavior:'smooth'});});
+  document.getElementById('nav-recent-btn').addEventListener('click',()=>{closeNav();backToHome();document.getElementById('recent-list').scrollIntoView({behavior:'smooth'});});
   document.getElementById('prev-poem').addEventListener('click',prevPoem);
   document.getElementById('next-poem').addEventListener('click',nextPoem);
   document.getElementById('nav-home').addEventListener('click',backToHome);
+  document.getElementById('nav-back').addEventListener('click',backToPoetPoems);
   document.getElementById('nav-random').addEventListener('click',randomPoem);
   document.getElementById('toggle-pinyin').addEventListener('click',()=>{
     showPinyin=!showPinyin;
@@ -771,8 +912,6 @@ function initApp(){
   if(localStorage.getItem('tangListLoopMode'))toggleListLoop();
   else if(localStorage.getItem('tangLoopMode'))toggleLoop();
 
-  document.getElementById('voice-status').textContent='MP3';
-  document.getElementById('pinyin-status').textContent=window.pinyinPro?'✓':'✗';
 }
 document.addEventListener('DOMContentLoaded',initApp);
 </script>
