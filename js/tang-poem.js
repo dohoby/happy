@@ -53,7 +53,7 @@ let slowLoopMode = localStorage.getItem('tangSlowLoop') === '1';         // 整�
 let slowLineLoopMode = localStorage.getItem('tangSlowLineLoop') === '1'; // 单句循环
 let slowAutoMode = localStorage.getItem('tangSlowAuto') !== '0';         // 自动继续（默认自动）
 
-// 预加载语音列表（Chrome 需要等待 voiceschanged）
+// 预加载语音列表
 if (speechSynth) {
   function loadVoices() {
     const voices = speechSynth.getVoices();
@@ -65,8 +65,9 @@ if (speechSynth) {
   if (speechSynth.onvoiceschanged !== undefined) {
     speechSynth.onvoiceschanged = loadVoices;
   }
-  // 部分浏览器 voices 延迟加载，再试一次
   setTimeout(loadVoices, 500);
+  // 保底：2秒后强制标记为就绪（部分浏览器 voices 永远为空但仍可朗读）
+  setTimeout(() => { speechVoicesReady = true; }, 2000);
 }
 
 // 缓存 DOM 元素
@@ -317,16 +318,22 @@ function startSlowRead() {
     return;
   }
   if (!speechSynth) {
-    showMessage('当前浏览器不支持语音合成功能', 'error');
+    showMessage('当前浏览器不支持语音合成，请用 Chrome/Safari/Edge', 'error');
     return;
   }
-  if (!speechVoicesReady) {
-    showMessage('语音引擎加载中，请稍后再试', 'info');
+  if (isSpeaking) {
+    // 如果已经在朗读，先停止
+    stopSlowRead();
     return;
   }
-  if (isSpeaking) return;
 
-  // 构建朗读队列：标题、作者、诗句
+  // 重置语音合成状态（解决 iOS Safari 首次调用失败的问题）
+  try {
+    speechSynth.cancel();
+    speechSynth.resume();
+  } catch(e) {}
+
+  // 构建朗读队列
   const lines = getPoemLines(currentPoem.content);
   slowReadLines = [currentPoem.title, currentPoet.name, ...lines];
   slowReadIndex = 0;
@@ -334,15 +341,18 @@ function startSlowRead() {
   isSpeaking = true;
   updateVoiceControls(true);
   updatePauseBtnState(false);
-  showMessage('跟读中...', 'speaking');
 
-  readNextLine();
+  // 延迟一小段时间再开始，确保 cancel/resume 生效
+  setTimeout(() => {
+    if (!isSpeaking) return;
+    readNextLine();
+  }, 100);
 }
 
 function readNextLine() {
   if (!isSpeaking || slowReadPaused) return;
 
-  // 整首循环：读完最后一句后从头开始
+  // 整首循环
   if (slowReadIndex >= slowReadLines.length) {
     if (slowLoopMode) {
       slowReadIndex = 0;
@@ -354,18 +364,13 @@ function readNextLine() {
   }
 
   const text = slowReadLines[slowReadIndex];
-  const lineIdx = slowReadIndex - 2; // 减去标题和作者
+  const lineIdx = slowReadIndex - 2;
 
-  // 高亮当前行（诗句部分）
   highlightLine(lineIdx);
 
-  // 更新状态提示
   const progress = slowReadLines.length > 0 ? (slowReadIndex + 1) + '/' + slowReadLines.length : '';
-  if (lineIdx >= 0) {
-    showMessage('跟读中 ' + progress + ' · ' + text.substring(0, 12), 'speaking');
-  }
+  showMessage('跟读中 ' + progress, 'speaking');
 
-  // 创建语音合成实例
   const utter = new SpeechSynthesisUtterance(text);
   utter.rate = 0.35;
   utter.pitch = 1.05;
@@ -373,22 +378,26 @@ function readNextLine() {
   utter.lang = 'zh-CN';
 
   // 尝试使用中文语音
-  const voices = speechSynth.getVoices();
-  const zhVoice = voices.find(v => v.lang.startsWith('zh') || v.lang.startsWith('cmn'));
-  if (zhVoice) utter.voice = zhVoice;
+  try {
+    const voices = speechSynth.getVoices();
+    if (voices && voices.length > 0) {
+      const zhVoice = voices.find(v => v.lang && (v.lang.startsWith('zh') || v.lang.startsWith('cmn')));
+      if (zhVoice) utter.voice = zhVoice;
+    }
+  } catch(e) {}
+
+  utter.onstart = function() {
+    showMessage('正在朗读...', 'speaking');
+  };
 
   utter.onend = function() {
     currentUtterance = null;
 
-    // 单句循环：重复当前句
     if (slowLineLoopMode && lineIdx >= 0) {
-      slowReadTimer = setTimeout(() => {
-        readNextLine();
-      }, 1200);
+      slowReadTimer = setTimeout(() => readNextLine(), 1200);
       return;
     }
 
-    // 手动模式：读完一句后暂停，等用户点击继续
     if (!slowAutoMode && lineIdx >= 0) {
       slowReadPaused = true;
       updatePauseBtnState(true);
@@ -405,6 +414,11 @@ function readNextLine() {
   utter.onerror = function(e) {
     currentUtterance = null;
     clearTimeout(slowReadTimer);
+    if (e.error === 'not-allowed') {
+      showMessage('浏览器禁止自动播放语音，请点击「开始跟读」重试', 'error');
+      stopSlowRead();
+      return;
+    }
     if (e.error !== 'canceled' && e.error !== 'interrupted') {
       slowReadIndex++;
       readNextLine();
@@ -412,7 +426,22 @@ function readNextLine() {
   };
 
   currentUtterance = utter;
-  speechSynth.speak(utter);
+
+  // 尝试朗读，如果失败给出提示
+  try {
+    speechSynth.speak(utter);
+    // 检查是否真的开始了
+    setTimeout(() => {
+      if (isSpeaking && !speechSynth.speaking && !speechSynth.paused && !currentUtterance) {
+        // 浏览器可能静默拒绝了语音合成
+        showMessage('语音播放被浏览器阻止，请尝试刷新页面后重试', 'error');
+        stopSlowRead();
+      }
+    }, 500);
+  } catch(e) {
+    showMessage('语音播放失败：' + e.message, 'error');
+    stopSlowRead();
+  }
 }
 
 function finishSlowRead() {
