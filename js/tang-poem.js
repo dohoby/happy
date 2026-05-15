@@ -31,6 +31,7 @@ let showPinyin = true;
 let currentTab = 'notes';
 let currentPoem = null;
 let playbackSpeed = parseFloat(localStorage.getItem('tangPlaybackSpeed')) || 0.75;
+let volume = parseFloat(localStorage.getItem('tangVolume')) || 0.8;
 let currentVoice = localStorage.getItem('tangVoice') || 'xiaoxiao';
 let followMode = localStorage.getItem('tangFollowMode') === '1';
 let singleLineMode = localStorage.getItem('tangSingleLineMode') !== '0';
@@ -46,6 +47,11 @@ let slowReadLines = [];
 let slowReadIndex = 0;
 let slowReadPaused = false;
 let slowReadTimer = null;
+
+// 跟读模式高级功能
+let slowLoopMode = localStorage.getItem('tangSlowLoop') === '1';         // 整首循环
+let slowLineLoopMode = localStorage.getItem('tangSlowLineLoop') === '1'; // 单句循环
+let slowAutoMode = localStorage.getItem('tangSlowAuto') !== '0';         // 自动继续（默认自动）
 
 // 预加载语音列表（Chrome 需要等待 voiceschanged）
 if (speechSynth) {
@@ -123,6 +129,7 @@ function playAudio(url, autoTry = false) {
   audioPlayer.pause();
   audioPlayer.currentTime = 0;
   audioPlayer.src = url;
+  audioPlayer.volume = volume;
   audioPlayer.playbackRate = playbackSpeed;
   let blocked = false;
   let tmo = null;
@@ -267,12 +274,38 @@ function setReadMode(mode) {
   $('voice-panel-title').textContent = isAudio ? '语音朗读' : '慢速跟读';
   $('speed-control').style.display = isAudio ? '' : 'none';
   $('voice-select-control').style.display = isAudio ? '' : 'none';
-  $('loop-btn').style.display = isAudio ? '' : 'none';
-  $('list-loop-btn').style.display = isAudio ? '' : 'none';
-  $('follow-btn').style.display = isAudio ? '' : 'none';
+
+  // 配置按钮文案和功能
+  if (isAudio) {
+    $('loop-btn').innerHTML = '<i class="fas fa-redo"></i> 循环';
+    $('loop-btn').classList.remove('active');
+    if (loopMode) $('loop-btn').classList.add('active');
+
+    $('list-loop-btn').innerHTML = '<i class="fas fa-list"></i> 连播';
+    $('list-loop-btn').classList.remove('active');
+    if (listLoopMode) $('list-loop-btn').classList.add('active');
+
+    $('follow-btn').innerHTML = '<i class="fas fa-book-reader"></i> 跟读';
+    $('follow-btn').classList.remove('active');
+    if (followMode) $('follow-btn').classList.add('active');
+  } else {
+    // 跟读模式：按钮功能重新映射
+    $('loop-btn').innerHTML = slowLoopMode ? '<i class="fas fa-redo"></i> 循环中' : '<i class="fas fa-redo"></i> 整首循环';
+    $('loop-btn').classList.toggle('active', slowLoopMode);
+
+    $('list-loop-btn').innerHTML = slowLineLoopMode ? '<i class="fas fa-repeat"></i> 单句循环中' : '<i class="fas fa-repeat"></i> 单句循环';
+    $('list-loop-btn').classList.toggle('active', slowLineLoopMode);
+
+    $('follow-btn').innerHTML = slowAutoMode ? '<i class="fas fa-forward"></i> 自动' : '<i class="fas fa-hand-pointer"></i> 手动';
+    $('follow-btn').classList.toggle('active', slowAutoMode);
+  }
+
   $('play-btn').innerHTML = isAudio ? '<i class="fas fa-play"></i> 朗读' : '<i class="fas fa-play"></i> 开始跟读';
 
   showMessage(isAudio ? '已切换到音频模式' : '已切换到跟读模式，适合小朋友逐句跟读', 'success');
+
+  // 重新绑定按钮事件
+  updateModeButtons();
 }
 
 // ========================
@@ -308,9 +341,16 @@ function startSlowRead() {
 
 function readNextLine() {
   if (!isSpeaking || slowReadPaused) return;
+
+  // 整首循环：读完最后一句后从头开始
   if (slowReadIndex >= slowReadLines.length) {
-    finishSlowRead();
-    return;
+    if (slowLoopMode) {
+      slowReadIndex = 0;
+      showMessage('整首循环，重新开始', 'info');
+    } else {
+      finishSlowRead();
+      return;
+    }
   }
 
   const text = slowReadLines[slowReadIndex];
@@ -319,10 +359,17 @@ function readNextLine() {
   // 高亮当前行（诗句部分）
   highlightLine(lineIdx);
 
+  // 更新状态提示
+  const progress = slowReadLines.length > 0 ? (slowReadIndex + 1) + '/' + slowReadLines.length : '';
+  if (lineIdx >= 0) {
+    showMessage('跟读中 ' + progress + ' · ' + text.substring(0, 12), 'speaking');
+  }
+
   // 创建语音合成实例
   const utter = new SpeechSynthesisUtterance(text);
   utter.rate = 0.35;
   utter.pitch = 1.05;
+  utter.volume = volume;
   utter.lang = 'zh-CN';
 
   // 尝试使用中文语音
@@ -332,6 +379,23 @@ function readNextLine() {
 
   utter.onend = function() {
     currentUtterance = null;
+
+    // 单句循环：重复当前句
+    if (slowLineLoopMode && lineIdx >= 0) {
+      slowReadTimer = setTimeout(() => {
+        readNextLine();
+      }, 1200);
+      return;
+    }
+
+    // 手动模式：读完一句后暂停，等用户点击继续
+    if (!slowAutoMode && lineIdx >= 0) {
+      slowReadPaused = true;
+      updatePauseBtnState(true);
+      showMessage('请点击「继续」读下一句', 'paused');
+      return;
+    }
+
     slowReadTimer = setTimeout(() => {
       slowReadIndex++;
       readNextLine();
@@ -765,10 +829,21 @@ function bindVoiceButtons() {
   $('play-btn').onclick = onPlayClick;
   $('pause-btn').onclick = onPauseClick;
   $('stop-btn').onclick = onStopClick;
-  $('loop-btn').onclick = toggleLoop;
-  $('list-loop-btn').onclick = toggleListLoop;
-  $('follow-btn').onclick = toggleFollow;
   $('fav-btn').onclick = toggleFavorite;
+  // loop/list-loop/follow 的功能在 setReadMode 中根据模式重新绑定
+  updateModeButtons();
+}
+
+function updateModeButtons() {
+  if (readMode === 'audio') {
+    $('loop-btn').onclick = toggleLoop;
+    $('list-loop-btn').onclick = toggleListLoop;
+    $('follow-btn').onclick = toggleFollow;
+  } else {
+    $('loop-btn').onclick = toggleSlowLoop;
+    $('list-loop-btn').onclick = toggleSlowLineLoop;
+    $('follow-btn').onclick = toggleSlowAuto;
+  }
 }
 
 function toggleLoop() {
@@ -819,12 +894,68 @@ function toggleFollow() {
   }
 }
 
+// ========================
+// 跟读模式 toggle 函数
+// ========================
+function toggleSlowLoop() {
+  slowLoopMode = !slowLoopMode;
+  localStorage.setItem('tangSlowLoop', slowLoopMode ? '1' : '');
+  const btn = $('loop-btn');
+  if (slowLoopMode) {
+    btn.classList.add('active');
+    btn.innerHTML = '<i class="fas fa-redo"></i> 循环中';
+    showMessage('已开启整首循环', 'success');
+  } else {
+    btn.classList.remove('active');
+    btn.innerHTML = '<i class="fas fa-redo"></i> 整首循环';
+    showMessage('已关闭整首循环', 'info');
+  }
+}
+
+function toggleSlowLineLoop() {
+  slowLineLoopMode = !slowLineLoopMode;
+  localStorage.setItem('tangSlowLineLoop', slowLineLoopMode ? '1' : '');
+  const btn = $('list-loop-btn');
+  if (slowLineLoopMode) {
+    btn.classList.add('active');
+    btn.innerHTML = '<i class="fas fa-repeat"></i> 单句循环中';
+    showMessage('已开启单句循环', 'success');
+  } else {
+    btn.classList.remove('active');
+    btn.innerHTML = '<i class="fas fa-repeat"></i> 单句循环';
+    showMessage('已关闭单句循环', 'info');
+  }
+}
+
+function toggleSlowAuto() {
+  slowAutoMode = !slowAutoMode;
+  localStorage.setItem('tangSlowAuto', slowAutoMode ? '1' : '0');
+  const btn = $('follow-btn');
+  if (slowAutoMode) {
+    btn.classList.add('active');
+    btn.innerHTML = '<i class="fas fa-forward"></i> 自动';
+    showMessage('已切换到自动模式，读完一句自动继续', 'success');
+  } else {
+    btn.classList.remove('active');
+    btn.innerHTML = '<i class="fas fa-hand-pointer"></i> 手动';
+    showMessage('已切换到手动模式，读完一句需手动继续', 'info');
+  }
+}
+
 function setSpeed(speed) {
   playbackSpeed = speed;
   localStorage.setItem('tangPlaybackSpeed', speed);
   audioPlayer.playbackRate = speed;
   document.querySelectorAll('.speed-btn[data-speed]').forEach(b => b.classList.toggle('active', parseFloat(b.dataset.speed) === speed));
   showMessage('朗读速度：' + speed + 'x', 'info');
+}
+
+function setVolume(val) {
+  volume = val;
+  localStorage.setItem('tangVolume', val);
+  audioPlayer.volume = val;
+  const pct = Math.round(val * 100);
+  showMessage('音量：' + pct + '%', 'info');
 }
 
 function setVoice(voice) {
@@ -1036,6 +1167,15 @@ function initApp() {
     b.addEventListener('click', () => setVoice(b.dataset.voice));
     b.classList.toggle('active', b.dataset.voice === currentVoice);
   });
+
+  // 音量滑块
+  const volSlider = $('volume-slider');
+  if (volSlider) {
+    volSlider.value = Math.round(volume * 100);
+    volSlider.addEventListener('input', (e) => {
+      setVolume(parseInt(e.target.value) / 100);
+    });
+  }
 
   // 模式切换按钮
   document.querySelectorAll('.read-mode-btn').forEach(btn => {

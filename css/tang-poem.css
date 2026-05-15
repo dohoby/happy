@@ -504,6 +504,37 @@ header::after {
 }
 .voice-btn.loop.active:hover, .voice-btn.list-loop.active:hover, .voice-btn.follow.active:hover { background: #a93226 }
 
+.volume-control { margin-bottom: 14px }
+.volume-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #e0e0e0;
+  outline: none;
+  cursor: pointer
+}
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2c3e50;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2)
+}
+.volume-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2c3e50;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2)
+}
+
 .voice-status { text-align: center; color: #7f8c8d; font-size: .85em; padding: 10px; background: #f8f9fa; border-radius: 8px }
 
 .poet-info h3 { color: #2c3e50; margin-bottom: 8px; font-size: 1em }
