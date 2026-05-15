@@ -40,11 +40,28 @@ let searchTimer = null;
 // 跟读模式状态
 let readMode = localStorage.getItem('tangReadMode') || 'audio'; // 'audio' | 'slow'
 let speechSynth = window.speechSynthesis || null;
+let speechVoicesReady = false;
 let currentUtterance = null;
 let slowReadLines = [];
 let slowReadIndex = 0;
 let slowReadPaused = false;
 let slowReadTimer = null;
+
+// 预加载语音列表（Chrome 需要等待 voiceschanged）
+if (speechSynth) {
+  function loadVoices() {
+    const voices = speechSynth.getVoices();
+    if (voices && voices.length > 0) {
+      speechVoicesReady = true;
+    }
+  }
+  loadVoices();
+  if (speechSynth.onvoiceschanged !== undefined) {
+    speechSynth.onvoiceschanged = loadVoices;
+  }
+  // 部分浏览器 voices 延迟加载，再试一次
+  setTimeout(loadVoices, 500);
+}
 
 // 缓存 DOM 元素
 const $ = id => document.getElementById(id);
@@ -262,8 +279,16 @@ function setReadMode(mode) {
 // 跟读引擎（Web Speech API）
 // ========================
 function startSlowRead() {
-  if (!currentPoem || !currentPoet || !speechSynth) {
-    showMessage('当前环境不支持跟读功能', 'error');
+  if (!currentPoem || !currentPoet) {
+    showMessage('请先选择一首诗歌', 'error');
+    return;
+  }
+  if (!speechSynth) {
+    showMessage('当前浏览器不支持语音合成功能', 'error');
+    return;
+  }
+  if (!speechVoicesReady) {
+    showMessage('语音引擎加载中，请稍后再试', 'info');
     return;
   }
   if (isSpeaking) return;
@@ -284,12 +309,7 @@ function startSlowRead() {
 function readNextLine() {
   if (!isSpeaking || slowReadPaused) return;
   if (slowReadIndex >= slowReadLines.length) {
-    // 全部读完
-    isSpeaking = false;
-    updateVoiceControls(false);
-    updatePauseBtnState(false);
-    clearAllHighlights();
-    showMessage('跟读完成', 'success');
+    finishSlowRead();
     return;
   }
 
@@ -297,35 +317,46 @@ function readNextLine() {
   const lineIdx = slowReadIndex - 2; // 减去标题和作者
 
   // 高亮当前行（诗句部分）
-  if (lineIdx >= 0) {
-    highlightLine(lineIdx);
-  }
+  highlightLine(lineIdx);
 
   // 创建语音合成实例
   const utter = new SpeechSynthesisUtterance(text);
-  utter.rate = 0.4;  // 极慢速
-  utter.pitch = 1.0;
+  utter.rate = 0.35;
+  utter.pitch = 1.05;
   utter.lang = 'zh-CN';
+
+  // 尝试使用中文语音
+  const voices = speechSynth.getVoices();
+  const zhVoice = voices.find(v => v.lang.startsWith('zh') || v.lang.startsWith('cmn'));
+  if (zhVoice) utter.voice = zhVoice;
 
   utter.onend = function() {
     currentUtterance = null;
-    // 句间停顿 1.5 秒
     slowReadTimer = setTimeout(() => {
       slowReadIndex++;
       readNextLine();
-    }, 1500);
+    }, 1800);
   };
 
-  utter.onerror = function() {
+  utter.onerror = function(e) {
     currentUtterance = null;
     clearTimeout(slowReadTimer);
-    // 出错时继续下一句
-    slowReadIndex++;
-    readNextLine();
+    if (e.error !== 'canceled' && e.error !== 'interrupted') {
+      slowReadIndex++;
+      readNextLine();
+    }
   };
 
   currentUtterance = utter;
   speechSynth.speak(utter);
+}
+
+function finishSlowRead() {
+  isSpeaking = false;
+  updateVoiceControls(false);
+  updatePauseBtnState(false);
+  clearAllHighlights();
+  showMessage('跟读完成', 'success');
 }
 
 function pauseSlowRead() {
@@ -335,12 +366,16 @@ function pauseSlowRead() {
     slowReadPaused = false;
     updatePauseBtnState(false);
     showMessage('跟读中...', 'speaking');
-    readNextLine();
+    if (speechSynth.paused) {
+      speechSynth.resume();
+    } else {
+      readNextLine();
+    }
   } else {
     // 暂停
     slowReadPaused = true;
-    if (speechSynth) speechSynth.cancel();
     clearTimeout(slowReadTimer);
+    if (speechSynth.speaking) speechSynth.pause();
     updatePauseBtnState(true);
     showMessage('已暂停', 'paused');
   }
@@ -348,8 +383,12 @@ function pauseSlowRead() {
 
 function stopSlowRead() {
   if (!isSpeaking && !slowReadPaused) return;
-  if (speechSynth) speechSynth.cancel();
   clearTimeout(slowReadTimer);
+  if (speechSynth) {
+    speechSynth.cancel();
+    // iOS Safari 上 cancel 后 resume 状态可能异常，重置一下
+    try { speechSynth.resume(); } catch(e) {}
+  }
   slowReadPaused = false;
   isSpeaking = false;
   currentUtterance = null;
@@ -369,56 +408,6 @@ function clearAllHighlights() {
   document.querySelectorAll('.poem-line').forEach(line => {
     line.classList.remove('active');
   });
-  clearCharHighlights();
-}
-
-function clearCharHighlights() {
-  document.querySelectorAll('.char-active').forEach(el => {
-    el.classList.remove('char-active');
-  });
-}
-
-function highlightChar(lineIdx, charIdx) {
-  if (lineIdx < 0) return;
-  const line = document.querySelector('.poem-line[data-line-idx="' + lineIdx + '"]');
-  if (!line) return;
-
-  // 清除之前的字高亮
-  line.querySelectorAll('.char-active').forEach(el => el.classList.remove('char-active'));
-
-  // 找到对应位置的字符
-  const textNodes = [];
-  const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT);
-  let node;
-  while ((node = walker.nextNode())) {
-    textNodes.push(node);
-  }
-
-  let cumulative = 0;
-  for (const textNode of textNodes) {
-    const text = textNode.textContent;
-    const start = cumulative;
-    const end = cumulative + text.length;
-    if (charIdx >= start && charIdx < end) {
-      const offset = charIdx - start;
-      const ch = text[offset];
-      // 只高亮汉字
-      if (/[一-鿿]/.test(ch)) {
-        const range = document.createRange();
-        range.setStart(textNode, offset);
-        range.setEnd(textNode, offset + 1);
-        const span = document.createElement('span');
-        span.className = 'char-active';
-        try {
-          range.surroundContents(span);
-        } catch (e) {
-          // 复杂节点结构时跳过字级高亮
-        }
-      }
-      break;
-    }
-    cumulative = end;
-  }
 }
 
 // ========================
