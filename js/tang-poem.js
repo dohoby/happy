@@ -1,0 +1,819 @@
+/**
+ * 唐诗三百首 - 主逻辑文件
+ */
+
+// ========================
+// 常量
+// ========================
+const POET_BG_COLORS = ['#e8f4fd','#fdf2f0','#f0f9f0','#fdf8e8','#f3f0fb','#fdf0f5','#e8f8f5','#fef3e8','#f0f4ff','#fff8e1','#e0f7fa','#fce4ec','#f1f8e9','#e8eaf6','#fff3e0','#e0f2f1'];
+const TAB_NAMES = { notes: '注释', translation: '译文', analysis: '赏析' };
+const VOICE_NAMES = { xiaoxiao: '女声温暖', xiaoyi: '女童活泼', yunxia: '少年可爱' };
+const STATUS_ICONS = {
+  success: ['fa-check-circle', '#27ae60'],
+  error: ['fa-exclamation-triangle', '#c0392b'],
+  speaking: ['fa-volume-up', '#8e44ad'],
+  paused: ['fa-pause-circle', '#2980b9'],
+  stopped: ['fa-stop-circle', '#7f8c8d']
+};
+
+// ========================
+// 全局状态
+// ========================
+let tangPoetry = [];
+let currentPoemText = '';
+let isSpeaking = false;
+let loopMode = false;
+let listLoopMode = false;
+let currentPoet = null;
+let currentPoemIndex = 0;
+let isAutoPlaying = false;
+let showPinyin = true;
+let currentTab = 'notes';
+let currentPoem = null;
+let playbackSpeed = parseFloat(localStorage.getItem('tangPlaybackSpeed')) || 0.75;
+let currentVoice = localStorage.getItem('tangVoice') || 'xiaoxiao';
+let followMode = localStorage.getItem('tangFollowMode') === '1';
+let singleLineMode = localStorage.getItem('tangSingleLineMode') !== '0';
+let currentLineTimings = [];
+let searchTimer = null;
+
+// 缓存 DOM 元素
+const $ = id => document.getElementById(id);
+const audioPlayer = $('audio-player');
+
+// ========================
+// 工具函数
+// ========================
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+function debounce(fn, delay) {
+  return function(...args) {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+function getAudioUrl(poet, index) {
+  if (!poet || !poet.poems[index]) return null;
+  const poem = poet.poems[index];
+  const safeTitle = poem.title.replace(/[^\w一-鿿]/g, '_');
+  return `resources/mp3_kids/${currentVoice}/${poet.id}_${String(index).padStart(2, '0')}_${safeTitle}.mp3`;
+}
+
+function getPoemLines(text) {
+  const rawLines = text.split('\n').filter(l => l.trim());
+  if (!singleLineMode) return rawLines;
+  const sentences = [];
+  for (const line of rawLines) {
+    const parts = line.match(/[^，。！？；：、]+[，。！？；：、]?/g) || [line];
+    for (const part of parts) {
+      if (part.trim()) sentences.push(part.trim());
+    }
+  }
+  return sentences;
+}
+
+function calculateLineTimings(poem, poetName) {
+  const poemLines = getPoemLines(poem.content);
+  const allLines = [poem.title + '。', poetName + '。', ...poemLines];
+  const weights = allLines.map(line => line.length + (line.match(/[，。！？；：、]/g) || []).length * 0.3);
+  const totalWeight = weights.reduce((a, b) => a + b, 0);
+  let cumulative = 0;
+  const timings = weights.map(w => {
+    const start = cumulative / totalWeight;
+    cumulative += w;
+    return { start };
+  });
+  return timings.slice(2);
+}
+
+// ========================
+// 语音控制
+// ========================
+function playAudio(url, autoTry = false) {
+  if (!url) { showMessage('暂无音频文件', 'error'); return; }
+  audioPlayer.pause();
+  audioPlayer.currentTime = 0;
+  audioPlayer.src = url;
+  audioPlayer.playbackRate = playbackSpeed;
+  let blocked = false;
+  let tmo = null;
+  if (isMobileDevice() && autoTry) {
+    tmo = setTimeout(() => {
+      if (!isSpeaking && !blocked) {
+        blocked = true;
+        audioPlayer.pause();
+        showMessage('请点击「朗读」按钮播放', 'info');
+      }
+    }, 500);
+  }
+  audioPlayer.onplay = function() {
+    if (tmo) clearTimeout(tmo);
+    audioPlayer.playbackRate = playbackSpeed;
+    isSpeaking = true;
+    updateVoiceControls(true);
+    updatePauseBtnState(false);
+    showMessage('朗读中...', 'speaking');
+  };
+  audioPlayer.ontimeupdate = function() {
+    updateFollowHighlight();
+  };
+  audioPlayer.onended = function() {
+    isSpeaking = false;
+    isAutoPlaying = false;
+    updateVoiceControls(false);
+    updatePauseBtnState(false);
+    clearFollowHighlight();
+    showMessage('朗读完成', 'success');
+    if (loopMode && currentPoemText) {
+      setTimeout(() => playAudio(getAudioUrl(currentPoet, currentPoemIndex)), 1000);
+    } else if (listLoopMode && currentPoet) {
+      setTimeout(() => autoPlayNextPoem(), 1000);
+    }
+  };
+  audioPlayer.onerror = function() {
+    if (tmo) clearTimeout(tmo);
+    isSpeaking = false;
+    isAutoPlaying = false;
+    updateVoiceControls(false);
+    updatePauseBtnState(false);
+    clearFollowHighlight();
+    showMessage('音频播放失败，请检查文件是否存在', 'error');
+    if (listLoopMode && currentPoet) {
+      setTimeout(() => autoPlayNextPoem(), 1000);
+    }
+  };
+  const p = audioPlayer.play();
+  if (p && typeof p.catch === 'function') {
+    p.catch(() => {
+      if (tmo) clearTimeout(tmo);
+      if (isMobileDevice() && autoTry) {
+        showMessage('请点击「朗读」按钮播放', 'info');
+      } else {
+        showMessage('音频播放失败，请检查文件是否存在', 'error');
+      }
+    });
+  }
+}
+
+function autoPlayNextPoem() {
+  if (!listLoopMode || !currentPoet || isAutoPlaying) return;
+  isAutoPlaying = true;
+  let next = currentPoemIndex + 1;
+  if (next >= currentPoet.poems.length) next = 0;
+  const idx = next;
+  setTimeout(() => {
+    if (listLoopMode && !isSpeaking) {
+      const p = currentPoet.poems[idx];
+      if (p) {
+        currentPoemIndex = idx;
+        showPoemFromList(currentPoet, idx);
+        setTimeout(() => {
+          const url = getAudioUrl(currentPoet, idx);
+          if (url) playAudio(url);
+        }, 500);
+      }
+    }
+    isAutoPlaying = false;
+  }, 1000);
+}
+
+function pauseAudio() {
+  if (audioPlayer.paused) {
+    audioPlayer.play();
+    showMessage('朗读中...', 'speaking');
+    updatePauseBtnState(false);
+  } else {
+    audioPlayer.pause();
+    showMessage('已暂停', 'paused');
+    updatePauseBtnState(true);
+  }
+}
+
+function stopAudio() {
+  audioPlayer.pause();
+  audioPlayer.currentTime = 0;
+  isSpeaking = false;
+  isAutoPlaying = false;
+  updateVoiceControls(false);
+  updatePauseBtnState(false);
+  clearFollowHighlight();
+  showMessage('已停止', 'stopped');
+}
+
+function updatePauseBtnState(paused) {
+  const btn = $('pause-btn');
+  if (paused) {
+    btn.innerHTML = '<i class="fas fa-play"></i> 继续';
+    btn.classList.remove('pause');
+  } else {
+    btn.innerHTML = '<i class="fas fa-pause"></i> 暂停';
+    btn.classList.add('pause');
+  }
+}
+
+function updateVoiceControls(playing) {
+  $('play-btn').disabled = playing;
+  $('pause-btn').disabled = !playing;
+  $('stop-btn').disabled = !playing;
+}
+
+// ========================
+// 跟读高亮
+// ========================
+function updateFollowHighlight() {
+  if (!followMode || !audioPlayer.duration || !currentLineTimings.length) return;
+  const progress = audioPlayer.currentTime / audioPlayer.duration;
+  let activeIdx = -1;
+  for (let i = 0; i < currentLineTimings.length; i++) {
+    if (progress >= currentLineTimings[i].start) activeIdx = i;
+  }
+  document.querySelectorAll('.poem-line').forEach((line, i) => {
+    line.classList.toggle('active', i === activeIdx);
+  });
+}
+
+function clearFollowHighlight() {
+  document.querySelectorAll('.poem-line').forEach(line => line.classList.remove('active'));
+}
+
+// ========================
+// 拼音渲染
+// ========================
+function addPinyinToText(text) {
+  const lines = getPoemLines(text);
+  if (!window.pinyinPro || !showPinyin) {
+    return lines.map((line, i) => {
+      if (!line.trim()) return '<br>';
+      return '<div class="poem-line" data-line-idx="' + i + '">' + line + '</div>';
+    }).join('');
+  }
+  try {
+    let html = '';
+    for (let li = 0; li < lines.length; li++) {
+      const line = lines[li];
+      if (!line.trim()) { html += '<br>'; continue; }
+      const arr = window.pinyinPro.pinyin(line, { toneType: 'symbol', type: 'array', multiple: true });
+      let out = '';
+      let ci = 0;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (/[一-鿿]/.test(ch)) {
+          out += '<span class="pinyin-ruby"><span class="pinyin-text">' + (arr[ci] || '') + '</span><span class="hanzi-text">' + ch + '</span></span>';
+          ci++;
+        } else {
+          out += '<span style="margin:0 2px">' + ch + '</span>';
+        }
+      }
+      html += '<div class="poem-line" data-line-idx="' + li + '">' + out + '</div>';
+    }
+    return html;
+  } catch (e) {
+    return lines.map((line, i) => {
+      if (!line.trim()) return '<br>';
+      return '<div class="poem-line" data-line-idx="' + i + '">' + line + '</div>';
+    }).join('');
+  }
+}
+
+function showMessage(msg, type = 'info') {
+  const el = $('current-status');
+  const [icon, color] = STATUS_ICONS[type] || ['fa-info-circle', '#7f8c8d'];
+  el.innerHTML = '<i class="fas ' + icon + '" style="color:' + color + '"></i> ' + msg;
+}
+
+// ========================
+// 页面渲染
+// ========================
+function renderPoetList() {
+  const ul = $('poet-list');
+  ul.innerHTML = '';
+  if (!tangPoetry || !tangPoetry.length) {
+    ul.innerHTML = '<li class="empty-message">暂无数据</li>';
+    return;
+  }
+  tangPoetry.forEach(poet => {
+    const li = document.createElement('li');
+    li.className = 'poet-item';
+    li.dataset.poetId = poet.id;
+    li.innerHTML = '<span class="poet-name">' + poet.name + '</span><span class="poet-count">' + poet.poems.length + '首</span>';
+    li.addEventListener('click', () => { showPoetPoems(poet.id); closeNav(); });
+    ul.appendChild(li);
+  });
+  const tp = tangPoetry.length;
+  const tc = tangPoetry.reduce((s, p) => s + p.poems.length, 0);
+  $('poet-count').textContent = tp;
+  $('poem-count').textContent = tc;
+}
+
+function renderPoetGrid() {
+  const grid = $('poet-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  if (!tangPoetry || !tangPoetry.length) return;
+  tangPoetry.forEach((poet, i) => {
+    const div = document.createElement('div');
+    div.className = 'poet-grid-item fade-in-up stagger-' + (i % 5 + 1);
+    div.style.background = POET_BG_COLORS[i % POET_BG_COLORS.length];
+    div.innerHTML = '<div class="poet-grid-avatar">' + poet.name.charAt(0) + '</div><div class="poet-grid-name">' + poet.name + '</div><div class="poet-grid-count">' + poet.poems.length + '首</div>';
+    div.addEventListener('click', () => showPoetPoems(poet.id));
+    grid.appendChild(div);
+  });
+}
+
+function renderDailyPoem() {
+  const el = $('daily-poem');
+  if (!el) return;
+  if (!tangPoetry || !tangPoetry.length) return;
+  const total = tangPoetry.reduce((s, p) => s + p.poems.length, 0);
+  const today = new Date();
+  const daySeed = Math.floor(today.getTime() / 86400000);
+  const idx = daySeed % total;
+  let remain = idx;
+  for (const poet of tangPoetry) {
+    if (remain < poet.poems.length) {
+      const poem = poet.poems[remain];
+      $('daily-title').textContent = poem.title;
+      $('daily-author-name').textContent = poet.name;
+      $('daily-preview').textContent = poem.content.split('\n')[0];
+      $('daily-date').textContent = (today.getMonth() + 1) + '月' + today.getDate() + '日';
+      el.onclick = () => showPoemFromList(poet, remain);
+      return;
+    }
+    remain -= poet.poems.length;
+  }
+}
+
+// ========================
+// 收藏与最近阅读
+// ========================
+function loadFavorites() {
+  try { return JSON.parse(localStorage.getItem('tangFavorites') || '[]'); }
+  catch (e) { return []; }
+}
+
+function saveFavorites(list) {
+  localStorage.setItem('tangFavorites', JSON.stringify(list));
+}
+
+function loadRecent() {
+  try { return JSON.parse(localStorage.getItem('tangRecent') || '[]'); }
+  catch (e) { return []; }
+}
+
+function saveRecent(list) {
+  localStorage.setItem('tangRecent', JSON.stringify(list.slice(0, 20)));
+}
+
+function isFavorite(title) {
+  return loadFavorites().some(f => f.title === title);
+}
+
+function toggleFavorite() {
+  if (!currentPoem || !currentPoet) return;
+  let list = loadFavorites();
+  const idx = list.findIndex(f => f.title === currentPoem.title);
+  if (idx >= 0) {
+    list.splice(idx, 1);
+    showMessage('已取消收藏', 'info');
+  } else {
+    list.unshift({ title: currentPoem.title, poetName: currentPoet.name, poetId: currentPoet.id, poemIndex: currentPoemIndex });
+    showMessage('已收藏', 'success');
+  }
+  saveFavorites(list);
+  updateFavBtn();
+  renderFavorites();
+}
+
+function updateFavBtn() {
+  const btn = $('fav-btn');
+  if (!btn) return;
+  const active = isFavorite(currentPoem ? currentPoem.title : '');
+  btn.classList.toggle('active', active);
+  btn.innerHTML = active ? '<i class="fas fa-heart"></i> 已收藏' : '<i class="far fa-heart"></i> 收藏';
+}
+
+function addRecent(poet, poem, index) {
+  let list = loadRecent().filter(r => r.title !== poem.title);
+  list.unshift({ title: poem.title, poetName: poet.name, poetId: poet.id, poemIndex: index });
+  saveRecent(list);
+  renderRecent();
+}
+
+function renderPoemList(container, list, emptyMsg) {
+  container.innerHTML = '';
+  if (!list || !list.length) {
+    container.innerHTML = '<div class="tab-empty" style="padding:16px">' + (emptyMsg || '暂无内容') + '</div>';
+    return;
+  }
+  list.slice(0, 10).forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'poem-list-item';
+    div.innerHTML = '<div class="pl-title">' + item.title + '</div><div class="pl-meta">' + item.poetName + '</div>';
+    div.addEventListener('click', () => {
+      const poet = tangPoetry.find(p => p.id === item.poetId);
+      if (poet) showPoemFromList(poet, item.poemIndex);
+    });
+    container.appendChild(div);
+  });
+}
+
+function renderFavorites() {
+  const section = $('fav-section');
+  if (!section) return;
+  const list = loadFavorites();
+  section.style.display = list.length ? 'block' : 'none';
+  renderPoemList($('fav-list'), list, '暂无收藏诗歌');
+}
+
+function renderRecent() {
+  const section = $('recent-section');
+  if (!section) return;
+  const list = loadRecent();
+  section.style.display = list.length ? 'block' : 'none';
+  renderPoemList($('recent-list'), list, '暂无阅读记录');
+}
+
+// ========================
+// 页面切换
+// ========================
+function showPoetPoems(poetId) {
+  const poet = tangPoetry.find(p => p.id === poetId);
+  if (!poet) return;
+  currentPoet = poet;
+  currentPoemIndex = 0;
+  $('current-poet-name').textContent = poet.name;
+  $('current-poet-count').textContent = poet.poems.length + '首作品';
+  const list = $('poet-poems-list');
+  list.innerHTML = '';
+  poet.poems.forEach((poem, i) => {
+    const div = document.createElement('div');
+    div.className = 'card poem-item';
+    div.style.cursor = 'pointer';
+    const preview = poem.content.split('\n')[0].substring(0, 14) + (poem.content.split('\n')[0].length > 14 ? '...' : '');
+    div.innerHTML = '<div style="font-weight:600;color:#2c3e50;">' + poem.title + '</div><div style="font-size:.85em;color:#888;margin-top:4px;">' + preview + '</div>';
+    div.addEventListener('click', () => showPoemFromList(poet, i));
+    list.appendChild(div);
+  });
+  $('home-page').classList.remove('active');
+  $('poet-poems-page').classList.add('active');
+  $('poem-page').classList.remove('active');
+  $('page-title').textContent = poet.name + '的作品';
+  $('search-results').classList.remove('active');
+  $('nav-home').classList.remove('active');
+  $('nav-back').classList.remove('hidden');
+}
+
+function showPoemFromList(poet, index) {
+  currentPoet = poet;
+  currentPoemIndex = index;
+  showPoem(poet, poet.poems[index], index);
+}
+
+function showPoem(poet, poem, index) {
+  currentPoem = poem;
+  $('detail-title').textContent = poem.title;
+  $('poet-name').textContent = poet.name;
+  $('poet-bio').textContent = poet.bio;
+  $('detail-content').innerHTML = addPinyinToText(poem.content);
+  $('page-title').textContent = poet.name + ' · ' + poem.title;
+  $('home-page').classList.remove('active');
+  $('poet-poems-page').classList.remove('active');
+  $('poem-page').classList.add('active');
+  currentPoemText = poem.title + '，' + poet.name + '。' + poem.content;
+  currentLineTimings = calculateLineTimings(poem, poet.name);
+  updateNavButtons(poet, index);
+  $('current-position').textContent = (index + 1) + '/' + poet.poems.length;
+  bindVoiceButtons();
+  currentTab = 'notes';
+  switchTab('notes');
+  $('search-results').classList.remove('active');
+  $('nav-home').classList.remove('active');
+  $('nav-back').classList.remove('hidden');
+  addRecent(poet, poem, index);
+  updateFavBtn();
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  const pane = $('tab-pane');
+  if (!currentPoem) {
+    pane.innerHTML = '<div class="tab-empty">请先选择一首诗歌</div>';
+    return;
+  }
+  const extra = poemExtras[currentPoem.title];
+  if (!extra || !extra[tab]) {
+    pane.innerHTML = '<div class="tab-empty">暂无' + TAB_NAMES[tab] + '</div>';
+    return;
+  }
+  let html = '';
+  if (tab === 'notes') {
+    extra.notes.split('。').filter(Boolean).forEach(s => {
+      if (s.trim()) html += '<p>' + s.trim() + '。</p>';
+    });
+  } else if (tab === 'translation') {
+    html = '<p>' + extra.translation + '</p>';
+  } else if (tab === 'analysis') {
+    html = '<p>' + extra.analysis + '</p>';
+  }
+  pane.innerHTML = html || '<div class="tab-empty">暂无内容</div>';
+}
+
+function updateNavButtons(poet, index) {
+  $('prev-poem').disabled = index <= 0;
+  $('next-poem').disabled = index >= poet.poems.length - 1 && !listLoopMode;
+}
+
+function prevPoem() {
+  if (currentPoet && currentPoemIndex > 0) showPoemFromList(currentPoet, currentPoemIndex - 1);
+}
+
+function nextPoem() {
+  if (!currentPoet) return;
+  let n = currentPoemIndex + 1;
+  if (n >= currentPoet.poems.length) {
+    if (listLoopMode) n = 0; else return;
+  }
+  showPoemFromList(currentPoet, n);
+}
+
+function bindVoiceButtons() {
+  $('play-btn').onclick = () => playAudio(getAudioUrl(currentPoet, currentPoemIndex));
+  $('pause-btn').onclick = pauseAudio;
+  $('stop-btn').onclick = stopAudio;
+  $('loop-btn').onclick = toggleLoop;
+  $('list-loop-btn').onclick = toggleListLoop;
+  $('follow-btn').onclick = toggleFollow;
+  $('fav-btn').onclick = toggleFavorite;
+}
+
+function toggleLoop() {
+  loopMode = !loopMode;
+  localStorage.setItem('tangLoopMode', loopMode ? '1' : '');
+  const btn = $('loop-btn');
+  if (loopMode) {
+    if (listLoopMode) toggleListLoop();
+    btn.classList.add('active');
+    btn.innerHTML = '<i class="fas fa-redo"></i> 循环中';
+    showMessage('已开启单曲循环', 'success');
+  } else {
+    btn.classList.remove('active');
+    btn.innerHTML = '<i class="fas fa-redo"></i> 循环';
+    showMessage('已关闭单曲循环', 'info');
+  }
+}
+
+function toggleListLoop() {
+  listLoopMode = !listLoopMode;
+  localStorage.setItem('tangListLoopMode', listLoopMode ? '1' : '');
+  const btn = $('list-loop-btn');
+  if (listLoopMode) {
+    if (loopMode) toggleLoop();
+    btn.classList.add('active');
+    btn.innerHTML = '<i class="fas fa-list"></i> 连播中';
+    showMessage('已开启列表连播', 'success');
+  } else {
+    btn.classList.remove('active');
+    btn.innerHTML = '<i class="fas fa-list"></i> 连播';
+    showMessage('已关闭列表连播', 'info');
+  }
+}
+
+function toggleFollow() {
+  followMode = !followMode;
+  localStorage.setItem('tangFollowMode', followMode ? '1' : '');
+  const btn = $('follow-btn');
+  if (followMode) {
+    btn.classList.add('active');
+    btn.innerHTML = '<i class="fas fa-book-reader"></i> 跟读中';
+    showMessage('已开启跟读模式', 'success');
+  } else {
+    btn.classList.remove('active');
+    btn.innerHTML = '<i class="fas fa-book-reader"></i> 跟读';
+    showMessage('已关闭跟读模式', 'info');
+    clearFollowHighlight();
+  }
+}
+
+function setSpeed(speed) {
+  playbackSpeed = speed;
+  localStorage.setItem('tangPlaybackSpeed', speed);
+  audioPlayer.playbackRate = speed;
+  document.querySelectorAll('.speed-btn[data-speed]').forEach(b => b.classList.toggle('active', parseFloat(b.dataset.speed) === speed));
+  showMessage('朗读速度：' + speed + 'x', 'info');
+}
+
+function setVoice(voice) {
+  currentVoice = voice;
+  localStorage.setItem('tangVoice', voice);
+  document.querySelectorAll('.speed-btn[data-voice]').forEach(b => b.classList.toggle('active', b.dataset.voice === voice));
+  showMessage('已切换音色：' + VOICE_NAMES[voice], 'success');
+}
+
+function toggleSingleLine() {
+  singleLineMode = !singleLineMode;
+  localStorage.setItem('tangSingleLineMode', singleLineMode ? '1' : '0');
+  $('toggle-single-line').textContent = singleLineMode ? '联句分行' : '单句分行';
+  if (currentPoem) {
+    $('detail-content').innerHTML = addPinyinToText(currentPoem.content);
+    currentLineTimings = calculateLineTimings(currentPoem, currentPoet.name);
+    if (!isSpeaking) clearFollowHighlight();
+  }
+}
+
+// ========================
+// 搜索（带防抖）
+// ========================
+function doSearch(kw) {
+  const q = kw.toLowerCase().trim();
+  if (!q) return { poems: [], poets: [] };
+  const poems = [], poets = [];
+  tangPoetry.forEach(poet => {
+    if (poet.name.includes(q) || poet.bio.includes(q)) poets.push({ type: 'poet', poet });
+    poet.poems.forEach((poem, idx) => {
+      if (poem.title.includes(q) || poem.content.includes(q)) {
+        poems.push({ type: 'poem', poet, poem, poemIndex: idx });
+      }
+    });
+  });
+  return { poems, poets };
+}
+
+function renderSearchResults(r, kw) {
+  const box = $('search-results');
+  if (!kw.trim() || (!r.poems.length && !r.poets.length)) {
+    box.classList.remove('active');
+    return;
+  }
+  let html = '';
+  if (r.poems.length) {
+    html += '<div class="result-section"><h3>诗歌 (' + r.poems.length + ')</h3>';
+    r.poems.slice(0, 8).forEach(item => {
+      const snippet = item.poem.content.replace(/\n/g, ' ').substring(0, 40);
+      html += '<div class="result-poem-item" data-pid="' + item.poet.id + '" data-idx="' + item.poemIndex + '"><div class="result-poem-title">' + item.poem.title + '</div><div class="result-poem-meta">' + item.poet.name + '</div><div class="result-poem-snippet">' + snippet + '...</div></div>';
+    });
+    if (r.poems.length > 8) html += '<div style="text-align:center;color:#999;font-size:.85em;padding:8px;">还有 ' + (r.poems.length - 8) + ' 首</div>';
+    html += '</div>';
+  }
+  if (r.poets.length) {
+    html += '<div class="result-section"><h3>诗人 (' + r.poets.length + ')</h3>';
+    r.poets.forEach(item => {
+      html += '<div class="result-poet-item" data-pid="' + item.poet.id + '"><div class="result-poet-name">' + item.poet.name + '</div><div class="result-poet-bio">' + item.poet.bio.substring(0, 50) + '...</div></div>';
+    });
+    html += '</div>';
+  }
+  box.innerHTML = html;
+  box.classList.add('active');
+  box.querySelectorAll('.result-poem-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const pid = el.dataset.pid;
+      const idx = parseInt(el.dataset.idx);
+      const poet = tangPoetry.find(p => p.id === pid);
+      if (poet) showPoemFromList(poet, idx);
+    });
+  });
+  box.querySelectorAll('.result-poet-item').forEach(el => {
+    el.addEventListener('click', () => { showPoetPoems(el.dataset.pid); });
+  });
+}
+
+const debouncedSearch = debounce((kw) => {
+  const r = doSearch(kw);
+  renderSearchResults(r, kw);
+}, 300);
+
+// ========================
+// 导航
+// ========================
+function openNav() {
+  $('side-nav').classList.add('active');
+  $('nav-overlay').classList.add('active');
+}
+
+function closeNav() {
+  $('side-nav').classList.remove('active');
+  $('nav-overlay').classList.remove('active');
+}
+
+function backToHome() {
+  $('home-page').classList.add('active');
+  $('poet-poems-page').classList.remove('active');
+  $('poem-page').classList.remove('active');
+  $('page-title').textContent = '唐诗三百首';
+  $('search-results').classList.remove('active');
+  stopAudio();
+  $('nav-home').classList.add('active');
+  $('nav-back').classList.add('hidden');
+}
+
+function backToPoetPoems() {
+  if (currentPoet) showPoetPoems(currentPoet.id);
+  else backToHome();
+}
+
+function randomPoem() {
+  if (!tangPoetry.length) return;
+  const poet = tangPoetry[Math.floor(Math.random() * tangPoetry.length)];
+  const idx = Math.floor(Math.random() * poet.poems.length);
+  showPoemFromList(poet, idx);
+}
+
+// ========================
+// 初始化
+// ========================
+function initApp() {
+  // 排序一次，后续复用
+  tangPoetry = tangPoetryData.slice().sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+
+  renderPoetList();
+  renderPoetGrid();
+  renderDailyPoem();
+  renderFavorites();
+  renderRecent();
+
+  // 事件绑定
+  $('menu-toggle').addEventListener('click', openNav);
+  $('nav-overlay').addEventListener('click', closeNav);
+  $('back-btn').addEventListener('click', backToPoetPoems);
+  $('back-to-poet-list').addEventListener('click', backToHome);
+  $('nav-fav-btn').addEventListener('click', () => {
+    closeNav();
+    backToHome();
+    $('fav-list').scrollIntoView({ behavior: 'smooth' });
+  });
+  $('nav-recent-btn').addEventListener('click', () => {
+    closeNav();
+    backToHome();
+    $('recent-list').scrollIntoView({ behavior: 'smooth' });
+  });
+  $('prev-poem').addEventListener('click', prevPoem);
+  $('next-poem').addEventListener('click', nextPoem);
+  $('nav-home').addEventListener('click', backToHome);
+  $('nav-back').addEventListener('click', backToPoetPoems);
+  $('nav-random').addEventListener('click', randomPoem);
+
+  $('toggle-pinyin').addEventListener('click', () => {
+    showPinyin = !showPinyin;
+    $('toggle-pinyin').textContent = showPinyin ? '隐藏拼音' : '显示拼音';
+    $('detail-content').classList.toggle('no-pinyin', !showPinyin);
+    if (currentPoem) {
+      $('detail-content').innerHTML = addPinyinToText(currentPoem.content);
+      switchTab(currentTab);
+    }
+  });
+
+  $('toggle-single-line').textContent = singleLineMode ? '联句分行' : '单句分行';
+  $('toggle-single-line').addEventListener('click', toggleSingleLine);
+
+  $('detail-content').addEventListener('click', (e) => {
+    const line = e.target.closest('.poem-line');
+    if (!line) return;
+    const idx = parseInt(line.dataset.lineIdx);
+    if (audioPlayer.duration && currentLineTimings[idx]) {
+      audioPlayer.currentTime = currentLineTimings[idx].start * audioPlayer.duration;
+      if (audioPlayer.paused) playAudio(getAudioUrl(currentPoet, currentPoemIndex));
+    }
+  });
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  // 搜索输入（防抖）
+  const searchInput = $('search-input');
+  searchInput.addEventListener('input', (e) => {
+    const kw = e.target.value.trim();
+    if (kw) {
+      debouncedSearch(kw);
+    } else {
+      clearTimeout(searchTimer);
+      $('search-results').classList.remove('active');
+    }
+  });
+
+  // 恢复设置
+  if (localStorage.getItem('tangListLoopMode')) toggleListLoop();
+  else if (localStorage.getItem('tangLoopMode')) toggleLoop();
+
+  if (followMode) {
+    const btn = $('follow-btn');
+    if (btn) {
+      btn.classList.add('active');
+      btn.innerHTML = '<i class="fas fa-book-reader"></i> 跟读中';
+    }
+  }
+
+  document.querySelectorAll('.speed-btn[data-speed]').forEach(b => {
+    b.addEventListener('click', () => setSpeed(parseFloat(b.dataset.speed)));
+    b.classList.toggle('active', parseFloat(b.dataset.speed) === playbackSpeed);
+  });
+  document.querySelectorAll('.speed-btn[data-voice]').forEach(b => {
+    b.addEventListener('click', () => setVoice(b.dataset.voice));
+    b.classList.toggle('active', b.dataset.voice === currentVoice);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initApp);
