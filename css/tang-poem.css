@@ -413,7 +413,7 @@ header::after {
 .stagger-4 { animation-delay: .2s }
 .stagger-5 { animation-delay: .25s }
 
-.voice-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px }
+.voice-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px }
 @media(min-width: 768px) { .voice-buttons { grid-template-columns: repeat(6, 1fr) } }
 
 .speed-control { margin-bottom: 12px }
@@ -421,45 +421,89 @@ header::after {
 .speed-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px }
 
 .speed-btn {
-  background: #ecf0f1;
-  border: none;
-  padding: 12px 4px;
-  border-radius: 6px;
+  background: #f5f5f5;
+  border: 1px solid #e8e8e8;
+  padding: 10px 4px;
+  border-radius: 8px;
   font-size: .85em;
-  color: #555;
+  color: #666;
   cursor: pointer;
-  transition: background .2s, color .2s;
+  transition: all .2s;
   font-weight: 500;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   min-height: 40px
 }
 
-.speed-btn:active { background: #bdc3c7 }
-.speed-btn.active { background: #2c3e50; color: white }
+.speed-btn:hover { background: #eee; border-color: #ddd }
+.speed-btn:active { background: #e0e0e0 }
+.speed-btn.active { background: #2c3e50; color: white; border-color: #2c3e50 }
 .speed-btn.active:active { background: #1a252f }
 
+/* Voice buttons - unified color scheme */
 .voice-btn {
-  background: #2c3e50;
-  color: white;
-  border: none;
-  padding: 12px 4px;
-  border-radius: 8px;
-  font-size: .9em;
+  background: #fff;
+  color: #444;
+  border: 1px solid #e0e0e0;
+  padding: 10px 4px;
+  border-radius: 10px;
+  font-size: .88em;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px
+  gap: 5px;
+  transition: all .2s;
+  font-weight: 500;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  min-height: 42px
 }
 
-.voice-btn:disabled { opacity: .4; cursor: not-allowed }
-.voice-btn.pause { background: #2980b9 }
-.voice-btn.stop { background: #27ae60 }
-.voice-btn.loop, .voice-btn.list-loop { background: #8e44ad }
-.voice-btn.loop.active, .voice-btn.list-loop.active { background: #e74c3c }
-.voice-btn.follow { background: #d35400 }
-.voice-btn.follow.active { background: #e74c3c }
+.voice-btn:hover { background: #f8f9fa; border-color: #ccc }
+.voice-btn:active { transform: scale(.96) }
+.voice-btn:disabled { opacity: .35; cursor: not-allowed; transform: none }
+
+/* Play button - primary action */
+.voice-btn#play-btn {
+  background: #2c3e50;
+  color: white;
+  border-color: #2c3e50
+}
+.voice-btn#play-btn:hover { background: #34495e }
+.voice-btn#play-btn:active { background: #1a252f }
+
+/* Pause button */
+.voice-btn.pause {
+  background: #fff;
+  color: #2980b9;
+  border-color: #2980b9
+}
+.voice-btn.pause:hover { background: #f0f7ff }
+
+/* Stop button */
+.voice-btn.stop {
+  background: #fff;
+  color: #7f8c8d;
+  border-color: #bdc3c7
+}
+.voice-btn.stop:hover { background: #f5f5f5 }
+
+/* Loop/ListLoop/Follow - secondary, active turns red */
+.voice-btn.loop, .voice-btn.list-loop, .voice-btn.follow {
+  background: #fff;
+  color: #666;
+  border-color: #e0e0e0
+}
+.voice-btn.loop:hover, .voice-btn.list-loop:hover, .voice-btn.follow:hover { background: #fafafa }
+
+.voice-btn.loop.active, .voice-btn.list-loop.active, .voice-btn.follow.active {
+  background: #c0392b;
+  color: white;
+  border-color: #c0392b
+}
+.voice-btn.loop.active:hover, .voice-btn.list-loop.active:hover, .voice-btn.follow.active:hover { background: #a93226 }
+
 .voice-status { text-align: center; color: #7f8c8d; font-size: .85em; padding: 10px; background: #f8f9fa; border-radius: 8px }
 
 .poet-info h3 { color: #2c3e50; margin-bottom: 8px; font-size: 1em }
@@ -503,34 +547,43 @@ header::after {
 /* Read Mode Toggle */
 .read-mode-toggle {
   display: flex;
-  gap: 8px;
+  gap: 0;
   margin-bottom: 14px;
-  background: #f0f0f0;
+  background: linear-gradient(135deg, #f8f9fa, #f0f0f0);
   padding: 4px;
-  border-radius: 10px
+  border-radius: 12px;
+  border: 1px solid #e8e8e8
 }
 
 .read-mode-btn {
   flex: 1;
-  background: none;
+  background: transparent;
   border: none;
-  padding: 8px;
-  border-radius: 8px;
+  padding: 10px 8px;
+  border-radius: 10px;
   font-size: .85em;
-  color: #666;
+  color: #888;
   cursor: pointer;
-  transition: all .2s;
+  transition: all .25s;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px
+  gap: 6px;
+  font-weight: 500
 }
 
+.read-mode-btn i { font-size: .9em }
+
 .read-mode-btn.active {
-  background: white;
-  color: #2c3e50;
+  background: #2c3e50;
+  color: white;
   font-weight: 600;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08)
+  box-shadow: 0 2px 8px rgba(44,62,80,0.25)
+}
+
+.read-mode-btn[data-mode="slow"].active {
+  background: #c0392b;
+  box-shadow: 0 2px 8px rgba(192,57,43,0.25)
 }
 
 /* Char highlight for slow read mode */
