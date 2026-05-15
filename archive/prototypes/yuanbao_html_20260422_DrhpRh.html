@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>唐诗三百首 - 带拼音与语音</title>
+    <!-- 引入 pinyin-pro 库（CDN） -->
+    <script src="https://unpkg.com/pinyin-pro@3"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: "Microsoft YaHei", sans-serif; 
+            display: flex; 
+            min-height: 100vh;
+            background: #f8f5f0;
+            color: #333;
+        }
+        /* 左侧诗人导航 */
+        #poet-nav {
+            width: 220px;
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px 0;
+            overflow-y: auto;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+        #poet-nav h2 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        #poet-list {
+            list-style: none;
+        }
+        #poet-list li {
+            padding: 8px 15px;
+            border-bottom: 1px solid #34495e;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        #poet-list li:hover {
+            background: #34495e;
+        }
+        /* 右侧内容区 */
+        #content {
+            flex: 1;
+            margin-left: 220px;
+            padding: 30px;
+            max-width: 800px;
+        }
+        .poem-title {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 5px;
+        }
+        .poet-name {
+            font-size: 1.2em;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        /* 拼音样式 */
+        .poem-content {
+            font-size: 1.4em;
+            line-height: 2.2;
+            margin: 25px 0;
+            text-align: center;
+        }
+        .poem-content ruby {
+            margin: 0 2px;
+        }
+        .poem-content rt {
+            font-size: 0.6em;
+            opacity: 0.75;
+        }
+        /* 语音控制栏 */
+        #voice-controls {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        #voice-controls button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #3498db;
+            color: white;
+            transition: background 0.3s;
+        }
+        #voice-controls button:hover {
+            background: #2980b9;
+        }
+        #voice-controls button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        /* 返回按钮 */
+        #back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+        #back-btn:hover {
+            text-decoration: underline;
+        }
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            #poet-nav {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+            #content {
+                margin-left: 0;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 左侧诗人列表 -->
+    <nav id="poet-nav">
+        <h2>🎏 诗人目录</h2>
+        <ul id="poet-list"></ul>
+    </nav>
+
+    <!-- 右侧内容区域 -->
+    <main id="content">
+        <!-- 默认首页显示 -->
+        <div id="home-page">
+            <h1>📖 唐诗三百首</h1>
+            <p>请从左侧选择一位诗人，查看其诗作详情（带拼音与语音朗读）。</p>
+        </div>
+
+        <!-- 诗歌详情页（初始隐藏） -->
+        <div id="poem-page" style="display: none;">
+            <a href="javascript:void(0)" id="back-btn">← 返回列表</a>
+            <h1 class="poem-title" id="detail-title">静夜思</h1>
+            <div class="poet-name" id="detail-poet">李白</div>
+            <div class="poem-content" id="detail-content"></div>
+            
+            <!-- 语音控制面板 -->
+            <div id="voice-controls">
+                <button id="play-btn">▶ 朗读</button>
+                <button id="pause-btn" disabled>⏸ 暂停</button>
+                <button id="stop-btn" disabled>⏹ 停止</button>
+                <span id="voice-status">准备就绪</span>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ========== 数据层：模拟唐诗数据库（按诗人排序） ==========
+        const poets = [
+            { id: 'libai', name: '李白', poems: [
+                { title: '静夜思', content: '床前明月光，疑是地上霜。举头望明月，低头思故乡。' },
+                { title: '望庐山瀑布', content: '日照香炉生紫烟，遥看瀑布挂前川。飞流直下三千尺，疑是银河落九天。' }
+            ]},
+            { id: 'dufu', name: '杜甫', poems: [
+                { title: '春望', content: '国破山河在，城春草木深。感时花溅泪，恨别鸟惊心。烽火连三月，家书抵万金。白头搔更短，浑欲不胜簪。' }
+            ]},
+            { id: 'wangwei', name: '王维', poems: [
+                { title: '相思', content: '红豆生南国，春来发几枝。愿君多采撷，此物最相思。' }
+            ]}
+            // 实际项目可继续扩展剩余诗人...
+        ];
+
+        // ========== 核心功能：拼音标注 ==========
+        function addPinyinToText(text) {
+            // 使用 pinyin-pro 库进行转换
+            const pinyinText = pinyin(text, { toneType: 'symbol', type: 'array' });
+            let html = '';
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                if (/[\u4e00-\u9fa5]/.test(char)) { // 仅对汉字注音
+                    const pinyin = pinyinText[i] || '';
+                    html += `<ruby>${char}<rt>${pinyin}</rt></ruby>`;
+                } else {
+                    html += char; // 标点符号等原样输出
+                }
+            }
+            return html;
+        }
+
+        // ========== 核心功能：语音朗读（TTS） ==========
+        let currentUtterance = null;
+        const synth = window.speechSynthesis;
+
+        function speakText(text) {
+            if (!('speechSynthesis' in window)) {
+                alert('您的浏览器不支持语音合成功能');
+                return;
+            }
+            synth.cancel(); // 停止之前的播放
+            currentUtterance = new SpeechSynthesisUtterance(text);
+            currentUtterance.lang = 'zh-CN';
+            currentUtterance.rate = 0.9; // 稍慢速朗读诗歌
+            currentUtterance.onstart = () => updateVoiceControls(true);
+            currentUtterance.onend = () => updateVoiceControls(false);
+            currentUtterance.onerror = () => updateVoiceControls(false);
+            synth.speak(currentUtterance);
+        }
+
+        function pauseSpeech() {
+            if (synth.speaking) synth.pause();
+        }
+
+        function resumeSpeech() {
+            if (synth.paused) synth.resume();
+        }
+
+        function stopSpeech() {
+            synth.cancel();
+            updateVoiceControls(false);
+        }
+
+        function updateVoiceControls(isPlaying) {
+            const playBtn = document.getElementById('play-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+            const stopBtn = document.getElementById('stop-btn');
+            const status = document.getElementById('voice-status');
+            
+            if (isPlaying) {
+                playBtn.disabled = true;
+                pauseBtn.disabled = false;
+                stopBtn.disabled = false;
+                status.textContent = '朗读中...';
+            } else {
+                playBtn.disabled = false;
+                pauseBtn.disabled = true;
+                stopBtn.disabled = true;
+                status.textContent = '已停止';
+            }
+        }
+
+        // ========== 页面渲染与路由 ==========
+        function renderPoetList() {
+            const listEl = document.getElementById('poet-list');
+            // 按诗人姓名排序
+            poets.sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+            
+            poets.forEach(poet => {
+                const li = document.createElement('li');
+                li.textContent = poet.name;
+                li.onclick = () => showPoet(poet.id);
+                listEl.appendChild(li);
+            });
+        }
+
+        function showPoet(poetId) {
+            const poet = poets.find(p => p.id === poetId);
+            if (!poet) return;
+            
+            // 显示第一首诗作为示例（实际可扩展为列表）
+            const poem = poet.poems[0];
+            document.getElementById('detail-title').textContent = poem.title;
+            document.getElementById('detail-poet').textContent = poet.name;
+            document.getElementById('detail-content').innerHTML = addPinyinToText(poem.content);
+            
+            // 切换页面视图
+            document.getElementById('home-page').style.display = 'none';
+            document.getElementById('poem-page').style.display = 'block';
+            
+            // 绑定语音播放文本
+            const fullText = `${poem.title}。${poet.name}。${poem.content}`;
+            document.getElementById('play-btn').onclick = () => speakText(fullText);
+        }
+
+        function backToList() {
+            stopSpeech();
+            document.getElementById('poem-page').style.display = 'none';
+            document.getElementById('home-page').style.display = 'block';
+        }
+
+        // ========== 初始化与事件绑定 ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPoetList();
+            document.getElementById('back-btn').onclick = backToList;
+            document.getElementById('pause-btn').onclick = pauseSpeech;
+            document.getElementById('stop-btn').onclick = stopSpeech;
+            document.getElementById('play-btn').onclick = () => {
+                const text = document.getElementById('detail-content').textContent;
+                if (text) speakText(text);
+            };
+        });
+    </script>
+</body>
+</html>

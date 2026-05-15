@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem *)",
+      "Bash(mv 20260423 20260424-1 20260424-2 20260424-3 archive/versions/)",
+      "Bash(mv 原型/* archive/prototypes/)",
+      "Bash(rmdir 原型)",
+      "Bash(mv yuanbao_html_*.html archive/prototypes/)",
+      "Bash(mv 唐诗三百首完整版应用.html.bak tts_progress.log tts_progress_v2.log tts_progress_v3.log archive/backup/)",
+      "Bash(git add *)",
+      "Bash(awk '{print $1}')"
+    ]
+  }
+}
