@@ -128,10 +128,14 @@
       <div class="card voice-controls" id="voice-panel">
         <div class="wechat-tip" id="wechat-tip"><i class="fas fa-info-circle"></i> 微信内不支持语音朗读，请在系统浏览器中打开</div>
         <div class="voice-title" style="justify-content:space-between">
-          <div style="display:flex;align-items:center;gap:8px"><i class="fas fa-volume-up"></i><span>语音朗读</span></div>
+          <div style="display:flex;align-items:center;gap:8px"><i class="fas fa-volume-up"></i><span id="voice-panel-title">语音朗读</span></div>
           <button class="fav-btn" id="fav-btn"><i class="far fa-heart"></i> 收藏</button>
         </div>
-        <div class="speed-control">
+        <div class="read-mode-toggle" id="read-mode-toggle">
+          <button class="read-mode-btn active" data-mode="audio"><i class="fas fa-music"></i> 音频版</button>
+          <button class="read-mode-btn" data-mode="slow"><i class="fas fa-book-reader"></i> 跟读版</button>
+        </div>
+        <div class="speed-control" id="speed-control">
           <div class="speed-label"><i class="fas fa-tachometer-alt"></i><span>朗读速度</span></div>
           <div class="speed-buttons">
             <button class="speed-btn" data-speed="0.5">0.5x</button>
@@ -140,7 +144,7 @@
             <button class="speed-btn" data-speed="1.25">1.25x</button>
           </div>
         </div>
-        <div class="voice-select-control" style="margin-bottom:12px">
+        <div class="voice-select-control" id="voice-select-control" style="margin-bottom:12px">
           <div class="speed-label"><i class="fas fa-microphone"></i><span>朗读音色</span></div>
           <div class="speed-buttons">
             <button class="speed-btn" data-voice="xiaoxiao">女声温暖</button>

@@ -37,6 +37,15 @@ let singleLineMode = localStorage.getItem('tangSingleLineMode') !== '0';
 let currentLineTimings = [];
 let searchTimer = null;
 
+// 跟读模式状态
+let readMode = localStorage.getItem('tangReadMode') || 'audio'; // 'audio' | 'slow'
+let speechSynth = window.speechSynthesis || null;
+let currentUtterance = null;
+let slowReadLines = [];
+let slowReadIndex = 0;
+let slowReadPaused = false;
+let slowReadTimer = null;
+
 // 缓存 DOM 元素
 const $ = id => document.getElementById(id);
 const audioPlayer = $('audio-player');
@@ -221,7 +230,226 @@ function updateVoiceControls(playing) {
 }
 
 // ========================
-// 跟读高亮
+// 模式切换
+// ========================
+function setReadMode(mode) {
+  if (readMode === mode) return;
+  readMode = mode;
+  localStorage.setItem('tangReadMode', mode);
+
+  // 停止当前播放
+  stopAudio();
+  stopSlowRead();
+
+  // 更新UI
+  document.querySelectorAll('.read-mode-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+
+  const isAudio = mode === 'audio';
+  $('voice-panel-title').textContent = isAudio ? '语音朗读' : '慢速跟读';
+  $('speed-control').style.display = isAudio ? '' : 'none';
+  $('voice-select-control').style.display = isAudio ? '' : 'none';
+  $('loop-btn').style.display = isAudio ? '' : 'none';
+  $('list-loop-btn').style.display = isAudio ? '' : 'none';
+  $('follow-btn').style.display = isAudio ? '' : 'none';
+  $('play-btn').innerHTML = isAudio ? '<i class="fas fa-play"></i> 朗读' : '<i class="fas fa-play"></i> 开始跟读';
+
+  showMessage(isAudio ? '已切换到音频模式' : '已切换到跟读模式，适合小朋友逐句跟读', 'success');
+}
+
+// ========================
+// 跟读引擎（Web Speech API）
+// ========================
+function startSlowRead() {
+  if (!currentPoem || !currentPoet || !speechSynth) {
+    showMessage('当前环境不支持跟读功能', 'error');
+    return;
+  }
+  if (isSpeaking) return;
+
+  // 构建朗读队列：标题、作者、诗句
+  const lines = getPoemLines(currentPoem.content);
+  slowReadLines = [currentPoem.title, currentPoet.name, ...lines];
+  slowReadIndex = 0;
+  slowReadPaused = false;
+  isSpeaking = true;
+  updateVoiceControls(true);
+  updatePauseBtnState(false);
+  showMessage('跟读中...', 'speaking');
+
+  readNextLine();
+}
+
+function readNextLine() {
+  if (!isSpeaking || slowReadPaused) return;
+  if (slowReadIndex >= slowReadLines.length) {
+    // 全部读完
+    isSpeaking = false;
+    updateVoiceControls(false);
+    updatePauseBtnState(false);
+    clearAllHighlights();
+    showMessage('跟读完成', 'success');
+    return;
+  }
+
+  const text = slowReadLines[slowReadIndex];
+  const lineIdx = slowReadIndex - 2; // 减去标题和作者
+
+  // 高亮当前行（诗句部分）
+  if (lineIdx >= 0) {
+    highlightLine(lineIdx);
+  }
+
+  // 创建语音合成实例
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.4;  // 极慢速
+  utter.pitch = 1.0;
+  utter.lang = 'zh-CN';
+
+  utter.onend = function() {
+    currentUtterance = null;
+    // 句间停顿 1.5 秒
+    slowReadTimer = setTimeout(() => {
+      slowReadIndex++;
+      readNextLine();
+    }, 1500);
+  };
+
+  utter.onerror = function() {
+    currentUtterance = null;
+    clearTimeout(slowReadTimer);
+    // 出错时继续下一句
+    slowReadIndex++;
+    readNextLine();
+  };
+
+  currentUtterance = utter;
+  speechSynth.speak(utter);
+}
+
+function pauseSlowRead() {
+  if (!isSpeaking) return;
+  if (slowReadPaused) {
+    // 继续
+    slowReadPaused = false;
+    updatePauseBtnState(false);
+    showMessage('跟读中...', 'speaking');
+    readNextLine();
+  } else {
+    // 暂停
+    slowReadPaused = true;
+    if (speechSynth) speechSynth.cancel();
+    clearTimeout(slowReadTimer);
+    updatePauseBtnState(true);
+    showMessage('已暂停', 'paused');
+  }
+}
+
+function stopSlowRead() {
+  if (!isSpeaking && !slowReadPaused) return;
+  if (speechSynth) speechSynth.cancel();
+  clearTimeout(slowReadTimer);
+  slowReadPaused = false;
+  isSpeaking = false;
+  currentUtterance = null;
+  updateVoiceControls(false);
+  updatePauseBtnState(false);
+  clearAllHighlights();
+  showMessage('已停止', 'stopped');
+}
+
+function highlightLine(index) {
+  document.querySelectorAll('.poem-line').forEach((line, i) => {
+    line.classList.toggle('active', i === index);
+  });
+}
+
+function clearAllHighlights() {
+  document.querySelectorAll('.poem-line').forEach(line => {
+    line.classList.remove('active');
+  });
+  clearCharHighlights();
+}
+
+function clearCharHighlights() {
+  document.querySelectorAll('.char-active').forEach(el => {
+    el.classList.remove('char-active');
+  });
+}
+
+function highlightChar(lineIdx, charIdx) {
+  if (lineIdx < 0) return;
+  const line = document.querySelector('.poem-line[data-line-idx="' + lineIdx + '"]');
+  if (!line) return;
+
+  // 清除之前的字高亮
+  line.querySelectorAll('.char-active').forEach(el => el.classList.remove('char-active'));
+
+  // 找到对应位置的字符
+  const textNodes = [];
+  const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT);
+  let node;
+  while ((node = walker.nextNode())) {
+    textNodes.push(node);
+  }
+
+  let cumulative = 0;
+  for (const textNode of textNodes) {
+    const text = textNode.textContent;
+    const start = cumulative;
+    const end = cumulative + text.length;
+    if (charIdx >= start && charIdx < end) {
+      const offset = charIdx - start;
+      const ch = text[offset];
+      // 只高亮汉字
+      if (/[一-鿿]/.test(ch)) {
+        const range = document.createRange();
+        range.setStart(textNode, offset);
+        range.setEnd(textNode, offset + 1);
+        const span = document.createElement('span');
+        span.className = 'char-active';
+        try {
+          range.surroundContents(span);
+        } catch (e) {
+          // 复杂节点结构时跳过字级高亮
+        }
+      }
+      break;
+    }
+    cumulative = end;
+  }
+}
+
+// ========================
+// 播放控制路由
+// ========================
+function onPlayClick() {
+  if (readMode === 'audio') {
+    playAudio(getAudioUrl(currentPoet, currentPoemIndex));
+  } else {
+    startSlowRead();
+  }
+}
+
+function onPauseClick() {
+  if (readMode === 'audio') {
+    pauseAudio();
+  } else {
+    pauseSlowRead();
+  }
+}
+
+function onStopClick() {
+  if (readMode === 'audio') {
+    stopAudio();
+  } else {
+    stopSlowRead();
+  }
+}
+
+// ========================
+// 跟读高亮（音频模式）
 // ========================
 function updateFollowHighlight() {
   if (!followMode || !audioPlayer.duration || !currentLineTimings.length) return;
@@ -473,6 +701,10 @@ function showPoemFromList(poet, index) {
 }
 
 function showPoem(poet, poem, index) {
+  // 切换诗歌时停止所有朗读
+  stopAudio();
+  stopSlowRead();
+
   currentPoem = poem;
   $('detail-title').textContent = poem.title;
   $('poet-name').textContent = poet.name;
@@ -541,9 +773,9 @@ function nextPoem() {
 }
 
 function bindVoiceButtons() {
-  $('play-btn').onclick = () => playAudio(getAudioUrl(currentPoet, currentPoemIndex));
-  $('pause-btn').onclick = pauseAudio;
-  $('stop-btn').onclick = stopAudio;
+  $('play-btn').onclick = onPlayClick;
+  $('pause-btn').onclick = onPauseClick;
+  $('stop-btn').onclick = onStopClick;
   $('loop-btn').onclick = toggleLoop;
   $('list-loop-btn').onclick = toggleListLoop;
   $('follow-btn').onclick = toggleFollow;
@@ -705,6 +937,7 @@ function backToHome() {
   $('page-title').textContent = '唐诗三百首';
   $('search-results').classList.remove('active');
   stopAudio();
+  stopSlowRead();
   $('nav-home').classList.add('active');
   $('nav-back').classList.add('hidden');
 }
@@ -814,6 +1047,14 @@ function initApp() {
     b.addEventListener('click', () => setVoice(b.dataset.voice));
     b.classList.toggle('active', b.dataset.voice === currentVoice);
   });
+
+  // 模式切换按钮
+  document.querySelectorAll('.read-mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => setReadMode(btn.dataset.mode));
+  });
+
+  // 初始化模式UI
+  setReadMode(readMode);
 }
 
 document.addEventListener('DOMContentLoaded', initApp);
