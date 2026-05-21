@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>学习报告 - 幼小衔接</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: #f5f0e8; color: #2c3e50;
+  min-height: 100vh; padding-bottom: 80px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 顶部 */
+.top-header {
+  background: linear-gradient(135deg, #1a2a3a, #2c3e50, #3d566e);
+  padding: 20px 16px 16px;
+  border-radius: 0 0 20px 20px; color: #fff;
+}
+.top-title { font-size: 20px; font-weight: 600; text-align: center; }
+
+/* 筛选 */
+.filter-bar {
+  display: flex; gap: 10px; margin: 16px;
+}
+.filter-select {
+  flex: 1; padding: 8px 12px; border-radius: 10px;
+  border: 1px solid #e8e0d0; background: #fff;
+  font-size: 14px; color: #2c3e50; font-family: inherit;
+}
+
+/* 学习时长卡片 */
+.time-card {
+  background: #fff; border-radius: 16px; margin: 0 16px 12px;
+  padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center;
+}
+.time-label { font-size: 14px; color: #6b8299; margin-bottom: 16px; }
+.time-ring-wrapper {
+  display: flex; justify-content: center; align-items: center; gap: 24px;
+}
+.time-ring {
+  width: 120px; height: 120px; border-radius: 50%;
+  background: conic-gradient(#27ae60 var(--pct), #e8e0d0 var(--pct));
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.time-ring::before {
+  content: ''; width: 100px; height: 100px; border-radius: 50%;
+  background: #fff; position: absolute;
+}
+.ring-text {
+  position: relative; z-index: 1;
+}
+.ring-value { font-size: 24px; font-weight: 700; color: #2c3e50; }
+.ring-unit { font-size: 12px; color: #6b8299; }
+
+/* 每日趋势 */
+.trend-card {
+  background: #fff; border-radius: 16px; margin: 0 16px 12px;
+  padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.trend-header {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 16px;
+  font-size: 15px; font-weight: 600;
+}
+.trend-header i { color: #2980b9; }
+.trend-chart {
+  display: flex; align-items: flex-end; justify-content: space-around;
+  height: 120px; gap: 8px;
+}
+.trend-bar-wrapper {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 6px;
+}
+.trend-bar {
+  width: 100%; max-width: 28px; min-height: 4px;
+  background: linear-gradient(to top, #27ae60, #2ecc71);
+  border-radius: 4px 4px 0 0; transition: height 0.5s ease-out;
+}
+.trend-bar.empty { background: #e8e0d0; }
+.trend-day { font-size: 11px; color: #6b8299; }
+
+/* 古诗统计 */
+.poem-stats-card {
+  background: #fff; border-radius: 16px; margin: 0 16px 12px;
+  padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.poem-stats-header {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 12px;
+  font-size: 15px; font-weight: 600;
+}
+.poem-stats-header i { color: #e67e22; }
+.poem-stats-row {
+  display: flex; gap: 12px; margin-bottom: 12px;
+}
+.poem-stat-box {
+  flex: 1; background: #faf8f3; border-radius: 10px;
+  padding: 12px; text-align: center;
+}
+.poem-stat-value { font-size: 20px; font-weight: 700; color: #2c3e50; }
+.poem-stat-label { font-size: 12px; color: #6b8299; margin-top: 4px; }
+.poem-streak {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 13px; color: #e67e22;
+}
+.recent-poem-list { margin-top: 12px; }
+.recent-poem-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 0; border-bottom: 1px solid #f5f0e8; font-size: 14px;
+}
+.recent-poem-item:last-child { border-bottom: none; }
+.recent-poem-name { font-weight: 500; }
+.recent-poem-meta { font-size: 12px; color: #6b8299; }
+
+/* 成就 */
+.achievement-card {
+  background: #fff; border-radius: 16px; margin: 0 16px 12px;
+  padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.achievement-header {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 12px;
+  font-size: 15px; font-weight: 600;
+}
+.achievement-header i { color: #f1c40f; }
+.achievement-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+}
+.achievement-cell {
+  text-align: center;
+}
+.achievement-icon {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 6px; font-size: 22px;
+  background: linear-gradient(135deg, #f1c40f, #f39c12);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+.achievement-icon.locked {
+  background: #e8e0d0; filter: grayscale(1); opacity: 0.6;
+}
+.achievement-name { font-size: 11px; color: #6b8299; }
+
+/* 底部导航 */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fff; border-top: 1px solid #f5f0e8;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+  display: flex; height: 64px; z-index: 100;
+}
+.nav-tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 2px;
+  color: #b0c4de; text-decoration: none; font-size: 10px;
+  cursor: pointer; border: none; background: none;
+}
+.nav-tab i { font-size: 22px; }
+.nav-tab.active { color: #2c3e50; }
+</style>
+</head>
+<body>
+
+<!-- 顶部 -->
+<div class="top-header">
+  <div class="top-title"><i class="fas fa-chart-bar"></i> 学习报告</div>
+</div>
+
+<!-- 筛选 -->
+<div class="filter-bar">
+  <select class="filter-select" id="time-filter">
+    <option value="week">本周</option>
+    <option value="month">本月</option>
+  </select>
+  <select class="filter-select" id="subject-filter">
+    <option value="all">全部学科</option>
+    <option value="chinese">语文</option>
+    <option value="math">数学</option>
+    <option value="english">英语</option>
+  </select>
+</div>
+
+<!-- 学习时长 -->
+<div class="time-card">
+  <div class="time-label">本周学习时长</div>
+  <div class="time-ring-wrapper">
+    <div class="time-ring" id="time-ring" style="--pct:0%">
+      <div class="ring-text">
+        <div class="ring-value" id="study-minutes">0</div>
+        <div class="ring-unit">分钟</div>
+      </div>
+    </div>
+    <div style="text-align:left">
+      <div style="font-size:13px;color:#6b8299">目标</div>
+      <div style="font-size:18px;font-weight:600">60<span style="font-size:12px;color:#6b8299">分钟</span></div>
+      <div style="font-size:13px;color:#27ae60;margin-top:4px" id="time-pct">完成 0%</div>
+    </div>
+  </div>
+</div>
+
+<!-- 每日趋势 -->
+<div class="trend-card">
+  <div class="trend-header"><i class="fas fa-chart-line"></i> 每日学习趋势</div>
+  <div class="trend-chart" id="trend-chart"></div>
+</div>
+
+<!-- 古诗统计 -->
+<div class="poem-stats-card">
+  <div class="poem-stats-header"><i class="fas fa-book-open"></i> 古诗学习统计</div>
+  <div class="poem-stats-row">
+    <div class="poem-stat-box">
+      <div class="poem-stat-value" id="stat-read-count">0</div>
+      <div class="poem-stat-label">已读</div>
+    </div>
+    <div class="poem-stat-box">
+      <div class="poem-stat-value" id="stat-mastered">0</div>
+      <div class="poem-stat-label">已掌握</div>
+    </div>
+  </div>
+  <div class="poem-streak"><i class="fas fa-fire"></i> 连续学习 <strong id="stat-streak-days">0</strong> 天</div>
+  <div class="recent-poem-list" id="recent-poem-list"></div>
+</div>
+
+<!-- 成就 -->
+<div class="achievement-card">
+  <div class="achievement-header"><i class="fas fa-trophy"></i> 获得成就</div>
+  <div class="achievement-grid" id="achievement-grid"></div>
+</div>
+
+<!-- 底部导航 -->
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-tab"><i class="fas fa-home"></i>首页</a>
+  <a href="chinese.html" class="nav-tab"><i class="fas fa-book"></i>课程</a>
+  <a href="report.html" class="nav-tab active"><i class="fas fa-chart-bar"></i>报告</a>
+  <a href="#" class="nav-tab" onclick="toast('个人中心即将上线')"><i class="fas fa-user"></i>我的</a>
+</nav>
+
+<script>
+function toast(msg) {
+  const div = document.createElement('div');
+  div.textContent = msg;
+  div.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.75);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:999;white-space:nowrap;';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 2000);
+}
+
+// 环形进度
+function renderTimeRing(minutes) {
+  const target = 60;
+  const pct = Math.min(minutes / target, 1);
+  document.getElementById('time-ring').style.setProperty('--pct', (pct * 100) + '%');
+  document.getElementById('study-minutes').textContent = minutes;
+  document.getElementById('time-pct').textContent = '完成 ' + Math.round(pct * 100) + '%';
+}
+
+// 每日趋势柱状图
+function renderTrendChart() {
+  const chart = document.getElementById('trend-chart');
+  const days = ['一', '二', '三', '四', '五', '六', '日'];
+  const values = [20, 35, 10, 30, 15, 0, 0]; // 模拟数据
+  const max = Math.max(...values, 1);
+
+  chart.innerHTML = days.map((d, i) => {
+    const h = Math.round((values[i] / max) * 100);
+    const cls = values[i] > 0 ? '' : 'empty';
+    return `
+      <div class="trend-bar-wrapper">
+        <div class="trend-bar ${cls}" style="height:${h}px"></div>
+        <div class="trend-day">${d}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// 加载报告数据
+function loadReport() {
+  const progress = JSON.parse(localStorage.getItem('poem_progress') || '{}');
+  const readCount = Object.keys(progress).length;
+  const masteredCount = Object.values(progress).filter(p => p.completed).length;
+  const streak = parseInt(localStorage.getItem('study_streak') || '0');
+  const recent = JSON.parse(localStorage.getItem('tangRecent') || '[]');
+
+  document.getElementById('stat-read-count').textContent = readCount;
+  document.getElementById('stat-mastered').textContent = masteredCount;
+  document.getElementById('stat-streak-days').textContent = streak;
+
+  // 学习时长（模拟：每首诗约5分钟）
+  const minutes = Math.min(readCount * 5, 90);
+  renderTimeRing(minutes);
+
+  // 最近学习
+  const recentList = document.getElementById('recent-poem-list');
+  if (recent.length) {
+    recentList.innerHTML = recent.slice(0, 5).map(r => {
+      const p = progress[r.title];
+      const meta = p && p.completed ? '已掌握' : ('朗读 ' + (p ? p.readCount || 1 : 1) + ' 次');
+      return `
+        <div class="recent-poem-item">
+          <span class="recent-poem-name">《${r.title}》— ${r.poetName}</span>
+          <span class="recent-poem-meta">${meta}</span>
+        </div>
+      `;
+    }).join('');
+  } else {
+    recentList.innerHTML = '<div style="color:#6b8299;font-size:13px;padding:8px 0">暂无学习记录</div>';
+  }
+
+  // 成就
+  const achievements = [
+    { icon: '🌟', name: '古诗小达人', unlocked: masteredCount >= 5 },
+    { icon: '🔥', name: '连续3天', unlocked: streak >= 3 },
+    { icon: '📚', name: '朗读者', unlocked: readCount >= 1 },
+    { icon: '🎯', name: '拼音高手', unlocked: false },
+    { icon: '💎', name: '收藏达人', unlocked: JSON.parse(localStorage.getItem('tangFavorites') || '[]').length >= 5 },
+    { icon: '🏆', name: '十首诗', unlocked: readCount >= 10 },
+    { icon: '⭐', name: '完美掌握', unlocked: masteredCount >= 10 },
+    { icon: '🎓', name: '学霸', unlocked: masteredCount >= 20 },
+  ];
+
+  document.getElementById('achievement-grid').innerHTML = achievements.map(a => `
+    <div class="achievement-cell">
+      <div class="achievement-icon ${a.unlocked ? '' : 'locked'}">${a.icon}</div>
+      <div class="achievement-name">${a.name}</div>
+    </div>
+  `).join('');
+}
+
+renderTrendChart();
+loadReport();
+</script>
+</body>
+</html>

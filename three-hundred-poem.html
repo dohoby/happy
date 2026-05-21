@@ -17,7 +17,12 @@
         <div class="page-title" id="page-title">唐诗三百首</div>
         <div class="header-subtitle">品读唐诗 · 传承经典</div>
       </div>
-      <div style="width:32px"></div>
+      <!-- 课程模式导航 -->
+    <div id="lesson-nav" style="display:none;align-items:center;gap:8px">
+      <button id="lesson-back" style="background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:13px;padding:6px 12px;border-radius:8px;cursor:pointer"><i class="fas fa-arrow-left"></i> 返回</button>
+      <button id="lesson-exit" style="background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:13px;padding:6px 12px;border-radius:8px;cursor:pointer"><i class="fas fa-sign-out-alt"></i> 退出</button>
+    </div>
+    <div style="width:32px" id="header-spacer"></div>
     </div>
     <div class="search-box">
       <input type="text" id="search-input" placeholder="搜索诗人、诗名或诗句...">
@@ -167,9 +172,20 @@
         <div class="voice-status" id="current-status"><i class="fas fa-info-circle"></i> 点击「朗读」播放语音</div>
       </div>
 
-      <div class="card poet-info">
+      <div class="card poet-info" id="poet-info-card">
         <h3><i class="fas fa-user"></i> 诗人简介</h3>
         <p id="poet-bio"></p>
+      </div>
+
+      <!-- 课程模式底部操作区 -->
+      <div id="lesson-actions" style="display:none;margin-bottom:80px">
+        <div class="card" style="padding:16px">
+          <button id="complete-btn" style="width:100%;padding:14px;background:linear-gradient(135deg,#27ae60,#2ecc71);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:10px"><i class="fas fa-check-circle"></i> ✅ 完成学习</button>
+          <div style="display:flex;gap:10px">
+            <button id="lesson-fav-btn" style="flex:1;padding:10px;background:#f5f0e8;border:1px solid #e8e0d0;border-radius:10px;font-size:14px;cursor:pointer;color:#2c3e50"><i class="far fa-heart"></i> 收藏</button>
+            <button id="mastered-btn" style="flex:1;padding:10px;background:#f5f0e8;border:1px solid #e8e0d0;border-radius:10px;font-size:14px;cursor:pointer;color:#2c3e50"><i class="fas fa-thumbs-up"></i> 学会了</button>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -179,6 +195,12 @@
     <button id="nav-home" class="nav-btn active"><i class="fas fa-home"></i><span>首页</span></button>
     <button id="nav-back" class="nav-btn hidden"><i class="fas fa-arrow-left"></i><span>返回</span></button>
     <button id="nav-random" class="nav-btn"><i class="fas fa-random"></i><span>随机</span></button>
+  </nav>
+
+  <!-- 课程模式底部导航 -->
+  <nav id="lesson-bottom-nav" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #f5f0e8;box-shadow:0 -2px 8px rgba(0,0,0,0.05);display:flex;height:64px;z-index:100;align-items:center;justify-content:space-around;padding:0 16px">
+    <button id="lesson-prev" style="background:none;border:none;color:#2c3e50;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:6px"><i class="fas fa-chevron-left"></i> 上一篇</button>
+    <button id="lesson-next" style="background:none;border:none;color:#2c3e50;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:6px">下一篇 <i class="fas fa-chevron-right"></i></button>
   </nav>
 </div>
 

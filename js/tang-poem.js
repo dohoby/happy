@@ -53,6 +53,21 @@ let slowLoopMode = localStorage.getItem('tangSlowLoop') === '1';         // 整�
 let slowLineLoopMode = localStorage.getItem('tangSlowLineLoop') === '1'; // 单句循环
 let slowAutoMode = localStorage.getItem('tangSlowAuto') !== '0';         // 自动继续（默认自动）
 
+// ========================
+// 课程模式
+// ========================
+let appMode = 'browse'; // 'browse' | 'lesson'
+let lessonPathId = null;
+let lessonFrom = null;
+let lessonTargetPoem = null;
+let lessonPathPoems = []; // 当前学习路径中的诗篇顺序
+
+// 学习路径数据
+const LESSON_PATHS = {
+  level1: ['咏鹅','春晓','静夜思','悯农','登鹳雀楼','相思','江雪','寻隐者不遇','鹿柴','竹里馆','池上','画','风','鸟鸣涧','杂诗','夜宿山寺','独坐敬亭山','秋浦歌','古朗月行','望天门山'],
+  level2: ['望庐山瀑布','赠汪伦','早发白帝城','绝句','春夜喜雨','望岳','送元二使安西','九月九日忆山东兄弟','山居秋暝','赋得古原草送别','忆江南','暮江吟','夜雨寄北','登乐游原','清明','山行','江南春','游子吟','黄鹤楼','凉州词']
+};
+
 // 预加载语音列表
 if (speechSynth) {
   function loadVoices() {
@@ -1107,6 +1122,17 @@ function randomPoem() {
 // 初始化
 // ========================
 function initApp() {
+  // 解析URL参数（模式检测）
+  const params = new URLSearchParams(location.search);
+  appMode = params.get('mode') || 'browse';
+  lessonPathId = params.get('path');
+  lessonFrom = params.get('from');
+  lessonTargetPoem = params.get('poem');
+
+  if (appMode === 'lesson') {
+    applyLessonMode();
+  }
+
   // 排序一次，后续复用
   tangPoetry = tangPoetryData.slice().sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
 
@@ -1213,6 +1239,201 @@ function initApp() {
 
   // 初始化模式UI
   setReadMode(readMode);
+
+  // 如果URL指定了诗篇，自动导航
+  if (lessonTargetPoem) {
+    const found = findPoemByTitle(lessonTargetPoem);
+    if (found) {
+      // 延迟一点确保DOM就绪
+      setTimeout(() => {
+        showPoemFromList(found.poet, found.index);
+      }, 100);
+    }
+  }
 }
 
 document.addEventListener('DOMContentLoaded', initApp);
+
+// ========================
+// 课程模式
+// ========================
+function applyLessonMode() {
+  // 隐藏搜索框
+  const searchBox = document.querySelector('.search-box');
+  if (searchBox) searchBox.style.display = 'none';
+
+  // 隐藏菜单按钮
+  const menuToggle = $('menu-toggle');
+  if (menuToggle) menuToggle.style.display = 'none';
+
+  // 隐藏头部占位符，显示课程导航
+  const headerSpacer = $('header-spacer');
+  if (headerSpacer) headerSpacer.style.display = 'none';
+  const lessonNav = $('lesson-nav');
+  if (lessonNav) lessonNav.style.display = 'flex';
+
+  // 更新副标题
+  const subtitle = document.querySelector('.header-subtitle');
+  if (subtitle && lessonPathId) {
+    const pathNames = { level1: '初识唐诗', level2: '熟读唐诗', level3: '精通唐诗' };
+    subtitle.textContent = '学习路径：' + (pathNames[lessonPathId] || lessonPathId);
+  }
+
+  // 绑定课程导航按钮
+  const lessonBack = $('lesson-back');
+  if (lessonBack) {
+    lessonBack.addEventListener('click', () => {
+      if (lessonPathId) {
+        window.location.href = 'path-detail.html?path=' + encodeURIComponent(lessonPathId);
+      } else {
+        window.history.back();
+      }
+    });
+  }
+  const lessonExit = $('lesson-exit');
+  if (lessonExit) {
+    lessonExit.addEventListener('click', () => {
+      window.location.href = 'poem-module.html';
+    });
+  }
+
+  // 隐藏首页、今日推荐、最近阅读、收藏等
+  $('fav-section') && ($('fav-section').style.display = 'none');
+
+  // 绑定课程模式底部导航
+  const lPrev = $('lesson-prev');
+  const lNext = $('lesson-next');
+  if (lPrev) lPrev.addEventListener('click', lessonPrevPoem);
+  if (lNext) lNext.addEventListener('click', lessonNextPoem);
+
+  // 绑定完成学习按钮
+  const completeBtn = $('complete-btn');
+  if (completeBtn) completeBtn.addEventListener('click', completeLesson);
+
+  // 绑定课程模式收藏按钮
+  const lessonFavBtn = $('lesson-fav-btn');
+  if (lessonFavBtn) lessonFavBtn.addEventListener('click', toggleFavorite);
+
+  // 绑定学会了按钮
+  const masteredBtn = $('mastered-btn');
+  if (masteredBtn) {
+    masteredBtn.addEventListener('click', () => {
+      completeLesson();
+      toast('太棒了！已标记为学会');
+    });
+  }
+
+  // 构建学习路径诗篇列表
+  if (lessonPathId && LESSON_PATHS[lessonPathId]) {
+    lessonPathPoems = LESSON_PATHS[lessonPathId].map(title => {
+      const found = findPoemByTitle(title);
+      return found || null;
+    }).filter(Boolean);
+  }
+}
+
+function findPoemByTitle(title) {
+  for (const poet of tangPoetryData) {
+    const idx = poet.poems.findIndex(p => p.title === title);
+    if (idx >= 0) return { poet, index: idx, poem: poet.poems[idx] };
+  }
+  return null;
+}
+
+function completeLesson() {
+  if (!currentPoem) { toast('请先选择一首诗歌'); return; }
+
+  // 记录学习进度
+  const progress = JSON.parse(localStorage.getItem('poem_progress') || '{}');
+  progress[currentPoem.title] = {
+    completed: true,
+    completedAt: Date.now(),
+    path: lessonPathId,
+    readCount: (progress[currentPoem.title]?.readCount || 0) + 1
+  };
+  localStorage.setItem('poem_progress', JSON.stringify(progress));
+
+  // 更新连续学习天数
+  const today = new Date().toDateString();
+  const lastStudy = localStorage.getItem('last_study_date');
+  let streak = parseInt(localStorage.getItem('study_streak') || '0');
+  if (lastStudy !== today) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (lastStudy === yesterday.toDateString()) {
+      streak++;
+    } else {
+      streak = 1;
+    }
+    localStorage.setItem('last_study_date', today);
+    localStorage.setItem('study_streak', String(streak));
+  }
+
+  toast('🎉 学习完成！进度已记录');
+
+  // 自动跳转到下一篇
+  setTimeout(() => {
+    lessonNextPoem();
+  }, 1200);
+}
+
+function lessonPrevPoem() {
+  if (!lessonPathPoems.length || !currentPoem) return;
+  const idx = lessonPathPoems.findIndex(p => p.poem.title === currentPoem.title);
+  if (idx > 0 && lessonPathPoems[idx - 1]) {
+    showPoemFromList(lessonPathPoems[idx - 1].poet, lessonPathPoems[idx - 1].index);
+  } else {
+    toast('已经是第一篇了');
+  }
+}
+
+function lessonNextPoem() {
+  if (!lessonPathPoems.length || !currentPoem) return;
+  const idx = lessonPathPoems.findIndex(p => p.poem.title === currentPoem.title);
+  if (idx >= 0 && idx < lessonPathPoems.length - 1 && lessonPathPoems[idx + 1]) {
+    showPoemFromList(lessonPathPoems[idx + 1].poet, lessonPathPoems[idx + 1].index);
+  } else {
+    toast('已完成本路径全部诗篇！');
+    // 返回路径页
+    if (lessonPathId) {
+      setTimeout(() => {
+        window.location.href = 'path-detail.html?path=' + encodeURIComponent(lessonPathId);
+      }, 1500);
+    }
+  }
+}
+
+// 课程模式：在showPoem时切换底部导航和显示课程操作区
+const _originalShowPoem = showPoem;
+showPoem = function(poet, poem, index) {
+  _originalShowPoem(poet, poem, index);
+  if (appMode === 'lesson') {
+    // 隐藏浏览模式底部导航，显示课程模式底部导航
+    const bottomNav = $('bottom-nav');
+    const lessonBottomNav = $('lesson-bottom-nav');
+    const lessonActions = $('lesson-actions');
+    const poetInfoCard = $('poet-info-card');
+    const favBtn = $('fav-btn');
+
+    if (bottomNav) bottomNav.style.display = 'none';
+    if (lessonBottomNav) lessonBottomNav.style.display = 'flex';
+    if (lessonActions) lessonActions.style.display = 'block';
+    if (poetInfoCard) poetInfoCard.style.display = 'none';
+    if (favBtn) favBtn.style.display = 'none';
+
+    // 更新课程模式收藏按钮状态
+    const lessonFavBtn = $('lesson-fav-btn');
+    if (lessonFavBtn) {
+      const active = isFavorite(currentPoem ? currentPoem.title : '');
+      lessonFavBtn.innerHTML = active ? '<i class="fas fa-heart"></i> 已收藏' : '<i class="far fa-heart"></i> 收藏';
+    }
+  }
+};
+
+function toast(msg) {
+  const div = document.createElement('div');
+  div.textContent = msg;
+  div.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.75);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:999;white-space:nowrap;';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 2000);
+}

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>语文天地 - 幼小衔接</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: #f5f0e8; color: #2c3e50;
+  min-height: 100vh; padding-bottom: 80px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 顶部导航 */
+.top-nav {
+  background: linear-gradient(135deg, #1a2a3a, #2c3e50, #3d566e);
+  padding: 16px; color: #fff; display: flex;
+  align-items: center; justify-content: space-between;
+  border-radius: 0 0 20px 20px;
+}
+.top-nav-left { display: flex; align-items: center; gap: 12px; }
+.back-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); border: none;
+  color: #fff; font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.top-nav-title { font-size: 18px; font-weight: 600; }
+
+/* 进度总览 */
+.progress-card {
+  background: #fff; border-radius: 16px; margin: 16px;
+  padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.progress-header { margin-bottom: 10px; }
+.progress-title { font-size: 15px; font-weight: 600; }
+.progress-stats { font-size: 13px; color: #6b8299; margin-top: 4px; }
+.progress-bar {
+  height: 8px; background: #e8e0d0; border-radius: 4px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; background: linear-gradient(90deg, #27ae60, #2ecc71);
+  border-radius: 4px; transition: width 0.5s ease-out;
+}
+
+/* 课程模块 */
+.module-card {
+  background: #fff; border-radius: 16px; margin: 0 16px 12px;
+  padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  cursor: pointer; transition: transform 0.15s;
+  position: relative; overflow: hidden;
+}
+.module-card:active { transform: scale(0.98); }
+.module-card.locked { opacity: 0.6; }
+.module-card.locked::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(245,240,232,0.4); pointer-events: none;
+}
+.module-header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+}
+.module-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.module-info { flex: 1; }
+.module-name { font-size: 16px; font-weight: 600; }
+.module-status { font-size: 12px; color: #6b8299; margin-top: 2px; }
+.module-lock { font-size: 20px; color: #b0c4de; }
+.module-progress-bar {
+  height: 6px; background: #e8e0d0; border-radius: 3px; overflow: hidden;
+}
+.module-progress-fill {
+  height: 100%; border-radius: 3px; transition: width 0.5s ease-out;
+}
+.module-action {
+  margin-top: 10px; text-align: right;
+}
+.module-btn {
+  display: inline-block; padding: 6px 16px;
+  background: #2c3e50; color: #fff; border-radius: 8px;
+  font-size: 13px; text-decoration: none; border: none; cursor: pointer;
+}
+.module-btn:disabled {
+  background: #b0c4de; cursor: not-allowed;
+}
+.hot-badge {
+  position: absolute; top: 8px; right: 8px;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: #fff; font-size: 10px; padding: 2px 8px;
+  border-radius: 8px; font-weight: 600;
+}
+
+/* 底部导航 */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fff; border-top: 1px solid #f5f0e8;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+  display: flex; height: 64px; z-index: 100;
+}
+.nav-tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 2px;
+  color: #b0c4de; text-decoration: none; font-size: 10px;
+  cursor: pointer; border: none; background: none;
+}
+.nav-tab i { font-size: 22px; }
+.nav-tab.active { color: #2c3e50; }
+</style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div class="top-nav">
+  <div class="top-nav-left">
+    <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+    <span class="top-nav-title">语文天地</span>
+  </div>
+  <i class="fas fa-bell" style="font-size:18px;opacity:0.7"></i>
+</div>
+
+<!-- 进度总览 -->
+<div class="progress-card">
+  <div class="progress-header">
+    <div class="progress-title"><i class="fas fa-book-open" style="color:#e67e22;margin-right:6px"></i>我的语文进度</div>
+    <div class="progress-stats">已学 <strong id="total-learned">12</strong> 课 | 累计 <strong id="total-time">45</strong> 分钟</div>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="total-progress" style="width:40%"></div>
+  </div>
+</div>
+
+<!-- 课程模块 -->
+<div id="module-list"></div>
+
+<!-- 底部导航 -->
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-tab"><i class="fas fa-home"></i>首页</a>
+  <a href="chinese.html" class="nav-tab active"><i class="fas fa-book"></i>课程</a>
+  <a href="report.html" class="nav-tab"><i class="fas fa-chart-bar"></i>报告</a>
+  <a href="#" class="nav-tab" onclick="toast('个人中心即将上线')"><i class="fas fa-user"></i>我的</a>
+</nav>
+
+<script>
+function toast(msg) {
+  const div = document.createElement('div');
+  div.textContent = msg;
+  div.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.75);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:999;white-space:nowrap;';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 2000);
+}
+
+// 课程模块配置
+const modules = [
+  { id: 'pinyin', name: '拼音王国', icon: '🎵', color: '#fde8e8', progress: 80, unlocked: true,
+    desc: '声母·韵母·拼读', action: '继续学习', link: 'pinyin.html' },
+  { id: 'shizi', name: '识字乐园', icon: '✏️', color: '#e8f4fd', progress: 45, unlocked: true,
+    desc: '已解锁 · 进度 45%', action: '继续学习', link: '#' },
+  { id: 'gushi', name: '古诗诵读', icon: '🌸', color: '#fdf2f0', progress: 20, unlocked: true,
+    desc: '已解锁 · 进度 20%', action: '进入学习', link: 'poem-module.html', hot: true },
+  { id: 'yuedu', name: '阅读理解', icon: '📖', color: '#f0f9f0', progress: 0, unlocked: false,
+    desc: '完成识字乐园解锁', action: '未解锁', link: '#' },
+  { id: 'kantu', name: '看图说话', icon: '🗣️', color: '#f3f0fb', progress: 0, unlocked: false,
+    desc: '完成古诗诵读解锁', action: '未解锁', link: '#' },
+];
+
+function renderModules() {
+  const container = document.getElementById('module-list');
+  container.innerHTML = modules.map(m => `
+    <div class="module-card ${m.unlocked ? '' : 'locked'}" ${m.unlocked ? `onclick="location.href='${m.link}'"` : 'onclick="toast(\'请先完成前置课程\')"'}>
+      ${m.hot ? '<div class="hot-badge">热门</div>' : ''}
+      <div class="module-header">
+        <div class="module-icon" style="background:${m.color}">${m.icon}</div>
+        <div class="module-info">
+          <div class="module-name">${m.name}</div>
+          <div class="module-status">${m.desc}</div>
+        </div>
+        ${m.unlocked ? '' : '<div class="module-lock"><i class="fas fa-lock"></i></div>'}
+      </div>
+      <div class="module-progress-bar">
+        <div class="module-progress-fill" style="width:${m.progress}%;background:${m.unlocked ? 'linear-gradient(90deg,#27ae60,#2ecc71)' : '#b0c4de'}"></div>
+      </div>
+    </div>
+  `).join('');
+
+  // 更新总进度
+  const totalProgress = Math.round(modules.filter(m => m.unlocked).reduce((s, m) => s + m.progress, 0) / modules.length);
+  document.getElementById('total-progress').style.width = totalProgress + '%';
+}
+
+renderModules();
+</script>
+</body>
+</html>

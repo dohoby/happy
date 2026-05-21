@@ -1,0 +1,2047 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>幼小衔接H5教程 - UE需求设计文档</title>
+<style>
+@page {
+    size: A4;
+    margin: 20mm 18mm 25mm 18mm;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", "WenQuanYi Micro Hei", sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.7;
+    color: #2c3e50;
+    background: #fff;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* 标题样式 */
+h1 {
+    font-size: 22pt;
+    font-weight: 700;
+    color: #1a2a3a;
+    border-bottom: 3px solid #2c3e50;
+    padding-bottom: 12px;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    page-break-after: avoid;
+}
+
+h2 {
+    font-size: 16pt;
+    font-weight: 600;
+    color: #2c3e50;
+    border-left: 4px solid #e67e22;
+    padding-left: 12px;
+    margin-top: 25px;
+    margin-bottom: 15px;
+    page-break-after: avoid;
+}
+
+h3 {
+    font-size: 13pt;
+    font-weight: 600;
+    color: #3d566e;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    page-break-after: avoid;
+}
+
+h4 {
+    font-size: 11pt;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-top: 15px;
+    margin-bottom: 8px;
+}
+
+/* 段落 */
+p {
+    margin: 8px 0;
+    text-align: justify;
+}
+
+/* 引用块 */
+blockquote {
+    margin: 12px 0;
+    padding: 10px 16px;
+    background: #faf8f3;
+    border-left: 3px solid #e67e22;
+    color: #3d566e;
+    font-size: 10pt;
+}
+
+blockquote p {
+    margin: 4px 0;
+}
+
+/* 代码块 */
+pre {
+    background: #1a2a3a;
+    color: #f5f0e8;
+    padding: 14px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 9pt;
+    line-height: 1.5;
+    page-break-inside: avoid;
+}
+
+code {
+    font-family: "SF Mono", "Consolas", "Monaco", "Courier New", monospace;
+    font-size: 9pt;
+}
+
+pre code {
+    background: none;
+    padding: 0;
+    color: #f5f0e8;
+}
+
+:not(pre) > code {
+    background: #f5f0e8;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #c0392b;
+    font-size: 9.5pt;
+}
+
+/* 表格 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 9.5pt;
+    page-break-inside: avoid;
+}
+
+th {
+    background: #2c3e50;
+    color: #fff;
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 600;
+    border: 1px solid #2c3e50;
+}
+
+td {
+    padding: 7px 10px;
+    border: 1px solid #e8e0d0;
+    vertical-align: top;
+}
+
+tr:nth-child(even) {
+    background: #faf8f3;
+}
+
+tr:hover {
+    background: #f5f0e8;
+}
+
+/* 列表 */
+ul, ol {
+    margin: 8px 0;
+    padding-left: 24px;
+}
+
+li {
+    margin: 4px 0;
+}
+
+/* 分隔线 */
+hr {
+    border: none;
+    border-top: 1px solid #e8e0d0;
+    margin: 20px 0;
+}
+
+/* 强调 */
+strong {
+    font-weight: 600;
+    color: #1a2a3a;
+}
+
+em {
+    font-style: italic;
+    color: #6b8299;
+}
+
+/* 链接 */
+a {
+    color: #2980b9;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* 打印优化 */
+.page-break {
+    page-break-before: always;
+}
+
+.avoid-break {
+    page-break-inside: avoid;
+}
+</style>
+</head>
+<body>
+<h1 id="h5-ue">幼小衔接H5互动教程 — UE需求设计文档</h1>
+<blockquote>
+<p>文档版本：v1.0.0<br />
+更新日期：2026-05-21<br />
+产品负责人：产品经理<br />
+适用平台：H5（移动端浏览器/微信内置浏览器）</p>
+</blockquote>
+<hr />
+<h2 id="_1">一、产品概述</h2>
+<h3 id="11">1.1 产品定位</h3>
+<p>「幼小衔接互动教程」是一款面向5-7岁学龄前儿童及家长的H5在线学习产品，涵盖语文、数学、英语三大核心学科，帮助孩子平稳过渡从幼儿园到小学阶段。产品采用游戏化学习理念，将知识点融入互动场景，提升学习趣味性与持续性。</p>
+<h3 id="12">1.2 核心目标</h3>
+<table>
+<thead>
+<tr>
+<th>目标维度</th>
+<th>具体描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>学习目标</td>
+<td>掌握小学一年级基础语文、数学、英语知识</td>
+</tr>
+<tr>
+<td>用户目标</td>
+<td>每日15-20分钟轻松学习，养成自主学习习惯</td>
+</tr>
+<tr>
+<td>商业目标</td>
+<td>提升用户留存与课程转化率</td>
+</tr>
+</tbody>
+</table>
+<h3 id="13">1.3 目标用户</h3>
+<table>
+<thead>
+<tr>
+<th>用户类型</th>
+<th>年龄段</th>
+<th>特征描述</th>
+<th>核心诉求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>学龄前儿童（主要用户）</td>
+<td>5-7岁</td>
+<td>注意力集中时间短，喜欢色彩丰富、有声音反馈的界面</td>
+<td>好玩、有趣、获得奖励</td>
+</tr>
+<tr>
+<td>家长（付费决策者）</td>
+<td>28-40岁</td>
+<td>关注学习效果与进度，偏好简洁明了的报告</td>
+<td>看到进步、省时省心</td>
+</tr>
+</tbody>
+</table>
+<h3 id="14">1.4 使用场景</h3>
+<ul>
+<li><strong>晨间学习</strong>：早餐前10分钟，孩子自主完成当日语文朗读任务</li>
+<li><strong>睡前亲子</strong>：家长陪伴下完成互动练习，查看学习报告</li>
+<li><strong>碎片时间</strong>：外出等待时，利用零散时间进行知识复习</li>
+</ul>
+<hr />
+<h2 id="_2">二、信息架构</h2>
+<pre><code>幼小衔接H5教程
+├── 首页（学习大厅）
+│   ├── 用户头像/等级
+│   ├── 今日学习任务
+│   ├── 学科入口
+│   │   ├── 语文天地
+│   │   ├── 数学王国
+│   │   └── 英语乐园
+│   ├── 学习日历/打卡
+│   └── 我的成就
+├── 语文天地
+│   ├── 课程目录
+│   │   ├── 拼音王国
+│   │   ├── 识字乐园
+│   │   ├── 古诗诵读  ← three-hundred-poem.html 嵌入
+│   │   ├── 阅读理解
+│   │   └── 看图说话
+│   ├── 学习进度
+│   └── 语文报告
+├── 数学王国
+├── 英语乐园
+├── 学习报告
+└── 个人中心
+</code></pre>
+<hr />
+<h2 id="_3">三、全局设计规范</h2>
+<h3 id="31">3.1 视觉规范</h3>
+<table>
+<thead>
+<tr>
+<th>元素</th>
+<th>规范</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>设计尺寸</td>
+<td>375px × 812px（iPhone X 基准），向下适配至 320px</td>
+</tr>
+<tr>
+<td>色彩主调</td>
+<td>暖米色 <code>#f5f0e8</code> 背景，深 slate <code>#2c3e50</code> 文字</td>
+</tr>
+<tr>
+<td>强调色</td>
+<td>翠绿 <code>#27ae60</code>（正确/通过）、暖橙 <code>#e67e22</code>（提示/警告）、朱红 <code>#c0392b</code>（错误/收藏）</td>
+</tr>
+<tr>
+<td>圆角规范</td>
+<td>卡片 16px，按钮 12px，头像/徽章 50%</td>
+</tr>
+<tr>
+<td>字体规范</td>
+<td>标题 18-20px PingFang SC Medium，正文 14-16px PingFang SC Regular</td>
+</tr>
+<tr>
+<td>安全区</td>
+<td>底部留出 80px 导航栏安全区域</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32">3.2 交互规范</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>交互方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>页面切换</td>
+<td>左右滑入滑出，200ms ease-out</td>
+</tr>
+<tr>
+<td>按钮反馈</td>
+<td>点击时缩放至 0.96，松开后恢复</td>
+</tr>
+<tr>
+<td>加载状态</td>
+<td>骨架屏 + 旋转动画</td>
+</tr>
+<tr>
+<td>成就/奖励</td>
+<td>全屏 confetti 动效 + 音效反馈</td>
+</tr>
+<tr>
+<td>返回顶部</td>
+<td>页面下滑超过 3 屏时，右下角出现浮动按钮</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33">3.3 通用组件</h3>
+<p><strong>底部导航栏</strong></p>
+<pre><code>┌─────────────────────────────────────┐
+│  [首页]    [课程]    [报告]    [我的]  │
+│   🏠        📚        📊        👤   │
+└─────────────────────────────────────┘
+</code></pre>
+<ul>
+<li>常驻显示，当前页图标高亮（填充色），未选中为线框色</li>
+<li>高度：64px（含安全区）</li>
+</ul>
+<hr />
+<h2 id="_4">四、页面详细设计</h2>
+<h3 id="41">4.1 首页（学习大厅）</h3>
+<p><strong>页面定位</strong>：用户进入后的主界面，展示个性化学习内容与快捷入口</p>
+<p><strong>布局结构</strong>：</p>
+<pre><code>┌─────────────────────────────┐
+│ 👤 小明  Lv.3  🌟 128      │  ← 顶部用户信息
+├─────────────────────────────┤
+│ 📅 今日任务（3/5 完成）      │  ← 进度卡片
+│ ████████░░░░░░░░░░ 60%     │
+├─────────────────────────────┤
+│                             │
+│   ┌─────┐   ┌─────┐        │
+│   │ 语文 │   │ 数学 │        │  ← 学科入口
+│   │ 📖  │   │ 🔢  │        │     2×2 网格
+│   └─────┘   └─────┘        │
+│   ┌─────┐   ┌─────┐        │
+│   │ 英语 │   │ 综合 │        │
+│   │ 🔤  │   │ 🎯  │        │
+│   └─────┘   └─────┘        │
+│                             │
+├─────────────────────────────┤
+│ 📆 学习打卡                   │  ← 7日打卡日历
+│ 一 二 三 四 五 六 日         │
+│ ○  ○  ●  ○  ○  ○  ○        │
+├─────────────────────────────┤
+│ 🏆 最新成就                   │  ← 成就展示
+│ 「古诗小达人」已获得！        │
+└─────────────────────────────┘
+│      [🏠] [📚] [📊] [👤]   │  ← 底部导航
+└─────────────────────────────┘
+</code></pre>
+<p><strong>交互说明</strong>：<br />
+- 点击学科卡片 → 进入对应学科首页<br />
+- 点击今日任务进度条 → 展开任务详情浮层<br />
+- 点击成就区域 → 进入成就墙页面<br />
+- 打卡日历支持左右滑动查看上周/下周</p>
+<hr />
+<h3 id="42">4.2 语文天地 — 课程目录页</h3>
+<p><strong>页面定位</strong>：语文学科入口，展示课程模块与学习路径</p>
+<p><strong>布局结构</strong>：</p>
+<pre><code>┌─────────────────────────────┐
+│ ← 语文天地          🔔      │  ← 顶部导航
+├─────────────────────────────┤
+│ 📖 我的语文进度              │  ← 进度总览
+│ 已学 12 课 | 累计 45 分钟   │
+│ ████████░░░░░░░░░░ 40%     │
+├─────────────────────────────┤
+│                             │
+│ ┌─────────────────────────┐ │
+│ │ 🎵 拼音王国              │ │  ← 课程模块卡片
+│ │ 已解锁 · 进度 80%        │ │     纵向列表，已解锁彩色
+│ │ ████████░░               │ │     未解锁灰色蒙层+锁图标
+│ └─────────────────────────┘ │
+│ ┌─────────────────────────┐ │
+│ │ ✏️ 识字乐园              │ │
+│ │ 已解锁 · 进度 45%        │ │
+│ │ ████░░░░░░░░             │ │
+│ └─────────────────────────┘ │
+│ ┌─────────────────────────┐ │
+│ │ 🌸 古诗诵读  ← 重点模块   │ │
+│ │ 已解锁 · 进度 20%        │ │
+│ │ ██░░░░░░░░░░             │ │
+│ │ [进入学习]               │ │
+│ └─────────────────────────┘ │
+│ ┌─────────────────────────┐ │
+│ │ 📖 阅读理解              │ │
+│ │ 🔒 完成识字乐园解锁      │ │
+│ └─────────────────────────┘ │
+│ ┌─────────────────────────┐ │
+│ │ 🗣️ 看图说话              │ │
+│ │ 🔒 完成古诗诵读解锁      │ │
+│ └─────────────────────────┘ │
+│                             │
+└─────────────────────────────┘
+│      [🏠] [📚] [📊] [👤]   │
+└─────────────────────────────┘
+</code></pre>
+<p><strong>交互说明</strong>：<br />
+- 已解锁模块：点击整卡片进入模块详情<br />
+- 未解锁模块：点击弹出解锁条件提示 toast<br />
+- 古诗诵读模块卡片右下角显示「热门」角标（运营配置）</p>
+<hr />
+<h3 id="43-three-hundred-poemhtml">4.3 古诗诵读 — 模块首页（ three-hundred-poem.html 嵌入入口）</h3>
+<p><strong>页面定位</strong>：唐诗三百首H5应用的嵌入入口页，承担课程化包装与数据对接功能</p>
+<p><strong>布局结构</strong>：</p>
+<pre><code>┌─────────────────────────────┐
+│ ← 古诗诵读                  │  ← 顶部导航（返回语文天地）
+├─────────────────────────────┤
+│                             │
+│   ┌─────────────────────┐   │
+│   │                     │   │  ← 模块头图
+│   │   🌸 古诗诵读 🌸    │   │     中国风插画背景
+│   │   品读唐诗·传承经典   │   │
+│   │   已收录 300+ 首    │   │
+│   │                     │   │
+│   └─────────────────────┘   │
+│                             │
+├─────────────────────────────┤
+│ 📊 学习统计                  │  ← 数据统计区
+│ 已读 12 首 | 收藏 5 首     │
+│ 连续学习 3 天 🔥            │
+├─────────────────────────────┤
+│ 🎯 今日推荐                  │  ← 运营推荐位
+│ 《静夜思》— 李白            │
+│ 「床前明月光，疑是地上霜」  │
+│ [立即朗读]                  │
+├─────────────────────────────┤
+│ 📚 学习路径                  │  ← 课程化路径（新增）
+├─────────────────────────────┤
+│ ┌─────────────────────────┐ │
+│ │ 🌱 初识唐诗（1-3岁）     │ │  ← 难度分级路径
+│ │ 推荐 20 首 · 已完成 8 首 │ │     按年龄段/难度分阶段
+│ │ ████████░░░░░░░░░░ 40%  │ │     每阶段含推荐诗篇列表
+│ └─────────────────────────┘ │
+│ ┌─────────────────────────┐ │
+│ │ 🌿 熟读唐诗（4-6岁）     │ │
+│ │ 推荐 50 首 · 已完成 4 首 │ │
+│ │ ████░░░░░░░░░░░░░░░░ 8% │ │
+│ └─────────────────────────┘ │
+│ ┌─────────────────────────┐ │
+│ │ 🌳 精通唐诗（6-8岁）     │ │
+│ │ 推荐 100 首 · 已解锁     │ │
+│ │ [开始挑战]               │ │
+│ └─────────────────────────┘ │
+│                             │
+├─────────────────────────────┤
+│ 🔍 全部诗歌（快捷入口）      │  ← 跳转 three-hundred-poem.html
+│ [进入诗歌大全]              │     全功能浏览模式
+├─────────────────────────────┤
+│                             │
+│ 最近学习                    │  ← 最近浏览记录（本地存储）
+│ 《春晓》《咏鹅》《悯农》     │
+│                             │
+└─────────────────────────────┘
+│      [🏠] [📚] [📊] [👤]   │
+└─────────────────────────────┘
+</code></pre>
+<p><strong>交互说明</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>元素</th>
+<th>点击行为</th>
+<th>目标页面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>今日推荐卡片</td>
+<td>跳转诗歌详情</td>
+<td>three-hundred-poem.html?poem=静夜思&amp;mode=lesson</td>
+</tr>
+<tr>
+<td>学习路径阶段</td>
+<td>展开该阶段诗篇列表</td>
+<td>本页展开/收起</td>
+</tr>
+<tr>
+<td>阶段内单首诗</td>
+<td>跳转诗歌详情</td>
+<td>three-hundred-poem.html?poem=xxx&amp;mode=lesson</td>
+</tr>
+<tr>
+<td>「进入诗歌大全」按钮</td>
+<td>跳转全功能浏览</td>
+<td>three-hundred-poem.html?mode=browse</td>
+</tr>
+<tr>
+<td>最近学习记录</td>
+<td>跳转对应诗歌详情</td>
+<td>three-hundred-poem.html?poem=xxx</td>
+</tr>
+</tbody>
+</table>
+<p><strong>与 three-hundred-poem.html 的对接参数</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mode</code></td>
+<td>string</td>
+<td><code>lesson</code> 课程模式（简化UI）/ <code>browse</code> 浏览模式（完整UI）</td>
+</tr>
+<tr>
+<td><code>poem</code></td>
+<td>string</td>
+<td>指定诗篇标题，进入后直接展示详情</td>
+</tr>
+<tr>
+<td><code>path</code></td>
+<td>string</td>
+<td>学习路径ID，用于记录学习进度和返回路径</td>
+</tr>
+<tr>
+<td><code>from</code></td>
+<td>string</td>
+<td>来源标识，用于埋点统计 <code>from=chinese_module</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="44-three-hundred-poemhtml">4.4 唐诗三百首页面（three-hundred-poem.html）— 双模式适配</h3>
+<p><strong>页面定位</strong>：核心诗歌浏览与学习页面，需支持「课程模式」与「浏览模式」两种展示形态</p>
+<h4 id="441-modelesson-ui">4.4.1 课程模式（mode=lesson）— 嵌入课程时的简化UI</h4>
+<p><strong>适配改造点</strong>：</p>
+<pre><code>┌─────────────────────────────┐
+│ ← 返回路径        [退出]    │  ← 顶部栏改造
+│  学习路径：初识唐诗          │     原「菜单」改为「返回课程」
+├─────────────────────────────┤     新增「退出」返回语文天地
+│                             │
+│ 《静夜思》                   │  ← 诗歌标题区（保持原设计）
+│ 👤 唐 · 李白                │
+│                             │
+├─────────────────────────────┤
+│                             │
+│      床前明月光              │  ← 诗歌正文区（保持原设计）
+│      疑是地上霜              │     拼音标注、单句分行等
+│      举头望明月              │
+│      低头思故乡              │
+│                             │
+├─────────────────────────────┤
+│ [🔊 朗读] [🐢 慢速] [📖 跟读]│  ← 语音控制区（保持原设计）
+│                             │     默认隐藏「收藏」功能
+├─────────────────────────────┤     课程模式简化部分按钮
+│ 📖 注释 | 📜 译文 | 🔍 赏析  │  ← Tab内容区（保持原设计）
+│                             │
+│ 明亮的月光洒在床前的窗户上   │
+│ 好像地上泛起了一层霜...      │
+│                             │
+├─────────────────────────────┤
+│ ✅ 完成学习                  │  ← 底部行动区（新增）
+│                             │     课程模式专属
+│ ┌─────────┐ ┌─────────┐    │     点击后记录进度，
+│ │ ⭐ 收藏  │ │ 👍 学会了 │    │     返回学习路径
+│ └─────────┘ └─────────┘    │
+└─────────────────────────────┘
+</code></pre>
+<p><strong>课程模式与浏览模式差异对照</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>功能模块</th>
+<th>浏览模式 (mode=browse)</th>
+<th>课程模式 (mode=lesson)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>顶部导航</td>
+<td>菜单按钮 + 搜索框</td>
+<td>返回按钮 + 当前路径 + 退出</td>
+</tr>
+<tr>
+<td>诗人侧边栏</td>
+<td>完整展示</td>
+<td>隐藏</td>
+</tr>
+<tr>
+<td>搜索功能</td>
+<td>完整支持</td>
+<td>隐藏</td>
+</tr>
+<tr>
+<td>今日推荐</td>
+<td>展示</td>
+<td>隐藏</td>
+</tr>
+<tr>
+<td>最近阅读</td>
+<td>展示</td>
+<td>隐藏</td>
+</tr>
+<tr>
+<td>诗歌导航</td>
+<td>上一首/下一首</td>
+<td>上一篇/下一篇（按学习路径顺序）</td>
+</tr>
+<tr>
+<td>语音控制</td>
+<td>完整功能</td>
+<td>完整功能</td>
+</tr>
+<tr>
+<td>收藏按钮</td>
+<td>展示</td>
+<td>隐藏（简化注意力）</td>
+</tr>
+<tr>
+<td>底部导航</td>
+<td>首页/返回/随机</td>
+<td>完成学习/收藏/学会了</td>
+</tr>
+<tr>
+<td>底部Tab栏</td>
+<td>系统导航</td>
+<td>系统导航</td>
+</tr>
+</tbody>
+</table>
+<h4 id="442">4.4.2 页面间数据通信</h4>
+<p><strong>从课程页进入诗歌页</strong>：</p>
+<pre><code class="language-javascript">// 课程页跳转示例
+const poemUrl = `three-hundred-poem.html?mode=lesson&amp;poem=${encodeURIComponent('静夜思')}&amp;path=level1&amp;from=chinese_module`;
+window.location.href = poemUrl;
+</code></pre>
+<p><strong>诗歌页读取参数并适配UI</strong>：</p>
+<pre><code class="language-javascript">// three-hundred-poem.js 需新增逻辑
+const params = new URLSearchParams(location.search);
+const mode = params.get('mode') || 'browse'; // 默认浏览模式
+const targetPoem = params.get('poem');
+const pathId = params.get('path');
+const fromModule = params.get('from');
+
+// 根据 mode 切换 UI
+if (mode === 'lesson') {
+    // 隐藏搜索框、侧边栏、收藏等
+    document.getElementById('search-box').style.display = 'none';
+    document.getElementById('menu-toggle').style.display = 'none';
+    document.getElementById('bottom-nav').innerHTML = lessonModeNavHTML;
+    // 显示返回路径
+    document.getElementById('header-subtitle').textContent = `学习路径：${getPathName(pathId)}`;
+}
+
+// 如果有指定诗篇，自动进入详情页
+if (targetPoem) {
+    navigateToPoem(targetPoem);
+}
+</code></pre>
+<p><strong>学习完成后的数据回传</strong>：</p>
+<pre><code class="language-javascript">// 点击「完成学习」后
+function completeLesson() {
+    // 1. 记录学习进度到 localStorage
+    const progress = JSON.parse(localStorage.getItem('poem_progress') || '{}');
+    progress[currentPoem.id] = {
+        completed: true,
+        completedAt: Date.now(),
+        path: pathId
+    };
+    localStorage.setItem('poem_progress', JSON.stringify(progress));
+
+    // 2. 更新路径进度
+    updatePathProgress(pathId, currentPoem.id);
+
+    // 3. 返回课程页
+    window.location.href = 'chinese-poem-module.html?path=' + pathId;
+}
+</code></pre>
+<hr />
+<h3 id="45">4.5 学习路径详情页</h3>
+<p><strong>页面定位</strong>：展示某一学习路径（如「初识唐诗」）内包含的所有推荐诗篇</p>
+<p><strong>布局结构</strong>：</p>
+<pre><code>┌─────────────────────────────┐
+│ ← 初识唐诗（20首推荐）       │
+├─────────────────────────────┤
+│                             │
+│ ┌─────────────────────────┐ │
+│ │ ✅ 《咏鹅》— 骆宾王       │ │  ← 已完成（绿色勾选）
+│ │    鹅鹅鹅，曲项向天歌...  │ │
+│ │    已朗读 3 次 · 已掌握   │ │
+│ └─────────────────────────┘ │
+│ ┌─────────────────────────┐ │
+│ │ ✅ 《春晓》— 孟浩然       │ │  ← 已完成
+│ │    春眠不觉晓，处处闻啼鸟..│ │
+│ │    已朗读 2 次 · 已掌握   │ │
+│ └─────────────────────────┘ │
+│ ┌─────────────────────────┐ │
+│ │ 📍 《静夜思》— 李白 ⭐    │ │  ← 当前学习（高亮边框）
+│ │    床前明月光...          │ │     当前所在位置
+│ │    [继续学习]             │ │
+│ └─────────────────────────┘ │
+│ ┌─────────────────────────┐ │
+│ │ ○ 《悯农》— 李绅         │ │  ← 未学习（灰色/锁）
+│ │    🔒 完成上一首解锁      │ │
+│ └─────────────────────────┘ │
+│ ...                         │
+│                             │
+└─────────────────────────────┘
+│      [🏠] [📚] [📊] [👤]   │
+└─────────────────────────────┘
+</code></pre>
+<p><strong>状态规则</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>状态</th>
+<th>视觉表现</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>已完成</td>
+<td>绿色左边框 + ✅ 图标 + 已掌握标签</td>
+<td>可点击复习</td>
+</tr>
+<tr>
+<td>当前学习</td>
+<td>橙色高亮边框 + 📍 图标 + 「继续学习」按钮</td>
+<td>点击进入</td>
+</tr>
+<tr>
+<td>未解锁</td>
+<td>灰色文字 + 🔒 图标 + 解锁条件</td>
+<td>点击提示先完成前置</td>
+</tr>
+<tr>
+<td>未学习但已解锁</td>
+<td>正常黑色文字 + ○ 图标</td>
+<td>点击进入</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="46">4.6 学习报告页</h3>
+<p><strong>页面定位</strong>：展示孩子在语文/古诗模块的学习数据，供家长查看</p>
+<p><strong>布局结构</strong>：</p>
+<pre><code>┌─────────────────────────────┐
+│ 📊 学习报告                  │
+├─────────────────────────────┤
+│ 筛选：[本周 ▼] [语文 ▼]     │
+├─────────────────────────────┤
+│                             │
+│   本周学习 45 分钟           │
+│   ┌─────────────────┐       │
+│   │   环形进度图     │       │  ← 学习时长可视化
+│   │    目标 60min    │       │
+│   │    完成 75%      │       │
+│   └─────────────────┘       │
+│                             │
+│ 📈 每日学习趋势              │  ← 柱状图/折线图
+│ 一  二  三  四  五  六  日  │
+│ ██  ██  █   ██  █   ░   ░  │
+│                             │
+├─────────────────────────────┤
+│ 📚 古诗学习统计              │
+│ 已读 12 首 | 已掌握 5 首    │
+│ 连续学习 3 天 🔥            │
+│                             │
+│ 最近学习：                  │
+│ • 《静夜思》— 朗读 3 次     │
+│ • 《春晓》— 朗读 2 次       │
+│ • 《咏鹅》— 已标记掌握      │
+│                             │
+├─────────────────────────────┤
+│ 🏆 获得成就                  │
+│ 「古诗小达人」「连续3天」    │
+│                             │
+└─────────────────────────────┘
+│      [🏠] [📚] [📊] [👤]   │
+└─────────────────────────────┘
+</code></pre>
+<hr />
+<h2 id="_5">五、核心功能流程</h2>
+<h3 id="51">5.1 古诗学习完整流程</h3>
+<pre><code>┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  语文天地   │ ──→ │  古诗诵读   │ ──→ │  学习路径   │
+│  课程目录   │     │  模块首页   │     │  详情页     │
+└─────────────┘     └─────────────┘     └─────────────┘
+                                                │
+                                                ↓
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  学习报告   │ ←── │  完成学习   │ ←── │ 诗歌详情页  │
+│  更新进度   │     │  记录进度   │     │(嵌入唐诗页面)│
+└─────────────┘     └─────────────┘     └─────────────┘
+                                                │
+                                                ↓
+                                        ┌─────────────┐
+                                        │  语音朗读   │
+                                        │  跟读练习   │
+                                        └─────────────┘
+</code></pre>
+<h3 id="52">5.2 语音朗读交互流程</h3>
+<pre><code>用户点击「朗读」
+    │
+    ├──→ 检测环境（微信内置浏览器？）
+    │       ├──→ 是 → 提示「请在系统浏览器打开以获得语音功能」
+    │       └──→ 否 → 继续
+    │
+    ├──→ 播放音频版（默认）/ 跟读版
+    │       ├──→ 音频版：调用 Azure TTS API 播放
+    │       └──→ 跟读版：逐句高亮 + Web Speech API
+    │
+    ├──→ 用户可控制：暂停/继续/停止/循环/调速/调音量
+    │
+    └──→ 播放结束 → 显示「朗读完成」提示
+</code></pre>
+<hr />
+<h2 id="_6">六、数据埋点设计</h2>
+<table>
+<thead>
+<tr>
+<th>事件名</th>
+<th>触发时机</th>
+<th>参数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>page_view</code></td>
+<td>页面打开</td>
+<td><code>page_name</code>, <code>page_path</code>, <code>mode</code></td>
+</tr>
+<tr>
+<td><code>module_enter</code></td>
+<td>进入古诗诵读模块</td>
+<td><code>from_page</code>, <code>user_level</code></td>
+</tr>
+<tr>
+<td><code>poem_open</code></td>
+<td>打开某首诗详情</td>
+<td><code>poem_id</code>, <code>poem_title</code>, <code>poet_name</code>, <code>mode</code></td>
+</tr>
+<tr>
+<td><code>poem_play</code></td>
+<td>点击朗读</td>
+<td><code>poem_id</code>, <code>voice_type</code>, <code>speed</code>, <code>mode</code></td>
+</tr>
+<tr>
+<td><code>poem_follow_read</code></td>
+<td>点击跟读</td>
+<td><code>poem_id</code>, <code>mode</code></td>
+</tr>
+<tr>
+<td><code>poem_complete</code></td>
+<td>完成学习</td>
+<td><code>poem_id</code>, <code>path_id</code>, <code>duration</code>, <code>mode</code></td>
+</tr>
+<tr>
+<td><code>poem_fav</code></td>
+<td>收藏/取消收藏</td>
+<td><code>poem_id</code>, <code>action</code></td>
+</tr>
+<tr>
+<td><code>path_progress</code></td>
+<td>路径进度更新</td>
+<td><code>path_id</code>, <code>completed_count</code>, <code>total_count</code></td>
+</tr>
+<tr>
+<td><code>search</code></td>
+<td>使用搜索</td>
+<td><code>keyword</code>, <code>result_count</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_7">七、异常与边界处理</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>处理方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>网络断开</td>
+<td>显示「网络开小差了～」插画提示，已缓存内容可正常浏览</td>
+</tr>
+<tr>
+<td>语音加载失败</td>
+<td>显示「语音加载失败，请检查网络后重试」，提供重新加载按钮</td>
+</tr>
+<tr>
+<td>指定诗篇不存在</td>
+<td>显示「未找到这首诗」，3秒后跳转首页</td>
+</tr>
+<tr>
+<td>微信内语音受限</td>
+<td>首次进入检测环境，顶部显示常驻提示条</td>
+</tr>
+<tr>
+<td>存储空间不足</td>
+<td>localStorage 写失败时降级为内存存储，不阻断流程</td>
+</tr>
+<tr>
+<td>返回路径缺失</td>
+<td><code>path</code> 参数无效时，默认返回古诗诵读模块首页</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_8">八、附录</h2>
+<h3 id="81">8.1 学习路径内容配置（初版）</h3>
+<p><strong>初识唐诗（推荐20首）</strong><br />
+| 序号 | 诗名 | 诗人 | 难度 |<br />
+|-----|------|------|------|<br />
+| 1 | 咏鹅 | 骆宾王 | ⭐ |<br />
+| 2 | 春晓 | 孟浩然 | ⭐ |<br />
+| 3 | 静夜思 | 李白 | ⭐ |<br />
+| 4 | 悯农（其二） | 李绅 | ⭐ |<br />
+| 5 | 登鹳雀楼 | 王之涣 | ⭐⭐ |<br />
+| ... | ... | ... | ... |</p>
+<p><strong>熟读唐诗（推荐50首）</strong><br />
+包含初识唐诗全部 + 扩展30首，难度逐步提升</p>
+<p><strong>精通唐诗（推荐100首）</strong><br />
+包含熟读唐诗全部 + 扩展50首，涵盖各题材</p>
+<h3 id="82">8.2 接口需求清单</h3>
+<table>
+<thead>
+<tr>
+<th>接口</th>
+<th>用途</th>
+<th>优先级</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET /api/poem/paths</td>
+<td>获取学习路径列表</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>GET /api/poem/path/:id</td>
+<td>获取路径详情及诗篇列表</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>POST /api/poem/progress</td>
+<td>提交学习进度</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>GET /api/poem/progress</td>
+<td>获取用户学习进度</td>
+<td>P0</td>
+</tr>
+<tr>
+<td>GET /api/poem/report</td>
+<td>获取学习报告数据</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>POST /api/poem/favorite</td>
+<td>收藏/取消收藏</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>GET /api/poem/favorites</td>
+<td>获取收藏列表</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<blockquote>
+<p>本文档为UE需求设计文档，后续需补充：<br />
+- UI视觉稿（Sketch/Figma 源文件）<br />
+- 交互动效说明（Principle/After Effects 原型）<br />
+- 接口详细设计文档（后端对接）<br />
+- 测试用例与验收标准</p>
+</blockquote>
+<hr />
+<h2 id="ui-visual-design-spec">九、UI 视觉规范（Visual Design Spec）</h2>
+<h3 id="91">9.1 全局色板</h3>
+<h4 id="_9">主色调</h4>
+<table>
+<thead>
+<tr>
+<th>色名</th>
+<th>色值</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Slate 900</td>
+<td><code>#1a2a3a</code></td>
+<td>顶部导航背景、最深文字</td>
+</tr>
+<tr>
+<td>Slate 800</td>
+<td><code>#2c3e50</code></td>
+<td>主标题文字、卡片深色背景</td>
+</tr>
+<tr>
+<td>Slate 600</td>
+<td><code>#3d566e</code></td>
+<td>次级标题、图标默认色</td>
+</tr>
+<tr>
+<td>Slate 400</td>
+<td><code>#6b8299</code></td>
+<td>辅助说明文字、占位符</td>
+</tr>
+<tr>
+<td>Slate 200</td>
+<td><code>#b0c4de</code></td>
+<td>分割线、禁用态边框</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_10">背景色</h4>
+<table>
+<thead>
+<tr>
+<th>色名</th>
+<th>色值</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Warm Base</td>
+<td><code>#f5f0e8</code></td>
+<td>全局页面底色（仿古纸质感）</td>
+</tr>
+<tr>
+<td>Warm Light</td>
+<td><code>#faf8f3</code></td>
+<td>卡片底色、输入框底色</td>
+</tr>
+<tr>
+<td>Warm Dark</td>
+<td><code>#e8e0d0</code></td>
+<td>选中态背景、Hover 背景</td>
+</tr>
+<tr>
+<td>White</td>
+<td><code>#ffffff</code></td>
+<td>浮层、弹窗、内容卡片</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_11">功能色</h4>
+<table>
+<thead>
+<tr>
+<th>色名</th>
+<th>色值</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Green 500</td>
+<td><code>#27ae60</code></td>
+<td>成功状态、已完成、正确反馈</td>
+</tr>
+<tr>
+<td>Green 100</td>
+<td><code>#d4edda</code></td>
+<td>成功态浅背景</td>
+</tr>
+<tr>
+<td>Orange 500</td>
+<td><code>#e67e22</code></td>
+<td>警告提示、当前学习、重点标记</td>
+</tr>
+<tr>
+<td>Orange 100</td>
+<td><code>#ffe5cc</code></td>
+<td>警告态浅背景</td>
+</tr>
+<tr>
+<td>Red 500</td>
+<td><code>#c0392b</code></td>
+<td>错误状态、收藏心形、删除</td>
+</tr>
+<tr>
+<td>Red 100</td>
+<td><code>#f8d7da</code></td>
+<td>错误态浅背景</td>
+</tr>
+<tr>
+<td>Blue 500</td>
+<td><code>#2980b9</code></td>
+<td>链接、最近阅读、信息提示</td>
+</tr>
+<tr>
+<td>Blue 100</td>
+<td><code>#d1ecf1</code></td>
+<td>信息态浅背景</td>
+</tr>
+<tr>
+<td>Yellow 500</td>
+<td><code>#f1c40f</code></td>
+<td>星星评级、成就徽章</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_12">渐变色</h4>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>色值</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Header Gradient</td>
+<td><code>linear-gradient(135deg, #1a2a3a, #2c3e50, #3d566e)</code></td>
+<td>顶部导航栏</td>
+</tr>
+<tr>
+<td>Card Gradient Dark</td>
+<td><code>linear-gradient(135deg, #34495e, #2c3e50)</code></td>
+<td>诗人页头卡片</td>
+</tr>
+<tr>
+<td>Success Gradient</td>
+<td><code>linear-gradient(135deg, #27ae60, #2ecc71)</code></td>
+<td>完成学习按钮</td>
+</tr>
+</tbody>
+</table>
+<h3 id="92">9.2 字体层级</h3>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>字号</th>
+<th>字重</th>
+<th>行高</th>
+<th>字间距</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>H1 页面标题</td>
+<td>20px</td>
+<td>600</td>
+<td>1.4</td>
+<td>2px</td>
+<td>顶部导航标题、模块大标题</td>
+</tr>
+<tr>
+<td>H2 模块标题</td>
+<td>18px</td>
+<td>600</td>
+<td>1.4</td>
+<td>1px</td>
+<td>卡片标题、段落标题</td>
+</tr>
+<tr>
+<td>H3 小节标题</td>
+<td>16px</td>
+<td>500</td>
+<td>1.5</td>
+<td>0.5px</td>
+<td>Tab 标题、列表标题</td>
+</tr>
+<tr>
+<td>Body 正文</td>
+<td>14px</td>
+<td>400</td>
+<td>1.6</td>
+<td>0</td>
+<td>正文内容、说明文字</td>
+</tr>
+<tr>
+<td>Caption 辅助</td>
+<td>12px</td>
+<td>400</td>
+<td>1.5</td>
+<td>0</td>
+<td>时间戳、标签、统计数字</td>
+</tr>
+<tr>
+<td>Small 极小</td>
+<td>10px</td>
+<td>400</td>
+<td>1.4</td>
+<td>0</td>
+<td>角标、徽标内文字</td>
+</tr>
+<tr>
+<td>Display 诗歌正文</td>
+<td>16px</td>
+<td>500</td>
+<td>2.0</td>
+<td>4px</td>
+<td>诗歌正文（加大字间距）</td>
+</tr>
+<tr>
+<td>Pinyin 拼音标注</td>
+<td>11px</td>
+<td>400</td>
+<td>1.2</td>
+<td>1px</td>
+<td>拼音标注（灰色 #6b8299）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>字体栈</strong>：<code>"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif</code></p>
+<h3 id="93">9.3 间距规范</h3>
+<h4 id="token">基础间距 token</h4>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>值</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>xs</td>
+<td>4px</td>
+<td>图标与文字间距、紧凑内边距</td>
+</tr>
+<tr>
+<td>sm</td>
+<td>8px</td>
+<td>按钮内图标边距、小卡片间隙</td>
+</tr>
+<tr>
+<td>md</td>
+<td>12px</td>
+<td>标准卡片内边距、列表项间距</td>
+</tr>
+<tr>
+<td>lg</td>
+<td>16px</td>
+<td>页面水平边距、卡片外边距</td>
+</tr>
+<tr>
+<td>xl</td>
+<td>20px</td>
+<td>模块间间距、顶部安全区</td>
+</tr>
+<tr>
+<td>2xl</td>
+<td>24px</td>
+<td>大模块间距、底部安全区</td>
+</tr>
+<tr>
+<td>3xl</td>
+<td>32px</td>
+<td>页面顶部/底部大留白</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_13">页面边距</h4>
+<ul>
+<li>水平页面边距：<code>16px</code>（<code>container</code> 默认 padding）</li>
+<li>顶部安全区：视口顶部 <code>env(safe-area-inset-top)</code> + <code>12px</code></li>
+<li>底部安全区：<code>env(safe-area-inset-bottom)</code> + <code>80px</code>（导航栏高度 64px + 内容间距 16px）</li>
+</ul>
+<h3 id="94">9.4 圆角规范</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>值</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sm</td>
+<td>8px</td>
+<td>小按钮、标签、输入框</td>
+</tr>
+<tr>
+<td>md</td>
+<td>12px</td>
+<td>标准按钮、小型卡片</td>
+</tr>
+<tr>
+<td>lg</td>
+<td>16px</td>
+<td>内容卡片、模块容器</td>
+</tr>
+<tr>
+<td>xl</td>
+<td>20px</td>
+<td>顶部导航底部圆角、大浮层</td>
+</tr>
+<tr>
+<td>full</td>
+<td>50%</td>
+<td>头像、圆形按钮、徽章</td>
+</tr>
+</tbody>
+</table>
+<h3 id="95">9.5 阴影规范</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>值</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sm</td>
+<td><code>0 1px 3px rgba(0,0,0,0.08)</code></td>
+<td>按钮 Hover、小型元素</td>
+</tr>
+<tr>
+<td>md</td>
+<td><code>0 2px 8px rgba(0,0,0,0.1)</code></td>
+<td>标准卡片、下拉菜单</td>
+</tr>
+<tr>
+<td>lg</td>
+<td><code>0 4px 16px rgba(0,0,0,0.12)</code></td>
+<td>浮层、弹窗、抽屉</td>
+</tr>
+<tr>
+<td>xl</td>
+<td><code>0 8px 32px rgba(0,0,0,0.15)</code></td>
+<td>全屏模态框</td>
+</tr>
+</tbody>
+</table>
+<h3 id="96">9.6 原子组件详设</h3>
+<h4 id="961-button">9.6.1 按钮（Button）</h4>
+<p><strong>主按钮（Primary）</strong></p>
+<pre><code>背景：#2c3e50
+文字：#ffffff，14px，500
+内边距：12px 24px
+圆角：12px
+高度：44px（最小点击区域）
+
+状态：
+- Default：背景 #2c3e50
+- Hover/Active：背景 #1a2a3a，scale(0.96)，transition 150ms
+- Disabled：背景 #b0c4de，文字 rgba(255,255,255,0.6)
+</code></pre>
+<p><strong>成功按钮（Success）</strong></p>
+<pre><code>背景：linear-gradient(135deg, #27ae60, #2ecc71)
+文字：#ffffff，14px，500
+内边距：12px 24px
+圆角：12px
+高度：44px
+
+状态：
+- Default：渐变背景
+- Active：scale(0.96)，亮度 -10%
+</code></pre>
+<p><strong>次要按钮（Secondary）</strong></p>
+<pre><code>背景：#f5f0e8
+边框：1px solid #e8e0d0
+文字：#2c3e50，14px，500
+内边距：12px 24px
+圆角：12px
+
+状态：
+- Default：背景 #f5f0e8
+- Active：背景 #e8e0d0
+</code></pre>
+<p><strong>图标按钮（Icon Button）</strong></p>
+<pre><code>尺寸：44px × 44px（最小点击区域）
+背景：transparent
+图标尺寸：20px
+颜色：#2c3e50
+
+状态：
+- Active：背景 rgba(0,0,0,0.06)，scale(0.92)
+</code></pre>
+<p><strong>底部大按钮（Bottom CTA）</strong></p>
+<pre><code>宽度：calc(100% - 32px)
+高度：48px
+背景：#2c3e50
+文字：#ffffff，16px，600
+圆角：12px
+位置：fixed，bottom: 80px（避开底部导航）
+左右居中
+</code></pre>
+<h4 id="962-card">9.6.2 卡片（Card）</h4>
+<p><strong>标准卡片</strong></p>
+<pre><code>背景：#ffffff
+圆角：16px
+内边距：16px
+阴影：0 2px 8px rgba(0,0,0,0.1)
+外边距-bottom：12px
+
+状态：
+- Default：阴影 0 2px 8px
+- Pressed：scale(0.98)，阴影 0 1px 3px
+- 课程模式-当前学习：边框 2px solid #e67e22
+- 课程模式-已完成：左边框 4px solid #27ae60
+</code></pre>
+<p><strong>深色头图卡片</strong></p>
+<pre><code>背景：linear-gradient(135deg, #34495e, #2c3e50)
+圆角：16px
+内边距：20px
+文字：#ffffff
+阴影：0 4px 16px rgba(0,0,0,0.15)
+</code></pre>
+<p><strong>列表项卡片</strong></p>
+<pre><code>背景：#ffffff
+圆角：12px
+内边距：12px 16px
+左边距：16px，右边距：16px
+底部边框：1px solid #f5f0e8（非最后一项）
+</code></pre>
+<h4 id="963-input">9.6.3 输入框（Input）</h4>
+<p><strong>搜索框</strong></p>
+<pre><code>背景：rgba(255,255,255,0.15)
+边框：1px solid rgba(255,255,255,0.2)
+圆角：12px
+高度：40px
+内边距：0 16px 0 40px（左侧留图标位）
+文字：14px，#ffffff
+占位符：rgba(255,255,255,0.6)
+
+状态：
+- Focus：边框 rgba(255,255,255,0.5)，背景 rgba(255,255,255,0.2)
+</code></pre>
+<p><strong>标准输入框</strong></p>
+<pre><code>背景：#faf8f3
+边框：1px solid #e8e0d0
+圆角：8px
+高度：44px
+内边距：0 12px
+文字：14px，#2c3e50
+占位符：#b0c4de
+
+状态：
+- Focus：边框 #2980b9，阴影 0 0 0 3px rgba(41,128,185,0.15)
+- Error：边框 #c0392b，阴影 0 0 0 3px rgba(192,57,43,0.15)
+</code></pre>
+<h4 id="964">9.6.4 导航栏</h4>
+<p><strong>顶部导航栏</strong></p>
+<pre><code>背景：linear-gradient(135deg, #1a2a3a, #2c3e50, #3d566e)
+高度：auto（含搜索框时）/ 56px（不含搜索框时）
+内边距：20px 16px 16px
+底部圆角：0 0 20px 20px
+文字：#ffffff
+
+子元素：
+- 返回按钮：44×44px，白色图标
+- 标题：18px，500，居中或左对齐
+- 右侧操作：44×44px，白色图标/文字
+</code></pre>
+<p><strong>底部Tab导航</strong></p>
+<pre><code>背景：#ffffff
+高度：64px（含安全区）
+上边框：1px solid #f5f0e8
+阴影：0 -2px 8px rgba(0,0,0,0.05)
+位置：fixed bottom
+
+Tab 项：
+- 宽度：25%
+- 图标：24px
+- 标签：10px，400
+- 默认色：#b0c4de
+- 选中色：#2c3e50
+- 选中图标：填充态
+</code></pre>
+<h4 id="965">9.6.5 标签与徽章</h4>
+<p><strong>状态标签</strong></p>
+<pre><code>高度：22px
+内边距：0 10px
+圆角：11px（全圆角胶囊）
+文字：11px，500
+
+配色：
+- 已完成：背景 #d4edda，文字 #27ae60
+- 进行中：背景 #ffe5cc，文字 #e67e22
+- 未解锁：背景 #f0f0f0，文字 #b0c4de
+- 已掌握：背景 #d1ecf1，文字 #2980b9
+</code></pre>
+<p><strong>角标徽章</strong></p>
+<pre><code>最小尺寸：18px × 18px
+背景：#c0392b
+文字：#ffffff，10px，600
+圆角：50%
+位置：absolute，右上角偏移 -6px
+</code></pre>
+<p><strong>等级徽章</strong></p>
+<pre><code>尺寸：32px × 32px
+背景：线性渐变（按等级变色）
+文字：#ffffff，12px，700
+圆角：50%
+阴影：0 2px 4px rgba(0,0,0,0.15)
+</code></pre>
+<h4 id="966-tab">9.6.6 Tab 切换</h4>
+<p><strong>标准 Tab</strong></p>
+<pre><code>容器：flex，居中或均分
+Tab 项：
+- 内边距：10px 16px
+- 文字：14px，500
+- 默认：#6b8299
+- 选中：#2c3e50，底部 2px 下划线（#2c3e50）
+- 切换动画：下划线 200ms ease-out 滑动
+
+内容区：
+- 内边距-top：16px
+- 切换动画：淡入淡出 150ms
+</code></pre>
+<p><strong>胶囊 Tab</strong></p>
+<pre><code>背景：#f5f0e8
+圆角：10px
+内边距：4px
+
+Tab 项：
+- 内边距：6px 16px
+- 圆角：8px
+- 默认：透明背景，#6b8299
+- 选中：#ffffff 背景，#2c3e50 文字，阴影 0 1px 3px rgba(0,0,0,0.1)
+</code></pre>
+<h4 id="967">9.6.7 进度指示</h4>
+<p><strong>线性进度条</strong></p>
+<pre><code>高度：6px
+背景轨道：#e8e0d0
+圆角：3px
+
+进度填充：
+- 高度：100%
+- 背景：#27ae60（或按主题色）
+- 圆角：3px
+- 动画：width 300ms ease-out
+</code></pre>
+<p><strong>环形进度</strong></p>
+<pre><code>尺寸：80px × 80px（默认）/ 120px × 120px（报告页）
+轨道颜色：#e8e0d0，宽度 6px
+进度颜色：#27ae60，宽度 6px
+中心文字：20px，600，#2c3e50
+中心辅助：10px，#6b8299
+</code></pre>
+<p><strong>步骤指示器</strong></p>
+<pre><code>节点尺寸：24px
+默认节点：边框 2px #e8e0d0，背景 #ffffff
+已完成节点：背景 #27ae60，图标 ✓（白色）
+当前节点：边框 2px #e67e22，背景 #ffffff，内点 8px #e67e22
+连线：高度 2px，默认 #e8e0d0，已完成 #27ae60
+</code></pre>
+<h4 id="968">9.6.8 语音控制面板</h4>
+<p><strong>控制按钮组</strong></p>
+<pre><code>按钮尺寸：48px × 40px
+圆角：8px
+默认背景：#f5f0e8
+默认图标：#2c3e50，16px
+
+状态：
+- Active/Playing：背景 #2c3e50，图标 #ffffff
+- Disabled：背景 #f0f0f0，图标 #b0c4de
+
+分组间距：按钮间 8px，功能组间 16px
+</code></pre>
+<p><strong>速度选择按钮</strong></p>
+<pre><code>尺寸：auto × 32px
+内边距：0 12px
+圆角：16px（全圆角）
+边框：1px solid #e8e0d0
+文字：12px，500
+
+状态：
+- 默认：背景 #ffffff，文字 #2c3e50
+- 选中：背景 #2c3e50，文字 #ffffff，边框 #2c3e50
+</code></pre>
+<p><strong>滑块（Range Slider）</strong></p>
+<pre><code>轨道高度：4px
+轨道背景：#e8e0d0
+轨道圆角：2px
+填充背景：#2c3e50
+
+滑块按钮：
+- 尺寸：16px × 16px
+- 背景：#ffffff
+- 边框：2px solid #2c3e50
+- 圆角：50%
+- 阴影：0 1px 3px rgba(0,0,0,0.15)
+
+点击区域：轨道上下各扩展 10px（确保易触达）
+</code></pre>
+<h3 id="97">9.7 诗歌展示专设规范</h3>
+<h4 id="971">9.7.1 诗歌正文排版</h4>
+<pre><code>容器：
+- 背景：#ffffff
+- 圆角：16px
+- 内边距：24px
+- 文字对齐：居中
+
+诗歌标题：
+- 字号：20px
+- 字重：600
+- 颜色：#2c3e50
+- 下边距：8px
+
+诗人信息：
+- 字号：13px
+- 颜色：#6b8299
+- 下边距：20px
+
+诗句：
+- 字号：16px
+- 字重：500
+- 颜色：#2c3e50
+- 行高：2.5（加大行距便于拼音嵌入）
+- 字间距：4px
+- 每句下边距：4px
+
+拼音行：
+- 字号：11px
+- 颜色：#6b8299
+- 行高：1.2
+- 与诗句间距：2px
+</code></pre>
+<h4 id="972">9.7.2 单句分行 / 整段显示切换</h4>
+<pre><code>切换控件：
+- 尺寸：auto × 28px
+- 背景：#f5f0e8
+- 圆角：8px
+- 内边距：4px
+
+选项：
+- 内边距：2px 10px
+- 圆角：6px
+- 默认：透明，#6b8299
+- 选中：#ffffff，#2c3e50，阴影 0 1px 2px rgba(0,0,0,0.1)
+</code></pre>
+<h3 id="98">9.8 插画与图标规范</h3>
+<h4 id="981">9.8.1 图标库</h4>
+<p>使用 <strong>Font Awesome 6</strong> 图标库，统一风格为 <code>solid</code> 填充样式。</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>图标</th>
+<th>颜色</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>首页</td>
+<td><code>fa-home</code></td>
+<td>默认 <code>#b0c4de</code> / 选中 <code>#2c3e50</code></td>
+</tr>
+<tr>
+<td>课程</td>
+<td><code>fa-book</code></td>
+<td>同上</td>
+</tr>
+<tr>
+<td>报告</td>
+<td><code>fa-chart-bar</code></td>
+<td>同上</td>
+</tr>
+<tr>
+<td>我的</td>
+<td><code>fa-user</code></td>
+<td>同上</td>
+</tr>
+<tr>
+<td>返回</td>
+<td><code>fa-arrow-left</code></td>
+<td><code>#ffffff</code></td>
+</tr>
+<tr>
+<td>搜索</td>
+<td><code>fa-search</code></td>
+<td><code>rgba(255,255,255,0.6)</code></td>
+</tr>
+<tr>
+<td>朗读</td>
+<td><code>fa-volume-up</code></td>
+<td><code>#2c3e50</code></td>
+</tr>
+<tr>
+<td>播放</td>
+<td><code>fa-play</code></td>
+<td><code>#ffffff</code></td>
+</tr>
+<tr>
+<td>暂停</td>
+<td><code>fa-pause</code></td>
+<td><code>#ffffff</code></td>
+</tr>
+<tr>
+<td>收藏</td>
+<td><code>fa-heart</code></td>
+<td>默认 <code>#b0c4de</code> / 已收藏 <code>#c0392b</code></td>
+</tr>
+<tr>
+<td>完成</td>
+<td><code>fa-check-circle</code></td>
+<td><code>#27ae60</code></td>
+</tr>
+<tr>
+<td>锁定</td>
+<td><code>fa-lock</code></td>
+<td><code>#b0c4de</code></td>
+</tr>
+<tr>
+<td>随机</td>
+<td><code>fa-random</code></td>
+<td><code>#2c3e50</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="982">9.8.2 插画风格</h4>
+<ul>
+<li><strong>风格</strong>：扁平插画，国风童趣，圆角可爱</li>
+<li><strong>主色调</strong>：与产品色板一致，暖米色+青绿+朱红点缀</li>
+<li><strong>人物造型</strong>：Q版比例，大眼睛，表情夸张友好</li>
+<li><strong>背景元素</strong>：祥云、山水、竹叶、卷轴等中国风元素</li>
+<li><strong>应用场景</strong>：空状态、成就达成、错误提示、模块头图</li>
+</ul>
+<h3 id="99">9.9 动画与过渡规范</h3>
+<h4 id="991">9.9.1 页面转场</h4>
+<pre><code class="language-css">/* 页面进入 */
+.page-enter {
+    animation: slideIn 300ms ease-out;
+}
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+}
+
+/* 页面退出 */
+.page-exit {
+    animation: slideOut 200ms ease-in;
+}
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to   { transform: translateX(-30%); opacity: 0; }
+}
+</code></pre>
+<h4 id="992">9.9.2 元素动画</h4>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>动画</th>
+<th>时长</th>
+<th>缓动</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>卡片入场</td>
+<td>fadeInUp（从下方淡入）</td>
+<td>400ms</td>
+<td>ease-out</td>
+</tr>
+<tr>
+<td>按钮点击</td>
+<td>scale(0.96)</td>
+<td>100ms</td>
+<td>ease-in-out</td>
+</tr>
+<tr>
+<td>列表项加载</td>
+<td>stagger fadeIn，每项间隔 50ms</td>
+<td>300ms</td>
+<td>ease-out</td>
+</tr>
+<tr>
+<td>Tab 下划线滑动</td>
+<td>translateX 变化</td>
+<td>200ms</td>
+<td>ease-out</td>
+</tr>
+<tr>
+<td>进度条填充</td>
+<td>width 变化</td>
+<td>500ms</td>
+<td>ease-out</td>
+</tr>
+<tr>
+<td>Toast 提示</td>
+<td>slideDown + fadeIn</td>
+<td>300ms</td>
+<td>ease-out</td>
+</tr>
+<tr>
+<td>成就弹窗</td>
+<td>scale(0.5→1) + fadeIn + confetti</td>
+<td>500ms</td>
+<td>spring</td>
+</tr>
+<tr>
+<td>收藏心形</td>
+<td>scale(1→1.3→1)</td>
+<td>300ms</td>
+<td>ease-out</td>
+</tr>
+<tr>
+<td>加载骨架</td>
+<td>shimmer（渐变位移动画）</td>
+<td>1.5s</td>
+<td>linear infinite</td>
+</tr>
+</tbody>
+</table>
+<h4 id="993">9.9.3 加载状态</h4>
+<p><strong>骨架屏（Skeleton）</strong></p>
+<pre><code>背景：#f0f0f0
+ shimmer 动画：
+ background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)
+ background-size: 200% 100%
+ animation: shimmer 1.5s infinite
+
+卡片骨架：圆角 16px，高度按实际内容
+文本骨架：圆角 4px，高度 14px，宽度 60%-90%
+圆形骨架：圆角 50%，用于头像
+</code></pre>
+<p><strong>全屏加载</strong></p>
+<pre><code>遮罩：rgba(255,255,255,0.8)
+加载图标：旋转动画，24px，#2c3e50
+加载文字：14px，#6b8299，&quot;加载中...&quot;
+</code></pre>
+<h3 id="910">9.10 响应式断点</h3>
+<table>
+<thead>
+<tr>
+<th>断点</th>
+<th>宽度</th>
+<th>适配说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Compact</td>
+<td>320px - 374px</td>
+<td>小屏手机，减小间距（12px→8px），减小字号（-1px）</td>
+</tr>
+<tr>
+<td>Default</td>
+<td>375px - 413px</td>
+<td>标准屏，iPhone SE/12 等</td>
+</tr>
+<tr>
+<td>Large</td>
+<td>414px - 767px</td>
+<td>大屏手机，增大卡片内边距（16px→20px）</td>
+</tr>
+<tr>
+<td>Tablet</td>
+<td>768px+</td>
+<td>平板/Web，居中容器 max-width 700px，增大间距</td>
+</tr>
+</tbody>
+</table>
+<h3 id="911">9.11 暗黑模式（预留）</h3>
+<p>为未来暗黑模式预留 token 映射：</p>
+<table>
+<thead>
+<tr>
+<th>明色模式</th>
+<th>暗色模式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#f5f0e8</code> 背景</td>
+<td><code>#1a1a2e</code></td>
+</tr>
+<tr>
+<td><code>#ffffff</code> 卡片</td>
+<td><code>#16213e</code></td>
+</tr>
+<tr>
+<td><code>#2c3e50</code> 文字</td>
+<td><code>#e0e0e0</code></td>
+</tr>
+<tr>
+<td><code>#6b8299</code> 辅助文字</td>
+<td><code>#8b9dc3</code></td>
+</tr>
+<tr>
+<td><code>#e8e0d0</code> 边框</td>
+<td><code>#2a2a4a</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_14">十、页面状态清单</h2>
+<table>
+<thead>
+<tr>
+<th>页面</th>
+<th>正常态</th>
+<th>空态</th>
+<th>加载态</th>
+<th>错误态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>首页</td>
+<td>有数据展示</td>
+<td>首次使用引导页</td>
+<td>骨架屏</td>
+<td>网络错误提示</td>
+</tr>
+<tr>
+<td>课程目录</td>
+<td>模块列表</td>
+<td>无课程（运营未配置）</td>
+<td>骨架屏</td>
+<td>加载失败重试</td>
+</tr>
+<tr>
+<td>古诗模块首页</td>
+<td>有学习记录</td>
+<td>全新用户引导</td>
+<td>骨架屏</td>
+<td>网络错误提示</td>
+</tr>
+<tr>
+<td>学习路径</td>
+<td>诗篇列表</td>
+<td>路径为空</td>
+<td>骨架屏</td>
+<td>加载失败重试</td>
+</tr>
+<tr>
+<td>诗歌详情</td>
+<td>诗歌内容</td>
+<td>诗篇不存在</td>
+<td>内容加载中</td>
+<td>诗篇未找到</td>
+</tr>
+<tr>
+<td>学习报告</td>
+<td>有统计数据</td>
+<td>暂无数据引导</td>
+<td>图表加载中</td>
+<td>数据加载失败</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_15">十一、手势操作规范</h2>
+<table>
+<thead>
+<tr>
+<th>手势</th>
+<th>场景</th>
+<th>响应</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>点击</td>
+<td>所有可交互元素</td>
+<td>触发对应操作 + 触觉反馈（支持设备）</td>
+</tr>
+<tr>
+<td>左滑</td>
+<td>诗歌详情页</td>
+<td>切换到上一首诗</td>
+</tr>
+<tr>
+<td>右滑</td>
+<td>诗歌详情页</td>
+<td>切换到下一首诗</td>
+</tr>
+<tr>
+<td>下拉</td>
+<td>列表页顶部</td>
+<td>刷新数据（显示刷新动画）</td>
+</tr>
+<tr>
+<td>上滑</td>
+<td>列表页底部</td>
+<td>加载更多（如有分页）</td>
+</tr>
+<tr>
+<td>长按</td>
+<td>诗歌列表项</td>
+<td>显示快捷操作菜单（收藏、分享）</td>
+</tr>
+<tr>
+<td>双指捏合</td>
+<td>诗歌正文</td>
+<td>调整字号大小（+/- 2px）</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

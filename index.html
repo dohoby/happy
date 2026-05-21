@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>幼小衔接 - 学习大厅</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  background: #f5f0e8;
+  color: #2c3e50;
+  min-height: 100vh;
+  padding-bottom: 80px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 顶部用户信息 */
+.header {
+  background: linear-gradient(135deg, #1a2a3a, #2c3e50, #3d566e);
+  padding: 20px 16px 16px;
+  border-radius: 0 0 20px 20px;
+  color: #fff;
+}
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.user-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: linear-gradient(135deg, #e67e22, #f39c12);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 700;
+}
+.user-meta { flex: 1; }
+.user-name { font-size: 16px; font-weight: 600; }
+.user-level {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; color: rgba(255,255,255,0.8); margin-top: 2px;
+}
+.user-stars {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 14px; color: #f1c40f;
+}
+
+/* 今日任务卡片 */
+.task-card {
+  background: #fff; border-radius: 16px; margin: 16px;
+  padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.task-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.task-title { font-size: 15px; font-weight: 600; }
+.task-progress-text { font-size: 13px; color: #6b8299; }
+.progress-bar {
+  height: 8px; background: #e8e0d0; border-radius: 4px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; background: linear-gradient(90deg, #27ae60, #2ecc71);
+  border-radius: 4px; transition: width 0.5s ease-out;
+}
+.task-items {
+  display: flex; gap: 8px; margin-top: 12px; overflow-x: auto;
+}
+.task-item {
+  min-width: 80px; text-align: center; padding: 8px;
+  background: #faf8f3; border-radius: 10px; font-size: 12px;
+}
+.task-item i { font-size: 20px; margin-bottom: 4px; display: block; }
+.task-item.done { color: #27ae60; }
+.task-item.pending { color: #6b8299; }
+
+/* 学科入口 */
+.section-title {
+  font-size: 16px; font-weight: 600; margin: 20px 16px 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+.subject-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin: 0 16px;
+}
+.subject-card {
+  background: #fff; border-radius: 16px; padding: 20px;
+  text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  cursor: pointer; transition: transform 0.15s;
+  text-decoration: none; color: inherit;
+}
+.subject-card:active { transform: scale(0.96); }
+.subject-icon {
+  width: 56px; height: 56px; border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 10px; font-size: 28px;
+}
+.subject-card.chinese .subject-icon { background: #fde8e8; }
+.subject-card.math .subject-icon { background: #e8f4fd; }
+.subject-card.english .subject-icon { background: #fdf2f0; }
+.subject-card.composite .subject-icon { background: #f0f9f0; }
+.subject-name { font-size: 15px; font-weight: 600; }
+.subject-desc { font-size: 12px; color: #6b8299; margin-top: 4px; }
+
+/* 打卡日历 */
+.calendar-card {
+  background: #fff; border-radius: 16px; margin: 16px;
+  padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.calendar-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.calendar-title { font-size: 15px; font-weight: 600; }
+.calendar-streak { font-size: 12px; color: #e67e22; }
+.calendar-weekdays {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  text-align: center; font-size: 12px; color: #6b8299; margin-bottom: 8px;
+}
+.calendar-days {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
+}
+.calendar-day {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; font-size: 14px; font-weight: 500;
+}
+.calendar-day.checked {
+  background: linear-gradient(135deg, #27ae60, #2ecc71); color: #fff;
+}
+.calendar-day.today {
+  border: 2px solid #e67e22; color: #e67e22;
+}
+.calendar-day.unchecked { color: #b0c4de; }
+
+/* 成就 */
+.achievement-card {
+  background: #fff; border-radius: 16px; margin: 16px;
+  padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.achievement-list {
+  display: flex; gap: 12px; overflow-x: auto; margin-top: 12px;
+}
+.achievement-item {
+  min-width: 70px; text-align: center;
+}
+.achievement-badge {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 6px; font-size: 22px;
+  background: linear-gradient(135deg, #f1c40f, #f39c12);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+.achievement-name { font-size: 11px; color: #6b8299; }
+
+/* 底部导航 */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fff; border-top: 1px solid #f5f0e8;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+  display: flex; height: 64px; z-index: 100;
+}
+.nav-tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 2px;
+  color: #b0c4de; text-decoration: none; font-size: 10px;
+  cursor: pointer; border: none; background: none;
+}
+.nav-tab i { font-size: 22px; }
+.nav-tab.active { color: #2c3e50; }
+.nav-tab.active i { font-weight: 900; }
+</style>
+</head>
+<body>
+
+<!-- 顶部用户信息 -->
+<div class="header">
+  <div class="user-info">
+    <div class="user-avatar" id="user-avatar">明</div>
+    <div class="user-meta">
+      <div class="user-name" id="user-name">小明</div>
+      <div class="user-level">
+        <span>Lv.<span id="user-lv">3</span></span>
+        <span style="margin:0 6px">|</span>
+        <span id="user-title">学习小达人</span>
+      </div>
+    </div>
+    <div class="user-stars">
+      <i class="fas fa-star"></i><span id="user-stars">128</span>
+    </div>
+  </div>
+</div>
+
+<!-- 今日任务 -->
+<div class="task-card">
+  <div class="task-header">
+    <span class="task-title"><i class="fas fa-calendar-check" style="color:#e67e22;margin-right:4px"></i>今日任务</span>
+    <span class="task-progress-text"><span id="task-done">3</span>/<span id="task-total">5</span> 完成</span>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="task-progress" style="width:60%"></div>
+  </div>
+  <div class="task-items" id="task-items">
+    <div class="task-item done"><i class="fas fa-check-circle"></i>朗读古诗</div>
+    <div class="task-item done"><i class="fas fa-check-circle"></i>拼音练习</div>
+    <div class="task-item done"><i class="fas fa-check-circle"></i>识字卡片</div>
+    <div class="task-item pending"><i class="fas fa-circle"></i>数学口算</div>
+    <div class="task-item pending"><i class="fas fa-circle"></i>英语单词</div>
+  </div>
+</div>
+
+<!-- 学科入口 -->
+<div class="section-title"><i class="fas fa-book-open" style="color:#e67e22"></i> 学科学习</div>
+<div class="subject-grid">
+  <a href="chinese.html" class="subject-card chinese">
+    <div class="subject-icon">📖</div>
+    <div class="subject-name">语文天地</div>
+    <div class="subject-desc">拼音·识字·古诗</div>
+  </a>
+  <a href="#" class="subject-card math" onclick="toast('数学王国正在建设中~')">
+    <div class="subject-icon">🔢</div>
+    <div class="subject-name">数学王国</div>
+    <div class="subject-desc">口算·逻辑·图形</div>
+  </a>
+  <a href="#" class="subject-card english" onclick="toast('英语乐园正在建设中~')">
+    <div class="subject-icon">🔤</div>
+    <div class="subject-name">英语乐园</div>
+    <div class="subject-desc">字母·单词·会话</div>
+  </a>
+  <a href="#" class="subject-card composite" onclick="toast('综合挑战正在建设中~')">
+    <div class="subject-icon">🎯</div>
+    <div class="subject-name">综合挑战</div>
+    <div class="subject-desc">闯关·竞赛·测评</div>
+  </a>
+</div>
+
+<!-- 学习打卡 -->
+<div class="calendar-card">
+  <div class="calendar-header">
+    <span class="calendar-title"><i class="fas fa-calendar-alt" style="color:#27ae60;margin-right:4px"></i>学习打卡</span>
+    <span class="calendar-streak"><i class="fas fa-fire"></i> 连续 <span id="streak-days">3</span> 天</span>
+  </div>
+  <div class="calendar-weekdays">
+    <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+  </div>
+  <div class="calendar-days" id="calendar-days"></div>
+</div>
+
+<!-- 最新成就 -->
+<div class="achievement-card">
+  <div class="calendar-header">
+    <span class="calendar-title"><i class="fas fa-trophy" style="color:#f1c40f;margin-right:4px"></i>最新成就</span>
+    <a href="#" style="font-size:12px;color:#2980b9;text-decoration:none;" onclick="toast('成就墙功能即将上线')">查看全部 ></a>
+  </div>
+  <div class="achievement-list" id="achievement-list">
+    <div class="achievement-item">
+      <div class="achievement-badge">🌟</div>
+      <div class="achievement-name">古诗小达人</div>
+    </div>
+    <div class="achievement-item">
+      <div class="achievement-badge" style="background:linear-gradient(135deg,#e74c3c,#c0392b)">🔥</div>
+      <div class="achievement-name">连续3天</div>
+    </div>
+    <div class="achievement-item">
+      <div class="achievement-badge" style="background:linear-gradient(135deg,#3498db,#2980b9)">📚</div>
+      <div class="achievement-name">朗读者</div>
+    </div>
+    <div class="achievement-item">
+      <div class="achievement-badge" style="background:linear-gradient(135deg,#9b59b6,#8e44ad)">🎯</div>
+      <div class="achievement-name">拼音高手</div>
+    </div>
+  </div>
+</div>
+
+<!-- 底部导航 -->
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-tab active"><i class="fas fa-home"></i>首页</a>
+  <a href="chinese.html" class="nav-tab"><i class="fas fa-book"></i>课程</a>
+  <a href="report.html" class="nav-tab"><i class="fas fa-chart-bar"></i>报告</a>
+  <a href="#" class="nav-tab" onclick="toast('个人中心即将上线')"><i class="fas fa-user"></i>我的</a>
+</nav>
+
+<script>
+function toast(msg) {
+  const div = document.createElement('div');
+  div.textContent = msg;
+  div.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.75);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:999;white-space:nowrap;';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 2000);
+}
+
+// 生成本周打卡日历
+function renderCalendar() {
+  const container = document.getElementById('calendar-days');
+  const today = new Date();
+  const day = today.getDay(); // 0=周日
+  const checkedDays = [true, true, false, false, false, false, false]; // 模拟数据
+
+  const weekDays = [];
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - ((day === 0 ? 7 : day) - 1));
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(startOfWeek);
+    d.setDate(startOfWeek.getDate() + i);
+    const isToday = d.toDateString() === today.toDateString();
+    const checked = checkedDays[i];
+    const cls = isToday ? 'today' : (checked ? 'checked' : 'unchecked');
+    const html = checked && !isToday ? '<i class="fas fa-check"></i>' : d.getDate();
+    container.innerHTML += `<div class="calendar-day ${cls}">${html}</div>`;
+  }
+}
+
+// 加载用户数据
+function loadUserData() {
+  const data = JSON.parse(localStorage.getItem('userData') || '{}');
+  const name = data.name || '小明';
+  const lv = data.lv || 3;
+  const stars = data.stars || 128;
+  document.getElementById('user-name').textContent = name;
+  document.getElementById('user-avatar').textContent = name.charAt(0);
+  document.getElementById('user-lv').textContent = lv;
+  document.getElementById('user-stars').textContent = stars;
+}
+
+renderCalendar();
+loadUserData();
+</script>
+</body>
+</html>

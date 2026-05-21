@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>学习路径 - 幼小衔接</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: #f5f0e8; color: #2c3e50;
+  min-height: 100vh; padding-bottom: 80px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 顶部导航 */
+.top-nav {
+  background: linear-gradient(135deg, #1a2a3a, #2c3e50, #3d566e);
+  padding: 16px; color: #fff; display: flex;
+  align-items: center; gap: 12px;
+  border-radius: 0 0 20px 20px;
+}
+.back-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); border: none;
+  color: #fff; font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none;
+}
+.top-nav-title { font-size: 18px; font-weight: 600; }
+.top-nav-sub { font-size: 12px; opacity: 0.8; }
+
+/* 路径进度 */
+.path-summary {
+  background: #fff; border-radius: 16px; margin: 16px;
+  padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.path-summary-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+}
+.path-summary-title { font-size: 15px; font-weight: 600; }
+.path-summary-count { font-size: 13px; color: #6b8299; }
+.path-summary-bar {
+  height: 8px; background: #e8e0d0; border-radius: 4px; overflow: hidden;
+}
+.path-summary-fill {
+  height: 100%; background: linear-gradient(90deg, #27ae60, #2ecc71);
+  border-radius: 4px; transition: width 0.5s ease-out;
+}
+
+/* 诗篇列表 */
+.poem-list { margin: 0 16px; }
+.poem-item {
+  background: #fff; border-radius: 12px; padding: 14px 16px;
+  margin-bottom: 10px; cursor: pointer; transition: transform 0.15s;
+  border-left: 4px solid transparent;
+  display: flex; align-items: center; gap: 12px;
+}
+.poem-item:active { transform: scale(0.98); }
+.poem-item.completed { border-left-color: #27ae60; }
+.poem-item.current { border-left-color: #e67e22; box-shadow: 0 0 0 1px rgba(230,126,34,0.3); }
+.poem-item.locked { opacity: 0.55; }
+.poem-status-icon {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+.poem-item.completed .poem-status-icon { background: #d4edda; color: #27ae60; }
+.poem-item.current .poem-status-icon { background: #ffe5cc; color: #e67e22; }
+.poem-item.locked .poem-status-icon { background: #f0f0f0; color: #b0c4de; }
+.poem-item.normal .poem-status-icon { background: #f5f0e8; color: #6b8299; }
+.poem-info { flex: 1; }
+.poem-title-row {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 4px;
+}
+.poem-title-text { font-size: 15px; font-weight: 600; }
+.poem-badge {
+  font-size: 10px; padding: 1px 6px; border-radius: 4px; font-weight: 500;
+}
+.poem-badge.mastered { background: #d1ecf1; color: #2980b9; }
+.poem-badge.read { background: #d4edda; color: #27ae60; }
+.poem-author-name { font-size: 12px; color: #6b8299; }
+.poem-preview { font-size: 13px; color: #3d566e; margin-top: 4px; line-height: 1.5; }
+.poem-action { text-align: right; }
+.poem-action-btn {
+  display: inline-block; padding: 4px 12px;
+  border-radius: 8px; font-size: 12px; text-decoration: none;
+}
+.poem-action-btn.primary { background: #2c3e50; color: #fff; }
+.poem-action-btn.secondary { background: #f5f0e8; color: #2c3e50; }
+.poem-action-btn.locked { background: #f0f0f0; color: #b0c4de; }
+
+/* 底部导航 */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fff; border-top: 1px solid #f5f0e8;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+  display: flex; height: 64px; z-index: 100;
+}
+.nav-tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 2px;
+  color: #b0c4de; text-decoration: none; font-size: 10px;
+  cursor: pointer; border: none; background: none;
+}
+.nav-tab i { font-size: 22px; }
+.nav-tab.active { color: #2c3e50; }
+</style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div class="top-nav">
+  <a href="poem-module.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+  <div>
+    <div class="top-nav-title" id="path-title">初识唐诗</div>
+    <div class="top-nav-sub" id="path-subtitle">20首推荐</div>
+  </div>
+</div>
+
+<!-- 路径进度 -->
+<div class="path-summary">
+  <div class="path-summary-header">
+    <span class="path-summary-title"><i class="fas fa-chart-pie" style="color:#27ae60;margin-right:6px"></i>路径进度</span>
+    <span class="path-summary-count"><span id="done-count">0</span> / <span id="total-count">20</span> 首</span>
+  </div>
+  <div class="path-summary-bar">
+    <div class="path-summary-fill" id="summary-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- 诗篇列表 -->
+<div class="poem-list" id="poem-list"></div>
+
+<!-- 底部导航 -->
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-tab"><i class="fas fa-home"></i>首页</a>
+  <a href="chinese.html" class="nav-tab active"><i class="fas fa-book"></i>课程</a>
+  <a href="report.html" class="nav-tab"><i class="fas fa-chart-bar"></i>报告</a>
+  <a href="#" class="nav-tab" onclick="toast('个人中心即将上线')"><i class="fas fa-user"></i>我的</a>
+</nav>
+
+<script>
+function toast(msg) {
+  const div = document.createElement('div');
+  div.textContent = msg;
+  div.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.75);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:999;white-space:nowrap;';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 2000);
+}
+
+// 路径配置
+const pathConfig = {
+  level1: {
+    name: '初识唐诗',
+    total: 20,
+    poems: [
+      { title: '咏鹅', poet: '骆宾王', content: '鹅鹅鹅，曲项向天歌。白毛浮绿水，红掌拨清波。' },
+      { title: '春晓', poet: '孟浩然', content: '春眠不觉晓，处处闻啼鸟。夜来风雨声，花落知多少。' },
+      { title: '静夜思', poet: '李白', content: '床前明月光，疑是地上霜。举头望明月，低头思故乡。' },
+      { title: '悯农', poet: '李绅', content: '锄禾日当午，汗滴禾下土。谁知盘中餐，粒粒皆辛苦。' },
+      { title: '登鹳雀楼', poet: '王之涣', content: '白日依山尽，黄河入海流。欲穷千里目，更上一层楼。' },
+      { title: '相思', poet: '王维', content: '红豆生南国，春来发几枝。愿君多采撷，此物最相思。' },
+      { title: '江雪', poet: '柳宗元', content: '千山鸟飞绝，万径人踪灭。孤舟蓑笠翁，独钓寒江雪。' },
+      { title: '寻隐者不遇', poet: '贾岛', content: '松下问童子，言师采药去。只在此山中，云深不知处。' },
+      { title: '鹿柴', poet: '王维', content: '空山不见人，但闻人语响。返景入深林，复照青苔上。' },
+      { title: '竹里馆', poet: '王维', content: '独坐幽篁里，弹琴复长啸。深林人不知，明月来相照。' },
+      { title: '池上', poet: '白居易', content: '小娃撑小艇，偷采白莲回。不解藏踪迹，浮萍一道开。' },
+      { title: '画', poet: '王维', content: '远看山有色，近听水无声。春去花还在，人来鸟不惊。' },
+      { title: '风', poet: '李峤', content: '解落三秋叶，能开二月花。过江千尺浪，入竹万竿斜。' },
+      { title: '鸟鸣涧', poet: '王维', content: '人闲桂花落，夜静春山空。月出惊山鸟，时鸣春涧中。' },
+      { title: '杂诗', poet: '王维', content: '君自故乡来，应知故乡事。来日绮窗前，寒梅著花未？' },
+      { title: '夜宿山寺', poet: '李白', content: '危楼高百尺，手可摘星辰。不敢高声语，恐惊天上人。' },
+      { title: '独坐敬亭山', poet: '李白', content: '众鸟高飞尽，孤云独去闲。相看两不厌，只有敬亭山。' },
+      { title: '秋浦歌', poet: '李白', content: '白发三千丈，缘愁似个长。不知明镜里，何处得秋霜。' },
+      { title: '古朗月行', poet: '李白', content: '小时不识月，呼作白玉盘。又疑瑶台镜，飞在青云端。' },
+      { title: '望天门山', poet: '李白', content: '天门中断楚江开，碧水东流至此回。两岸青山相对出，孤帆一片日边来。' },
+    ]
+  },
+  level2: {
+    name: '熟读唐诗',
+    total: 50,
+    poems: [
+      { title: '望庐山瀑布', poet: '李白', content: '日照香炉生紫烟，遥看瀑布挂前川。飞流直下三千尺，疑是银河落九天。' },
+      { title: '赠汪伦', poet: '李白', content: '李白乘舟将欲行，忽闻岸上踏歌声。桃花潭水深千尺，不及汪伦送我情。' },
+      { title: '早发白帝城', poet: '李白', content: '朝辞白帝彩云间，千里江陵一日还。两岸猿声啼不住，轻舟已过万重山。' },
+      { title: '绝句', poet: '杜甫', content: '两个黄鹂鸣翠柳，一行白鹭上青天。窗含西岭千秋雪，门泊东吴万里船。' },
+      { title: '春夜喜雨', poet: '杜甫', content: '好雨知时节，当春乃发生。随风潜入夜，润物细无声。' },
+      { title: '望岳', poet: '杜甫', content: '岱宗夫如何？齐鲁青未了。造化钟神秀，阴阳割昏晓。' },
+      { title: '送元二使安西', poet: '王维', content: '渭城朝雨浥轻尘，客舍青青柳色新。劝君更尽一杯酒，西出阳关无故人。' },
+      { title: '九月九日忆山东兄弟', poet: '王维', content: '独在异乡为异客，每逢佳节倍思亲。遥知兄弟登高处，遍插茱萸少一人。' },
+      { title: '山居秋暝', poet: '王维', content: '空山新雨后，天气晚来秋。明月松间照，清泉石上流。' },
+      { title: '赋得古原草送别', poet: '白居易', content: '离离原上草，一岁一枯荣。野火烧不尽，春风吹又生。' },
+      { title: '忆江南', poet: '白居易', content: '江南好，风景旧曾谙。日出江花红胜火，春来江水绿如蓝。' },
+      { title: '暮江吟', poet: '白居易', content: '一道残阳铺水中，半江瑟瑟半江红。可怜九月初三夜，露似真珠月似弓。' },
+      { title: '夜雨寄北', poet: '李商隐', content: '君问归期未有期，巴山夜雨涨秋池。何当共剪西窗烛，却话巴山夜雨时。' },
+      { title: '登乐游原', poet: '李商隐', content: '向晚意不适，驱车登古原。夕阳无限好，只是近黄昏。' },
+      { title: '清明', poet: '杜牧', content: '清明时节雨纷纷，路上行人欲断魂。借问酒家何处有？牧童遥指杏花村。' },
+      { title: '山行', poet: '杜牧', content: '远上寒山石径斜，白云生处有人家。停车坐爱枫林晚，霜叶红于二月花。' },
+      { title: '江南春', poet: '杜牧', content: '千里莺啼绿映红，水村山郭酒旗风。南朝四百八十寺，多少楼台烟雨中。' },
+      { title: '游子吟', poet: '孟郊', content: '慈母手中线，游子身上衣。临行密密缝，意恐迟迟归。谁言寸草心，报得三春晖。' },
+      { title: '黄鹤楼', poet: '崔颢', content: '昔人已乘黄鹤去，此地空余黄鹤楼。黄鹤一去不复返，白云千载空悠悠。' },
+      { title: '凉州词', poet: '王之涣', content: '黄河远上白云间，一片孤城万仞山。羌笛何须怨杨柳，春风不度玉门关。' },
+    ]
+  }
+};
+
+const params = new URLSearchParams(location.search);
+const pathId = params.get('path') || 'level1';
+const path = pathConfig[pathId];
+
+if (!path) {
+  document.getElementById('poem-list').innerHTML = '<div style="text-align:center;padding:40px;color:#6b8299">路径不存在</div>';
+} else {
+  document.getElementById('path-title').textContent = path.name;
+  document.getElementById('path-subtitle').textContent = path.total + '首推荐';
+  document.getElementById('total-count').textContent = path.total;
+
+  const progress = JSON.parse(localStorage.getItem('poem_progress') || '{}');
+
+  // 确定每个诗篇的状态
+  let currentIdx = -1;
+  for (let i = 0; i < path.poems.length; i++) {
+    if (!progress[path.poems[i].title]) {
+      currentIdx = i;
+      break;
+    }
+  }
+
+  const doneCount = path.poems.filter(p => progress[p.title] && progress[p.title].completed).length;
+  document.getElementById('done-count').textContent = doneCount;
+  document.getElementById('summary-bar').style.width = Math.round(doneCount / path.total * 100) + '%';
+
+  const list = document.getElementById('poem-list');
+  list.innerHTML = path.poems.map((poem, i) => {
+    const isCompleted = progress[poem.title] && progress[poem.title].completed;
+    const isCurrent = i === currentIdx;
+    const isLocked = !isCompleted && !isCurrent;
+    const cls = isCompleted ? 'completed' : (isCurrent ? 'current' : (isLocked ? 'locked' : 'normal'));
+    const icon = isCompleted ? '<i class="fas fa-check"></i>' : (isCurrent ? '<i class="fas fa-map-marker-alt"></i>' : (isLocked ? '<i class="fas fa-lock"></i>' : '<i class="far fa-circle"></i>'));
+    const btnCls = isCompleted ? 'secondary' : (isCurrent ? 'primary' : 'locked');
+    const btnText = isCompleted ? '复习' : (isCurrent ? '继续学习' : (isLocked ? '需解锁' : '学习'));
+    const onClick = isLocked ? `onclick="toast('请先完成前面的诗篇')"` : `onclick="location.href='three-hundred-poem.html?mode=lesson&poem=${encodeURIComponent(poem.title)}&path=${pathId}&from=chinese_module'"`;
+
+    return `
+      <div class="poem-item ${cls}" ${onClick}>
+        <div class="poem-status-icon">${icon}</div>
+        <div class="poem-info">
+          <div class="poem-title-row">
+            <span class="poem-title-text">${poem.title}</span>
+            ${isCompleted ? '<span class="poem-badge mastered">已掌握</span>' : ''}
+          </div>
+          <div class="poem-author-name">${poem.poet}</div>
+          <div class="poem-preview">${poem.content.substring(0, 20)}...</div>
+        </div>
+        <div class="poem-action">
+          <span class="poem-action-btn ${btnCls}">${btnText}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一年级拼音小助手</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Pacifico&display=swap');
+        body {
+            font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+            background-color: #f0f6fb;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        #welcome-bar {
+            width: 100vw;
+            min-width: 340px;
+            background: linear-gradient(90deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 22px 0 7px 0;
+            font-size: 24px;
+            font-weight: 700;
+            color: #d35400;
+            letter-spacing: .5px;
+            box-shadow: 0 2px 10px rgba(250, 139, 90, 0.08);
+            margin-bottom: 0;
+            position: sticky;
+            top: 0;
+            z-index: 102;
+        }
+        .container {
+            max-width: 1040px;
+            margin: 28px auto 0 auto;
+            padding: 10px 2vw 32px 2vw;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        h1 {
+            color: #ff6b6b;
+            margin-bottom: 16px;
+            font-size: 2.3em;
+            letter-spacing: .03em;
+        }
+        .grid-sections {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            justify-content: center;
+        }
+        .section {
+            background: white;
+            border-radius: 22px;
+            padding: 20px 25px 25px 25px;
+            min-width: 255px;
+            min-height: 258px;
+            flex: 1 1 320px;
+            max-width: 500px;
+            box-shadow: 0 4px 18px rgba(52, 174, 228, 0.10);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h2 {
+            color: #4ecdc4;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            font-size: 1.20em;
+            margin: 0 0 6px 0;
+        }
+        .hint {
+            color: #888;
+            font-size: 14px;
+            margin-top: 5px;
+            margin-bottom: 2px;
+        }
+        button {
+            background-color: #ffd34a;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 22px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            margin: 7px 7px 7px 0;
+            transition: transform 0.1s, background 0.12s;
+            box-shadow: 0 3px 7px rgba(0,0,0,0.10);
+        }
+        button:hover {
+            background-color: #ffdb4d;
+            transform: translateY(-2.5px) scale(1.03);
+        }
+        button:active {
+            transform: translateY(1px) scale(.98);
+        }
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 17px;
+        }
+        .card {
+            background-color: #e0f7fa;
+            border: 2px solid #4ecdc4;
+            border-radius: 14px;
+            width: 74px;
+            height: 74px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+            color: #006d77;
+            transition: all 0.18s;
+        }
+        .card:hover {
+            background-color: #b2ebf2;
+            transform: scale(1.11);
+            border-color: #30b4be;
+        }
+        .card .pinyin-normal {
+            font-family: 'Microsoft YaHei', 'Arial', sans-serif !important;
+            font-size: 32px;
+            font-weight: normal;
+            color: #334755;
+            text-transform: none;
+            line-height: 1.2;
+        }
+        .card .pinyin-handwritten {
+            font-family: 'Pacifico', 'Comic Sans MS', 'Segoe Script', cursive, sans-serif !important;
+            font-size: 32px;
+            font-weight: normal;
+            color: #334755;
+            text-transform: none;
+            line-height: 1.2;
+        }
+        .card .small-text {
+            font-size: 13px;
+            color: #888;
+            margin-top: 2px;
+        }
+        .tune-btn {
+            background-color: #a8e6cf;
+            width: 58px;
+            height: 58px;
+            font-size: 27px;
+            border-radius: 50%;
+            margin: 0 8px 5px 0;
+            font-family: 'Pacifico', 'Comic Sans MS', 'Segoe Script', cursive, sans-serif;
+        }
+        .tune-btn:hover {
+            background: #92e7b5;
+            border: 2px solid #73d4a4;
+        }
+        .pinyin-select {
+            margin: 10px 6px;
+        }
+        select {
+            padding: 7px 13px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-family: 'Microsoft YaHei', 'Arial', sans-serif;
+            font-weight: normal;
+            color: #224466;
+            text-transform: none;
+        }
+        #result {
+            font-size: 31px;
+            font-weight: bold;
+            color: #ff6b6b;
+            min-height: 36px;
+            margin: 12px 0 6px 0;
+        }
+        .result-shengmu {
+            font-family: 'Microsoft YaHei', 'Arial', sans-serif !important;
+        }
+        .result-yunmu {
+            font-family: 'Pacifico', 'Comic Sans MS', 'Segoe Script', cursive, sans-serif !important;
+        }
+        .result-pinyin {
+            font-size: 31px;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+        .setup-info {
+            background: #fff7da;
+            border-left: 5px solid #ffc107;
+            padding: 14px 11px 14px 18px;
+            text-align: left;
+            font-size: 15px;
+            color: #856404;
+            margin-top: 12px;
+            box-shadow: 0 1px 9px rgba(255,221,100,0.08);
+            border-radius: 8px;
+            max-width: 769px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media (max-width: 900px) {
+            .container {
+                max-width: 99vw;
+                padding: 1vw 1vw 22px 1vw;
+            }
+            .grid-sections {
+                flex-direction: column;
+                gap: 18px;
+            }
+            .section {
+                min-width: 220px;
+                max-width: 99vw;
+                box-sizing: border-box;
+            }
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 0 1.2vw 14vw 1.2vw;
+                margin-top: 15px;
+            }
+            #welcome-bar {
+                font-size: 19px;
+                padding: 18px 0 6px 0;
+            }
+            h1 {
+                font-size: 1.45em;
+                margin-bottom: 8px;
+            }
+            .setup-info {
+                font-size: 13.4px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="welcome-bar" style="display: none;"></div>
+
+<div class="container">
+
+    <h1>🎉 拼音小助手 🎉</h1>
+
+    <div class="grid-sections">
+        <!-- 1. 声母学习区 -->
+        <div class="section">
+            <h2>🎵 声母 (shēng mǔ)</h2>
+            <p class="hint">点击卡片听发音</p>
+            <div class="card-container" id="shengmu-container">
+                <!-- 声母卡片将由JS生成 -->
+            </div>
+        </div>
+
+        <!-- 2. 韵母学习区 -->
+        <div class="section">
+            <h2>🎵 韵母 (yùn mǔ)</h2>
+            <p class="hint">点击卡片听发音（单韵母、复韵母、鼻韵母）</p>
+            <div class="card-container" id="yunmu-container">
+                <!-- 韵母卡片将由JS生成 -->
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-sections">
+        <!-- 3. 声调练习区 -->
+        <div class="section">
+            <h2>🎵 声调 (shēng diào) - 以 a 为例</h2>
+            <p class="hint">点击按钮听不同声调</p>
+            <div>
+                <button class="tune-btn" onclick="playTune('a')">ā</button>
+                <button class="tune-btn" onclick="playTune('á')">á</button>
+                <button class="tune-btn" onclick="playTune('ǎ')">ǎ</button>
+                <button class="tune-btn" onclick="playTune('à')">à</button>
+            </div>
+        </div>
+
+        <!-- 4. 简单拼读练习区 -->
+        <div class="section">
+            <h2>🎵 拼读练习 (pīn dú)</h2>
+            <p class="hint">选择声母和韵母，点击拼读</p>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center;">
+                <div class="pinyin-select">
+                    <label for="sm-select">声母:</label>
+                    <select id="sm-select">
+                        <!-- JS填充选项 -->
+                    </select>
+                </div>
+                <div class="pinyin-select">
+                    <label for="ym-select">韵母:</label>
+                    <select id="ym-select">
+                        <!-- JS填充选项 -->
+                    </select>
+                </div>
+            </div>
+            <div id="result"></div>
+            <button id="pindu-btn" onclick="拼读()">🔊 拼读</button>
+        </div>
+    </div>
+    <!-- 音频设置说明 -->
+    <div class="setup-info">
+        <strong>📢 重要：音频设置说明 (给老师/家长)</strong><br>
+        1. 本页面需要您准备音频文件。请创建以下名称的音频文件(.mp3格式)，并放在与本html文件相同的文件夹中：<br>
+        - <strong>声母（23个）:</strong> <code>b.mp3</code>, <code>p.mp3</code>, <code>m.mp3</code>, <code>f.mp3</code>, <code>d.mp3</code>, <code>t.mp3</code>, <code>n.mp3</code>, <code>l.mp3</code>, <code>g.mp3</code>, <code>k.mp3</code>, <code>h.mp3</code>, <code>j.mp3</code>, <code>q.mp3</code>, <code>x.mp3</code>, <code>zh.mp3</code>, <code>ch.mp3</code>, <code>sh.mp3</code>, <code>r.mp3</code>, <code>z.mp3</code>, <code>c.mp3</code>, <code>s.mp3</code>, <code>y.mp3</code>, <code>w.mp3</code><br>
+        - <strong>单韵母（6个）:</strong> <code>a.mp3</code>, <code>o.mp3</code>, <code>e.mp3</code>, <code>i.mp3</code>, <code>u.mp3</code>, <code>v.mp3</code> (ü用v表示)<br>
+        - <strong>复韵母（9个）:</strong> <code>ai.mp3</code>, <code>ei.mp3</code>, <code>ui.mp3</code>, <code>ao.mp3</code>, <code>ou.mp3</code>, <code>iu.mp3</code>, <code>ie.mp3</code>, <code>ve.mp3</code> (üe用ve表示), <code>er.mp3</code><br>
+        - <strong>前鼻韵母（5个）:</strong> <code>an.mp3</code>, <code>en.mp3</code>, <code>in.mp3</code>, <code>un.mp3</code>, <code>vn.mp3</code> (ün用vn表示)<br>
+        - <strong>后鼻韵母（4个）:</strong> <code>ang.mp3</code>, <code>eng.mp3</code>, <code>ing.mp3</code>, <code>ong.mp3</code><br>
+        - <strong>声调:</strong> <code>a.mp3</code>, <code>a2.mp3</code> (代表á), <code>a3.mp3</code> (代表ǎ), <code>a4.mp3</code> (代表à)<br>
+        - <strong>拼读:</strong> <code>b-a.mp3</code> (代表ba), <code>m-a.mp3</code> (代表ma) 等<br><br>
+        2. <strong>如何获取音频？</strong><br>
+        - <strong>推荐：</strong> 请用手机录音功能，由您或发音标准的人录制，确保清晰。<br>
+        - 临时方案：使用在线TTS工具（如“百度语音合成”、“讯飞听见”）生成单个拼音的音频。<br><br>
+        3. 录制好音频后，修改JS代码中 <code>audioPaths</code> 对象里的文件名即可。<br>
+        4. <strong>注意：</strong> 浏览器可能要求用户先交互（点击页面）才能播放声音。
+    </div>
+</div>
+
+<script>
+    // 修复进入网页以后点不了的问题（主要和Chrome等浏览器的自动播放策略有关）
+
+    // 1. 声母/韵母/音频配置
+    const shengmuList = ['b', 'p', 'm', 'f', 'd', 't', 'n', 'l', 'g', 'k', 'h', 'j', 'q', 'x', 'zh', 'ch', 'sh', 'r', 'z', 'c', 's', 'y', 'w'];
+    const danYunmu = ['a', 'o', 'e', 'i', 'u', 'ü'];
+    const fuYunmu = ['ai', 'ei', 'ui', 'ao', 'ou', 'iu', 'ie', 'üe', 'er'];
+    const qianBiYunmu = ['an', 'en', 'in', 'un', 'ün'];
+    const houBiYunmu = ['ang', 'eng', 'ing', 'ong'];
+    const yunmuList = [...danYunmu, ...fuYunmu, ...qianBiYunmu, ...houBiYunmu];
+    const audioPaths = {
+        b: 'b.mp3', p: 'p.mp3', m: 'm.mp3', f: 'f.mp3',
+        d: 'd.mp3', t: 't.mp3', n: 'n.mp3', l: 'l.mp3',
+        g: 'g.mp3', k: 'k.mp3', h: 'h.mp3',
+        j: 'j.mp3', q: 'q.mp3', x: 'x.mp3',
+        zh: 'zh.mp3', ch: 'ch.mp3', sh: 'sh.mp3', r: 'r.mp3',
+        z: 'z.mp3', c: 'c.mp3', s: 's.mp3',
+        y: 'y.mp3', w: 'w.mp3',
+        a: 'a.mp3', o: 'o.mp3', e: 'e.mp3', i: 'i.mp3', u: 'u.mp3', ü: 'v.mp3',
+        ai: 'ai.mp3', ei: 'ei.mp3', ui: 'ui.mp3',
+        ao: 'ao.mp3', ou: 'ou.mp3', iu: 'iu.mp3',
+        ie: 'ie.mp3', üe: 've.mp3', er: 'er.mp3',
+        an: 'an.mp3', en: 'en.mp3', in: 'in.mp3', un: 'un.mp3', ün: 'vn.mp3',
+        ang: 'ang.mp3', eng: 'eng.mp3', ing: 'ing.mp3', ong: 'ong.mp3',
+        a_tune1: 'a.mp3',
+        a_tune2: 'a2.mp3',
+        a_tune3: 'a3.mp3',
+        a_tune4: 'a4.mp3',
+        'b-a': 'b-a.mp3', 'p-a': 'p-a.mp3', 'm-a': 'm-a.mp3', 'f-a': 'f-a.mp3',
+        'd-a': 'd-a.mp3', 't-a': 't-a.mp3', 'n-a': 'n-a.mp3', 'l-a': 'l-a.mp3',
+        'g-a': 'g-a.mp3', 'k-a': 'k-a.mp3', 'h-a': 'h-a.mp3',
+        'j-i': 'j-i.mp3', 'q-i': 'q-i.mp3', 'x-i': 'x-i.mp3',
+        'zh-a': 'zh-a.mp3',
+        'ch-a': 'ch-a.mp3',
+        'sh-a': 'sh-a.mp3',
+        'r-a': 'r-a.mp3',
+        'z-a': 'z-a.mp3', 'c-a': 'c-a.mp3', 's-a': 's-a.mp3'
+    };
+    function isYunmu(str) { return yunmuList.includes(str); }
+    function isShengmu(str) { return shengmuList.includes(str); }
+    let username = "";
+    // Chrome/Edge会阻止自动播放音频，必须有人机交互才允许音频
+    // 本版加入用户首次点击后解锁音频策略
+    let userInteracted = false;
+
+    // 在任意用户点击后，解锁音频播放
+    function unlockAudioPolicy() {
+        userInteracted = true;
+        document.removeEventListener('click', unlockAudioPolicy);
+    }
+    document.addEventListener('click', unlockAudioPolicy, { once: true });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        askNameAndWelcome();
+        generateCards('shengmu-container', shengmuList, 'shengmu');
+        generateCards('yunmu-container', yunmuList, 'yunmu');
+        populateSelects();
+        document.getElementById('pindu-btn').style.display = "inline-block";
+    });
+
+    function askNameAndWelcome() {
+        let name = "";
+        // 保护性处理，禁止空名
+        while (!name) {
+            name = prompt("欢迎来到拼音学习课堂，请输入你的姓名：", "");
+            if (name === null) name = "";
+            name = name.trim();
+        }
+        username = name;
+        const welBar = document.getElementById('welcome-bar');
+        if (welBar) {
+            welBar.innerHTML = `欢迎 <span style="color:#E17055">${escapeHtml(username)}</span> 小朋友来到拼音学习课堂 👋`;
+            welBar.style.display = "block";
+        }
+    }
+    function escapeHtml(str) {
+        return str.replace(/[&<>'"]/g, tag => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        }[tag]));
+    }
+    function generateCards(containerId, list, type) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        list.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            let pinyinClass = '';
+            let pinyinDisplay = '';
+            if (type === "shengmu") {
+                pinyinClass = 'pinyin-normal';
+                pinyinDisplay = item.toLowerCase();
+            } else if (type === "yunmu") {
+                pinyinClass = 'pinyin-normal';
+                pinyinDisplay = item.toLowerCase();
+            }
+            card.innerHTML = `<div class="${pinyinClass}">${pinyinDisplay}</div><div class="small-text">${getMeaning(item)}</div>`;
+            card.onclick = () => playSound(item, type);
+            container.appendChild(card);
+        });
+    }
+    function getMeaning(pinyin) {
+        const meanings = {
+            'b': '波', 'p': '坡', 'm': '摸', 'f': '佛',
+            'd': '得', 't': '特', 'n': '呢', 'l': '了',
+            'g': '哥', 'k': '科', 'h': '喝',
+            'j': '鸡', 'q': '七', 'x': '西',
+            'zh': '知', 'ch': '吃', 'sh': '师', 'r': '日',
+            'z': '资', 'c': '次', 's': '思',
+            'y': '一', 'w': '乌',
+            'a': '啊', 'o': '哦', 'e': '鹅', 'i': '衣', 'u': '乌', 'ü': '鱼',
+            'ai': '爱', 'ei': '诶', 'ui': '威',
+            'ao': '奥', 'ou': '欧', 'iu': '优',
+            'ie': '也', 'üe': '约', 'er': '儿',
+            'an': '安', 'en': '恩', 'in': '音', 'un': '温', 'ün': '云',
+            'ang': '昂', 'eng': '嗯', 'ing': '英', 'ong': '翁'
+        };
+        return meanings[pinyin] || '';
+    }
+    function populateSelects() {
+        const smSelect = document.getElementById('sm-select');
+        const ymSelect = document.getElementById('ym-select');
+        smSelect.innerHTML = "";
+        ymSelect.innerHTML = "";
+        shengmuList.forEach(sm => {
+            const option = document.createElement('option');
+            option.value = sm;
+            option.textContent = sm.toLowerCase();
+            option.style.fontFamily = "'Microsoft YaHei', 'Arial', sans-serif";
+            smSelect.appendChild(option);
+        });
+        yunmuList.forEach(ym => {
+            const option = document.createElement('option');
+            option.value = ym;
+            option.textContent = ym.toLowerCase();
+            option.style.fontFamily = "'Microsoft YaHei', 'Arial', sans-serif";
+            ymSelect.appendChild(option);
+        });
+    }
+    function playSound(name, type) {
+        let fileName = '';
+        if (type === 'shengmu') fileName = audioPaths[name];
+        if (type === 'yunmu') fileName = audioPaths[name];
+        playAudio(fileName);
+    }
+    function playTune(tune) {
+        let fileName = '';
+        if (tune === 'a') fileName = audioPaths.a_tune1;
+        if (tune === 'á') fileName = audioPaths.a_tune2;
+        if (tune === 'ǎ') fileName = audioPaths.a_tune3;
+        if (tune === 'à') fileName = audioPaths.a_tune4;
+        playAudio(fileName);
+    }
+    function 拼读() {
+        const sm = document.getElementById('sm-select').value;
+        const ym = document.getElementById('ym-select').value;
+        const key = `${sm}-${ym}`;
+        const resultDiv = document.getElementById('result');
+        let displayPinyin = sm + ym;
+        if (ym === 'ü' || ym === 'üe' || ym === 'ün') {
+            if (['j', 'q', 'x', 'y'].includes(sm)) {
+                displayPinyin = sm + ym.replace('ü', 'u').replace('v', 'u');
+            } else {
+                displayPinyin = sm + ym.replace('ü', 'v');
+            }
+        }
+        let smHtml = `<span class="result-shengmu">${sm.toLowerCase()}</span>`;
+        let ymHtml = `<span class="result-yunmu">${ym.toLowerCase()}</span>`;
+        let dpHtml = `<span class="result-pinyin">${displayPinyin.toLowerCase()}</span>`;
+        resultDiv.innerHTML = `${smHtml} + ${ymHtml} = ${dpHtml}`;
+        const fileName = audioPaths[key];
+        if (fileName) {
+            playAudio(fileName);
+        } else {
+            alert(`抱歉，缺少音频文件: ${key}.mp3\n请录制或配置该拼读音频。\n\n提示：您可以在 audioPaths 对象中添加 "${key}": "${key}.mp3" 来配置音频路径。`);
+        }
+    }
+
+    // 修订的播放函数，只有经过首个人机交互后才允许play，否则给出提示
+    function playAudio(fileName) {
+        if (!fileName) {
+            alert("音频文件未配置！请查看页面底部的说明。");
+            return;
+        }
+        if (!userInteracted) {
+            alert("请点击页面任意一次后再操作，浏览器出于安全策略需用户交互后才能播放音频。");
+            return;
+        }
+        const audio = new Audio(fileName);
+        audio.play().catch(e => {
+            console.error("播放失败:", e);
+            alert("播放失败！请确保:\n1. 已按说明录制音频文件\n2. 文件名完全匹配\n3. 浏览器允许自动播放（请先点击页面任意位置）");
+        });
+    }
+</script>
+
+</body>
+</html>

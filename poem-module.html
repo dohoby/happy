@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>古诗诵读 - 幼小衔接</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: #f5f0e8; color: #2c3e50;
+  min-height: 100vh; padding-bottom: 80px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 顶部导航 */
+.top-nav {
+  background: linear-gradient(135deg, #1a2a3a, #2c3e50, #3d566e);
+  padding: 16px; color: #fff; display: flex;
+  align-items: center; gap: 12px;
+  border-radius: 0 0 20px 20px;
+}
+.back-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); border: none;
+  color: #fff; font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none;
+}
+.top-nav-title { font-size: 18px; font-weight: 600; }
+
+/* 模块头图 */
+.hero-card {
+  background: linear-gradient(135deg, #c0392b, #e74c3c, #c0392b);
+  margin: 16px; border-radius: 16px; padding: 28px 20px;
+  text-align: center; color: #fff;
+  box-shadow: 0 4px 16px rgba(192,57,43,0.25);
+  position: relative; overflow: hidden;
+}
+.hero-card::before {
+  content: ''; position: absolute; top: -30px; right: -30px;
+  width: 120px; height: 120px; border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+}
+.hero-card::after {
+  content: ''; position: absolute; bottom: -20px; left: -20px;
+  width: 80px; height: 80px; border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+}
+.hero-title { font-size: 22px; font-weight: 700; letter-spacing: 4px; position: relative; z-index: 1; }
+.hero-subtitle { font-size: 14px; opacity: 0.9; margin-top: 8px; position: relative; z-index: 1; }
+.hero-count { font-size: 13px; opacity: 0.8; margin-top: 6px; position: relative; z-index: 1; }
+
+/* 统计卡片 */
+.stats-card {
+  background: #fff; border-radius: 16px; margin: 0 16px 12px;
+  padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  display: flex; justify-content: space-around; text-align: center;
+}
+.stat-item {}
+.stat-value { font-size: 22px; font-weight: 700; color: #2c3e50; }
+.stat-label { font-size: 12px; color: #6b8299; margin-top: 4px; }
+.stat-divider { width: 1px; background: #e8e0d0; }
+
+/* 今日推荐 */
+.recommend-card {
+  background: #fff; border-radius: 16px; margin: 0 16px 12px;
+  padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.recommend-header {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 12px;
+  font-size: 15px; font-weight: 600;
+}
+.recommend-header i { color: #f1c40f; }
+.recommend-content {
+  background: linear-gradient(135deg, #faf8f3, #f5f0e8);
+  border-radius: 12px; padding: 16px;
+}
+.recommend-poem-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.recommend-poem-author { font-size: 13px; color: #6b8299; margin-bottom: 8px; }
+.recommend-poem-line { font-size: 14px; color: #3d566e; line-height: 1.8; }
+.recommend-btn {
+  display: inline-block; margin-top: 12px;
+  padding: 8px 20px; background: #2c3e50; color: #fff;
+  border-radius: 10px; font-size: 13px; text-decoration: none;
+}
+
+/* 学习路径 */
+.path-card {
+  background: #fff; border-radius: 16px; margin: 0 16px 12px;
+  padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.path-header {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 12px;
+  font-size: 15px; font-weight: 600;
+}
+.path-header i { color: #27ae60; }
+.path-item {
+  background: #faf8f3; border-radius: 12px; padding: 14px 16px;
+  margin-bottom: 10px; cursor: pointer; transition: transform 0.15s;
+  border-left: 4px solid transparent;
+}
+.path-item:active { transform: scale(0.98); }
+.path-item.completed { border-left-color: #27ae60; }
+.path-item.current { border-left-color: #e67e22; }
+.path-item.locked { opacity: 0.6; }
+.path-name { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.path-desc { font-size: 12px; color: #6b8299; margin-top: 4px; }
+.path-progress-bar {
+  height: 5px; background: #e8e0d0; border-radius: 3px; overflow: hidden; margin-top: 8px;
+}
+.path-progress-fill {
+  height: 100%; background: linear-gradient(90deg, #27ae60, #2ecc71);
+  border-radius: 3px; transition: width 0.5s ease-out;
+}
+.path-action {
+  margin-top: 8px; text-align: right;
+}
+.path-action-btn {
+  display: inline-block; padding: 4px 14px;
+  background: #2c3e50; color: #fff; border-radius: 8px;
+  font-size: 12px; text-decoration: none;
+}
+.path-action-btn.secondary {
+  background: #f5f0e8; color: #2c3e50;
+}
+
+/* 快捷入口 */
+.quick-card {
+  background: #fff; border-radius: 16px; margin: 0 16px 12px;
+  padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center; cursor: pointer;
+}
+.quick-card:active { transform: scale(0.98); }
+.quick-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+.quick-btn {
+  display: inline-block; padding: 10px 28px;
+  background: linear-gradient(135deg, #1a2a3a, #2c3e50);
+  color: #fff; border-radius: 12px; font-size: 14px;
+  text-decoration: none;
+}
+
+/* 最近学习 */
+.recent-card {
+  background: #fff; border-radius: 16px; margin: 0 16px 12px;
+  padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.recent-header {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 12px;
+  font-size: 15px; font-weight: 600;
+}
+.recent-header i { color: #2980b9; }
+.recent-list { display: flex; gap: 8px; flex-wrap: wrap; }
+.recent-tag {
+  background: #f5f0e8; padding: 6px 12px; border-radius: 8px;
+  font-size: 13px; cursor: pointer; text-decoration: none; color: inherit;
+}
+.recent-tag:active { background: #e8e0d0; }
+.recent-empty { font-size: 13px; color: #6b8299; }
+
+/* 底部导航 */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fff; border-top: 1px solid #f5f0e8;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+  display: flex; height: 64px; z-index: 100;
+}
+.nav-tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 2px;
+  color: #b0c4de; text-decoration: none; font-size: 10px;
+  cursor: pointer; border: none; background: none;
+}
+.nav-tab i { font-size: 22px; }
+.nav-tab.active { color: #2c3e50; }
+</style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div class="top-nav">
+  <a href="chinese.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+  <span class="top-nav-title">古诗诵读</span>
+</div>
+
+<!-- 模块头图 -->
+<div class="hero-card">
+  <div class="hero-title">🌸 古诗诵读 🌸</div>
+  <div class="hero-subtitle">品读唐诗 · 传承经典</div>
+  <div class="hero-count">已收录 300+ 首</div>
+</div>
+
+<!-- 学习统计 -->
+<div class="stats-card">
+  <div class="stat-item">
+    <div class="stat-value" id="stat-read">0</div>
+    <div class="stat-label">已读</div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <div class="stat-value" id="stat-fav">0</div>
+    <div class="stat-label">收藏</div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <div class="stat-value" id="stat-streak">0</div>
+    <div class="stat-label">连续天</div>
+  </div>
+</div>
+
+<!-- 今日推荐 -->
+<div class="recommend-card">
+  <div class="recommend-header"><i class="fas fa-sparkles"></i> 今日推荐</div>
+  <div class="recommend-content" id="recommend-content">
+    <div class="recommend-poem-title" id="rec-title">--</div>
+    <div class="recommend-poem-author" id="rec-author">--</div>
+    <div class="recommend-poem-line" id="rec-preview">--</div>
+    <a href="#" class="recommend-btn" id="rec-btn">立即朗读</a>
+  </div>
+</div>
+
+<!-- 学习路径 -->
+<div class="path-card">
+  <div class="path-header"><i class="fas fa-route"></i> 学习路径</div>
+  <div class="path-item completed" onclick="location.href='path-detail.html?path=level1'">
+    <div class="path-name"><i class="fas fa-check-circle" style="color:#27ae60"></i> 🌱 初识唐诗</div>
+    <div class="path-desc">推荐 20 首 · 已完成 <span id="level1-done">8</span> 首</div>
+    <div class="path-progress-bar"><div class="path-progress-fill" id="level1-bar" style="width:40%"></div></div>
+  </div>
+  <div class="path-item current" onclick="location.href='path-detail.html?path=level2'">
+    <div class="path-name"><i class="fas fa-book-open" style="color:#e67e22"></i> 🌿 熟读唐诗</div>
+    <div class="path-desc">推荐 50 首 · 已完成 <span id="level2-done">4</span> 首</div>
+    <div class="path-progress-bar"><div class="path-progress-fill" id="level2-bar" style="width:8%"></div></div>
+    <div class="path-action"><span class="path-action-btn">继续学习</span></div>
+  </div>
+  <div class="path-item locked">
+    <div class="path-name"><i class="fas fa-lock" style="color:#b0c4de"></i> 🌳 精通唐诗</div>
+    <div class="path-desc">推荐 100 首 · 完成熟读唐诗后解锁</div>
+    <div class="path-progress-bar"><div class="path-progress-fill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<!-- 快捷入口 -->
+<div class="quick-card" onclick="location.href='three-hundred-poem.html?mode=browse'">
+  <div class="quick-title"><i class="fas fa-search" style="color:#2980b9"></i> 全部诗歌</div>
+  <div style="font-size:13px;color:#6b8299;margin-bottom:10px">浏览 300+ 首唐诗，自由探索</div>
+  <span class="quick-btn">进入诗歌大全 <i class="fas fa-arrow-right"></i></span>
+</div>
+
+<!-- 最近学习 -->
+<div class="recent-card">
+  <div class="recent-header"><i class="fas fa-clock"></i> 最近学习</div>
+  <div class="recent-list" id="recent-list">
+    <span class="recent-empty">还没有学习记录，快开始吧~</span>
+  </div>
+</div>
+
+<!-- 底部导航 -->
+<nav class="bottom-nav">
+  <a href="index.html" class="nav-tab"><i class="fas fa-home"></i>首页</a>
+  <a href="chinese.html" class="nav-tab active"><i class="fas fa-book"></i>课程</a>
+  <a href="report.html" class="nav-tab"><i class="fas fa-chart-bar"></i>报告</a>
+  <a href="#" class="nav-tab" onclick="toast('个人中心即将上线')"><i class="fas fa-user"></i>我的</a>
+</nav>
+
+<script>
+function toast(msg) {
+  const div = document.createElement('div');
+  div.textContent = msg;
+  div.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.75);color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:999;white-space:nowrap;';
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 2000);
+}
+
+// 简单诗歌数据（用于今日推荐）
+const simplePoems = [
+  { title: '静夜思', poet: '李白', content: '床前明月光，疑是地上霜。\n举头望明月，低头思故乡。' },
+  { title: '春晓', poet: '孟浩然', content: '春眠不觉晓，处处闻啼鸟。\n夜来风雨声，花落知多少。' },
+  { title: '咏鹅', poet: '骆宾王', content: '鹅鹅鹅，曲项向天歌。\n白毛浮绿水，红掌拨清波。' },
+  { title: '悯农', poet: '李绅', content: '锄禾日当午，汗滴禾下土。\n谁知盘中餐，粒粒皆辛苦。' },
+  { title: '登鹳雀楼', poet: '王之涣', content: '白日依山尽，黄河入海流。\n欲穷千里目，更上一层楼。' },
+  { title: '相思', poet: '王维', content: '红豆生南国，春来发几枝。\n愿君多采撷，此物最相思。' },
+  { title: '江雪', poet: '柳宗元', content: '千山鸟飞绝，万径人踪灭。\n孤舟蓑笠翁，独钓寒江雪。' },
+];
+
+// 今日推荐
+function renderDailyRecommend() {
+  const today = new Date();
+  const daySeed = Math.floor(today.getTime() / 86400000);
+  const poem = simplePoems[daySeed % simplePoems.length];
+  document.getElementById('rec-title').textContent = '《' + poem.title + '》';
+  document.getElementById('rec-author').textContent = '— ' + poem.poet;
+  document.getElementById('rec-preview').textContent = poem.content.split('\n')[0];
+  document.getElementById('rec-btn').href = 'three-hundred-poem.html?mode=lesson&poem=' + encodeURIComponent(poem.title) + '&from=chinese_module';
+}
+
+// 加载统计数据
+function loadStats() {
+  const progress = JSON.parse(localStorage.getItem('poem_progress') || '{}');
+  const readCount = Object.keys(progress).length;
+  const favs = JSON.parse(localStorage.getItem('tangFavorites') || '[]');
+  const streak = parseInt(localStorage.getItem('study_streak') || '0');
+  document.getElementById('stat-read').textContent = readCount;
+  document.getElementById('stat-fav').textContent = favs.length;
+  document.getElementById('stat-streak').textContent = streak;
+}
+
+// 加载最近学习
+function loadRecent() {
+  const recent = JSON.parse(localStorage.getItem('tangRecent') || '[]');
+  const container = document.getElementById('recent-list');
+  if (!recent.length) return;
+  container.innerHTML = recent.slice(0, 6).map(r =>
+    `<a href="three-hundred-poem.html?mode=lesson&poem=${encodeURIComponent(r.title)}&from=chinese_module" class="recent-tag">《${r.title}》</a>`
+  ).join('');
+}
+
+// 加载学习路径进度
+function loadPathProgress() {
+  const progress = JSON.parse(localStorage.getItem('poem_progress') || '{}');
+  // level1: 20首推荐，初识唐诗
+  const level1Poems = ['咏鹅', '春晓', '静夜思', '悯农', '登鹳雀楼', '相思', '江雪'];
+  const level1Done = level1Poems.filter(p => progress[p] && progress[p].completed).length;
+  document.getElementById('level1-done').textContent = level1Done;
+  document.getElementById('level1-bar').style.width = Math.round(level1Done / 20 * 100) + '%';
+
+  // level2: 50首推荐
+  const level2Done = Math.min(Object.keys(progress).length, 50);
+  document.getElementById('level2-done').textContent = level2Done;
+  document.getElementById('level2-bar').style.width = Math.round(level2Done / 50 * 100) + '%';
+}
+
+renderDailyRecommend();
+loadStats();
+loadRecent();
+loadPathProgress();
+</script>
+</body>
+</html>
