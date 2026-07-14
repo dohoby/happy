@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>10以内加减法练习</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    margin: 0;
+    padding: 6mm 8mm;
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    font-size: 18px;
+    color: #222;
+  }
+  h1 {
+    text-align: center;
+    font-size: 22px;
+    margin-bottom: 3mm;
+    letter-spacing: 2px;
+  }
+  .info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 4mm;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 2mm;
+  }
+  .sheet {
+    width: 100%;
+  }
+  .row {
+    display: flex;
+    gap: 8mm;
+    margin-bottom: 4mm;
+    break-inside: avoid;
+  }
+  .problem {
+    display: flex;
+    align-items: center;
+    min-height: 42px;
+    height: auto;
+    flex: 1;
+  }
+  .num {
+    min-width: 28px;
+    text-align: right;
+    margin-right: 6px;
+    font-size: 15px;
+    color: #666;
+  }
+  .shapes {
+    display: inline-flex;
+    align-items: center;
+    align-content: flex-start;
+    gap: 6px;
+    min-width: 68px;
+    min-height: 34px;
+    height: auto;
+    flex-wrap: wrap;
+  }
+  .shape {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .blank {
+    display: inline-block;
+    width: 26px;
+    height: 20px;
+    border-bottom: 2px solid #333;
+    text-align: center;
+    margin: 0 5px;
+    flex-shrink: 0;
+  }
+  .op {
+    margin: 0 4px;
+    font-weight: bold;
+    font-size: 18px;
+    width: 16px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .eq {
+    margin: 0 4px;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .print-bar {
+    text-align: center;
+    margin: 4mm 0 6mm;
+  }
+  .print-bar .count-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 6px;
+    font-size: 15px;
+    color: #333;
+  }
+  .print-bar input[type="number"] {
+    width: 60px;
+    padding: 6px 8px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+  }
+  .print-bar button {
+    padding: 8px 18px;
+    margin: 0 6px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #fff;
+    background: #3498db;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  }
+  .print-bar button:hover {
+    background: #2980b9;
+  }
+  .print-bar button:last-child {
+    background: #2ecc71;
+  }
+  .print-bar button:last-child:hover {
+    background: #27ae60;
+  }
+
+  body.exporting .no-print { display: none; }
+  body.exporting #print-area {
+    width: 551px;
+    max-width: none;
+    margin: 0 auto;
+  }
+  body.exporting h1 {
+    margin-bottom: 3mm;
+    font-size: 24px;
+  }
+  body.exporting .info {
+    margin-bottom: 3mm;
+    padding-bottom: 2mm;
+    font-size: 14px;
+  }
+  body.exporting .row {
+    display: block;
+    gap: 0;
+    margin-bottom: 2mm;
+  }
+  body.exporting .problem {
+    width: 100%;
+    flex: none;
+    min-height: 38px;
+    height: auto;
+    margin-bottom: 2mm;
+  }
+  body.exporting .shapes {
+    min-width: 64px;
+    min-height: 24px;
+    height: auto;
+    gap: 4px;
+    flex-wrap: wrap;
+    align-content: flex-start;
+  }
+  body.exporting .shape {
+    width: 24px;
+    height: 24px;
+    font-size: 18px;
+  }
+  body.exporting .blank {
+    width: 24px;
+    height: 22px;
+    margin: 0 3px;
+  }
+  body.exporting .op,
+  body.exporting .eq {
+    margin: 0 3px;
+    font-size: 20px;
+  }
+  body.exporting .num { font-size: 16px; }
+
+  @page {
+    size: A4;
+    margin: 8mm;
+  }
+
+  @media print {
+    body { padding: 0; }
+    h1 {
+      margin-bottom: 3mm;
+      font-size: 24px;
+    }
+    .info {
+      margin-bottom: 3mm;
+      padding-bottom: 2mm;
+      font-size: 14px;
+    }
+    .no-print { display: none; }
+    .row {
+      display: block;
+      gap: 0;
+      margin-bottom: 2mm;
+    }
+    .problem {
+      width: 100%;
+      flex: none;
+      min-height: 38px;
+      height: auto;
+      margin-bottom: 2mm;
+    }
+    .shapes {
+      min-width: 64px;
+      min-height: 24px;
+      height: auto;
+      gap: 4px;
+      flex-wrap: wrap;
+      align-content: flex-start;
+    }
+    .shape {
+      width: 24px;
+      height: 24px;
+      font-size: 18px;
+    }
+    .blank {
+      width: 24px;
+      height: 22px;
+      margin: 0 3px;
+    }
+    .op, .eq {
+      margin: 0 3px;
+      font-size: 20px;
+    }
+    .num { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+  <div id="print-area">
+    <h1>10 以内加减法练习</h1>
+    <div class="info">
+      <span>姓名：__________</span>
+      <span>先数图形，再填写数字。</span>
+      <span>日期：__________</span>
+    </div>
+    <div class="sheet" id="sheet"></div>
+  </div>
+
+  <div class="no-print print-bar">
+    <label class="count-label">题数：<input type="number" id="problemCount" value="100" min="10" max="200" step="10"></label>
+    <button onclick="regenerate()">🔄 生成</button>
+    <button onclick="exportPDF()">📥 一键导出 PDF</button>
+    <button onclick="window.print()">🖨️ 打印</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    const sheet = document.getElementById('sheet');
+    const icons = [
+      { name: 'circle', char: '🔴' },
+      { name: 'triangle', char: '🔺' },
+      { name: 'star', char: '⭐' },
+      { name: 'heart', char: '❤️' },
+      { name: 'moon', char: '🌙' },
+      { name: 'sun', char: '☀️' },
+      { name: 'cloud', char: '☁️' },
+      { name: 'car', char: '🚗' },
+      { name: 'boat', char: '🚢' },
+      { name: 'balloon', char: '🎈' },
+      { name: 'ball', char: '⚽' },
+      { name: 'fish', char: '🐟' },
+      { name: 'apple', char: '🍎' },
+      { name: 'banana', char: '🍌' },
+      { name: 'strawberry', char: '🍓' },
+      { name: 'watermelon', char: '🍉' },
+      { name: 'orange', char: '🍊' },
+      { name: 'grape', char: '🍇' },
+      { name: 'bread', char: '🍞' },
+      { name: 'cookie', char: '🍪' },
+      { name: 'icecream', char: '🍦' },
+      { name: 'lollipop', char: '🍭' },
+      { name: 'flower', char: '🌸' },
+      { name: 'butterfly', char: '🦋' },
+      { name: 'bird', char: '🐦' },
+      { name: 'cat', char: '🐱' },
+      { name: 'dog', char: '🐶' },
+      { name: 'rabbit', char: '🐰' },
+      { name: 'house', char: '🏠' },
+      { name: 'tree', char: '🌳' },
+      { name: 'umbrella', char: '☂️' },
+      { name: 'gift', char: '🎁' }
+    ];
+
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function shuffle(arr) {
+      const copy = arr.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    let iconDeck = shuffle(icons);
+
+    function nextIcon() {
+      if (iconDeck.length === 0) {
+        iconDeck = shuffle(icons);
+      }
+      return iconDeck.pop();
+    }
+
+    function makeProblem(idx) {
+      const isAdd = Math.random() < 0.55;
+      let a, b, op;
+      if (isAdd) {
+        a = rand(1, 9);
+        b = rand(1, 10 - a);
+        op = '+';
+      } else {
+        a = rand(2, 10);
+        b = rand(1, a);
+        op = '-';
+      }
+      const icon = nextIcon();
+      const shape = `<span class="shape">${icon.char}</span>`;
+      const shapes1 = shape.repeat(a);
+      const shapes2 = shape.repeat(b);
+      return `
+        <div class="problem">
+          <span class="num">${idx + 1}.</span>
+          <span class="shapes">${shapes1}</span>
+          <span class="blank"></span>
+          <span class="op">${op}</span>
+          <span class="shapes">${shapes2}</span>
+          <span class="blank"></span>
+          <span class="eq">=</span>
+          <span class="blank"></span>
+        </div>
+      `;
+    }
+
+    function regenerate() {
+      const input = document.getElementById('problemCount');
+      let count = parseInt(input.value, 10);
+      if (isNaN(count) || count < 10) count = 10;
+      if (count > 200) count = 200;
+      input.value = count;
+
+      iconDeck = shuffle(icons);
+      let html = '';
+      for (let i = 0; i < count; i += 2) {
+        html += '<div class="row">';
+        html += makeProblem(i);
+        if (i + 1 < count) {
+          html += makeProblem(i + 1);
+        }
+        html += '</div>';
+      }
+      sheet.innerHTML = html;
+    }
+
+    regenerate();
+
+    async function exportPDF() {
+      const element = document.getElementById('print-area');
+      const btn = document.querySelector('.print-bar button');
+      const originalText = btn ? btn.textContent : '';
+      if (btn) btn.textContent = '正在生成 PDF…';
+
+      try {
+        document.body.classList.add('exporting');
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        await new Promise(resolve => setTimeout(resolve, 200));
+
+        const canvas = await html2canvas(element, {
+          scale: 1,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff'
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const margin = 8;
+        const imgWidth = pageWidth - margin * 2;
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+
+        let position = margin;
+        let heightLeft = imgHeight;
+        pdf.addImage(imgData, 'JPEG', margin, position, imgWidth, imgHeight);
+        heightLeft -= (pageHeight - margin * 2);
+
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight + margin;
+          pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', margin, position, imgWidth, imgHeight);
+          heightLeft -= (pageHeight - margin * 2);
+        }
+
+        pdf.save('10以内加减法练习_' + new Date().toLocaleDateString() + '.pdf');
+      } catch (err) {
+        alert('导出失败：' + (err.message || err));
+      } finally {
+        document.body.classList.remove('exporting');
+        if (btn) btn.textContent = originalText;
+      }
+    }
+  </script>
+</body>
+</html>
