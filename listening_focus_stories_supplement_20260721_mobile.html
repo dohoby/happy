@@ -322,7 +322,6 @@
 
     .btn:active { transform: scale(0.96); }
 
-    .btn-primary { background: var(--primary); color: #fff; }
     .btn-accent { background: var(--accent); color: #fff; }
     .btn-ghost { background: #EDF2F7; color: var(--text); }
 
@@ -536,17 +535,6 @@
     .toc-panel-name { font-size: 15px; font-weight: 600; }
     .toc-panel-goal { font-size: 12px; color: var(--text-light); }
 
-    /* 朗读状态 */
-    .speaking .btn-primary {
-      background: var(--danger);
-      animation: pulse 1.2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.75; }
-    }
-
     /* 页脚 */
     .footer {
       text-align: center;
@@ -629,7 +617,6 @@
         <div class="daily-content" id="dailyContent"></div>
       </div>
       <div class="story-actions" style="padding:0 18px 14px;">
-        <button class="btn btn-primary" id="dailySpeakBtn" onclick="speakDailyStory()">🔊 朗读故事</button>
         <button class="btn btn-accent" onclick="toggleDailyAnswers()">📋 展开全部答案</button>
       </div>
       <div class="qa-section">
@@ -715,15 +702,15 @@
         goal: "声音 + 顺序 + 数量",
         content: [
           "夏天的傍晚，小青蛙呱呱决定跳过池塘去找朋友玩。",
-          "池塘里热闹极了！呱呱先听到“知了知了”的蝉叫声，然后听到“嗡嗡嗡”的蜜蜂飞过头顶，接着听到“扑通”一声，原来是一条小鱼跳出水面又钻了回去。",
-          "呱呱鼓起白白的肚皮，用力一蹬后腿，“呱——”地叫了一声，一连跳过了三片圆圆的荷叶。",
+          "池塘里热闹极了！呱呱先听到\"知了知了\"的蝉叫声，然后听到\"嗡嗡嗡\"的蜜蜂飞过头顶，接着听到\"扑通\"一声，原来是一条小鱼跳出水面又钻了回去。",
+          "呱呱鼓起白白的肚皮，用力一蹬后腿，\"呱——\"地叫了一声，一连跳过了三片圆圆的荷叶。",
           "可是最后一片荷叶上蹲着一只大蜻蜓，呱呱差点踩到它，赶紧又跳了一跳，才稳稳地落到对岸的草丛里。"
         ],
         qas: [
-          { icon: "🔊“, type: ”声音“, q: ”故事里出现了哪三种小动物的声音？分别是怎么叫的？“, a: ”蝉“知了知了”、蜜蜂“嗡嗡嗡”、青蛙“呱——”" },
-          { icon: "🔢“, type: ”数量“, q: ”呱呱跳过了几片荷叶？后来因为什么又多跳了一跳？“, a: ”三片；最后一片上有大蜻蜓" },
-          { icon: "📋“, type: ”顺序“, q: ”呱呱听到的声音按顺序是什么？先听到谁，再听到谁，最后听到什么声音？“, a: ”蝉叫 → 蜜蜂飞 → 小鱼跳出水" },
-          { icon: "🔍“, type: ”找茬“, q: ”我刚才说呱呱“喵喵”叫了一声，对吗？“, a: ”错，青蛙是“呱呱”叫" }
+          { icon: "🔊", type: "声音", q: "故事里出现了哪三种小动物的声音？分别是怎么叫的？", a: "蝉\"知了知了\"、蜜蜂\"嗡嗡嗡\"、青蛙\"呱——\"" },
+          { icon: "🔢", type: "数量", q: "呱呱跳过了几片荷叶？后来因为什么又多跳了一跳？", a: "三片；最后一片上有大蜻蜓" },
+          { icon: "📋", type: "顺序", q: "呱呱听到的声音按顺序是什么？先听到谁，再听到谁，最后听到什么声音？", a: "蝉叫 → 蜜蜂飞 → 小鱼跳出水" },
+          { icon: "🔍", type: "找茬", q: "我刚才说呱呱\"喵喵\"叫了一声，对吗？", a: "错，青蛙是\"呱呱\"叫" }
         ]
       },
       {
@@ -739,10 +726,10 @@
           "最后，她拿出一个蓝色的玻璃杯，倒入满满一杯温牛奶，端到了妈妈床前。"
         ],
         qas: [
-          { icon: "⏰“, type: ”时间“, q: ”咪咪是什么时候给妈妈做早餐的？你从哪里听出来的？“, a: ”星期天早上；“星期天的早上”、“早餐”" },
-          { icon: "🔧“, type: ”工具“, q: ”咪咪做早餐用了哪些工具或厨具？“, a: ”平底锅、刀、烤面包机、蓝色玻璃杯" },
-          { icon: "📋“, type: ”顺序“, q: ”咪咪做早餐的步骤是什么？先做什么，再做什么，最后做什么？“, a: ”穿围裙 → 拿食材 → 煎蛋 → 切面包烤面包 → 倒牛奶" },
-          { icon: "🔍“, type: ”找茬“, q: ”我刚才说咪咪把两个鸡蛋打进了蓝色玻璃杯里，对吗？“, a: ”错，鸡蛋是放进平底锅煎的" }
+          { icon: "⏰", type: "时间", q: "咪咪是什么时候给妈妈做早餐的？你从哪里听出来的？", a: "星期天早上；\"星期天的早上\"、\"早餐\"" },
+          { icon: "🔧", type: "工具", q: "咪咪做早餐用了哪些工具或厨具？", a: "平底锅、刀、烤面包机、蓝色玻璃杯" },
+          { icon: "📋", type: "顺序", q: "咪咪做早餐的步骤是什么？先做什么，再做什么，最后做什么？", a: "穿围裙 → 拿食材 → 煎蛋 → 切面包烤面包 → 倒牛奶" },
+          { icon: "🔍", type: "找茬", q: "我刚才说咪咪把两个鸡蛋打进了蓝色玻璃杯里，对吗？", a: "错，鸡蛋是放进平底锅煎的" }
         ]
       },
       {
@@ -753,15 +740,15 @@
         goal: "方位 + 特征 + 排除",
         content: [
           "小黄鸭丫丫在草地上追蝴蝶，走着走着迷了路，找不到妈妈了。",
-          "她先跑到大树下，看到一只棕色的小狗在刨土。丫丫问：“你是我的妈妈吗？”小狗摇摇头说：“不是，我没有翅膀，也不会游泳。”",
-          "丫丫又走到花丛边，看见一只五颜六色的蝴蝶。丫丫问：“你是我的妈妈吗？”蝴蝶笑着说：“不是，我只有两根触角，身体小小的。”",
-          "最后，丫丫听见“嘎嘎嘎”的叫声从小河那边传来。她赶紧跑过去，发现一只黄色的、扁嘴巴、有蹼脚的大鸭子正焦急地找她呢！"
+          "她先跑到大树下，看到一只棕色的小狗在刨土。丫丫问：\"你是我的妈妈吗？\"小狗摇摇头说：\"不是，我没有翅膀，也不会游泳。\"",
+          "丫丫又走到花丛边，看见一只五颜六色的蝴蝶。丫丫问：\"你是我的妈妈吗？\"蝴蝶笑着说：\"不是，我只有两根触角，身体小小的。\"",
+          "最后，丫丫听见\"嘎嘎嘎\"的叫声从小河那边传来。她赶紧跑过去，发现一只黄色的、扁嘴巴、有蹼脚的大鸭子正焦急地找她呢！"
         ],
         qas: [
-          { icon: "📍“, type: ”方位“, q: ”丫丫先后去了哪些地方找妈妈？“, a: ”大树下 → 花丛边 → 小河那边" },
-          { icon: "🎨“, type: ”特征“, q: ”鸭妈妈长什么样？说出三个特点。“, a: ”黄色、扁嘴巴、有蹼脚" },
-          { icon: "🚫“, type: ”排除“, q: ”小狗和蝴蝶为什么不是丫丫的妈妈？“, a: ”小狗没有翅膀不会游泳；蝴蝶有触角、身体小" },
-          { icon: "🔍“, type: ”找茬“, q: ”我刚才说鸭妈妈是“喵喵喵”叫的，对吗？“, a: ”错，鸭子是“嘎嘎嘎”叫" }
+          { icon: "📍", type: "方位", q: "丫丫先后去了哪些地方找妈妈？", a: "大树下 → 花丛边 → 小河那边" },
+          { icon: "🎨", type: "特征", q: "鸭妈妈长什么样？说出三个特点。", a: "黄色、扁嘴巴、有蹼脚" },
+          { icon: "🚫", type: "排除", q: "小狗和蝴蝶为什么不是丫丫的妈妈？", a: "小狗没有翅膀不会游泳；蝴蝶有触角、身体小" },
+          { icon: "🔍", type: "找茬", q: "我刚才说鸭妈妈是\"喵喵喵\"叫的，对吗？", a: "错，鸭子是\"嘎嘎嘎\"叫" }
         ]
       },
       {
@@ -772,15 +759,15 @@
         goal: "数量 + 比较 + 合作",
         content: [
           "森林里要搭一座小桥，小象壮壮主动来帮忙搬木头。",
-          "壮壮看到河边堆着三根又粗又长的圆木头。他用长长的鼻子卷住最粗的那一根，“嘿哟嘿哟”地往前走。",
+          "壮壮看到河边堆着三根又粗又长的圆木头。他用长长的鼻子卷住最粗的那一根，\"嘿哟嘿哟\"地往前走。",
           "小老鼠吱吱看见了，急忙跑过来帮忙。可是木头太沉了，小老鼠推了半天，木头只动了一点点。",
           "这时候，小松鼠跳跳也跳了过来，三个小伙伴一起用力，终于把三根木头全都搬到了桥墩旁边。"
         ],
         qas: [
-          { icon: "🔢“, type: ”数量“, q: ”河边一共有几根木头？最后搬走了几根？“, a: ”三根；三根都搬走了" },
-          { icon: "📏“, type: ”比较“, q: ”壮壮先搬的是哪一根？它有什么特点？“, a: ”最粗的那一根" },
-          { icon: "🤝“, type: ”合作“, q: ”最后是谁一起把木头搬过去的？“, a: ”小象壮壮、小老鼠吱吱、小松鼠跳跳" },
-          { icon: "🔍“, type: ”找茬“, q: ”我刚才说小老鼠用长鼻子卷木头，对吗？“, a: ”错，长鼻子的是小象，小老鼠是用推的" }
+          { icon: "🔢", type: "数量", q: "河边一共有几根木头？最后搬走了几根？", a: "三根；三根都搬走了" },
+          { icon: "📏", type: "比较", q: "壮壮先搬的是哪一根？它有什么特点？", a: "最粗的那一根" },
+          { icon: "🤝", type: "合作", q: "最后是谁一起把木头搬过去的？", a: "小象壮壮、小老鼠吱吱、小松鼠跳跳" },
+          { icon: "🔍", type: "找茬", q: "我刚才说小老鼠用长鼻子卷木头，对吗？", a: "错，长鼻子的是小象，小老鼠是用推的" }
         ]
       },
       {
@@ -796,10 +783,10 @@
           "雨点落下来之前，所有蚂蚁都安全地躲进了新家。"
         ],
         qas: [
-          { icon: "📂“, type: ”分类“, q: ”蚂蚁们搬的东西分别属于哪一类？“, a: ”吃的——米饭、饼干；用的/住的——树叶当床" },
-          { icon: "🔢“, type: ”数量“, q: ”米饭有几粒？树叶有几片？饼干有几块？“, a: ”米饭六粒、树叶三片、饼干一小块" },
-          { icon: "🐜“, type: ”团队“, q: ”第三队搬饼干的时候，用了什么词来形容它们？“, a: ”齐心协力" },
-          { icon: "🔍“, type: ”找茬“, q: ”我刚才说蚂蚁们把树叶放到储藏室当床，对吗？“, a: ”错，树叶是铺在新家当床，不是放储藏室" }
+          { icon: "📂", type: "分类", q: "蚂蚁们搬的东西分别属于哪一类？", a: "吃的——米饭、饼干；用的/住的——树叶当床" },
+          { icon: "🔢", type: "数量", q: "米饭有几粒？树叶有几片？饼干有几块？", a: "米饭六粒、树叶三片、饼干一小块" },
+          { icon: "🐜", type: "团队", q: "第三队搬饼干的时候，用了什么词来形容它们？", a: "齐心协力" },
+          { icon: "🔍", type: "找茬", q: "我刚才说蚂蚁们把树叶放到储藏室当床，对吗？", a: "错，树叶是铺在新家当床，不是放储藏室" }
         ]
       },
       {
@@ -812,13 +799,13 @@
           "小考拉毛毛第一次自己坐公交车去外婆家。",
           "他站在站牌下，排队等 12 路公交车。车来了，毛毛等车上的人下完，才跟着队伍慢慢走上去。",
           "上车后，毛毛先把硬币投进箱子里，然后找到车厢中部一个黄色的空座位坐了下来，还把小书包抱在胸前。",
-          "下一站上来一位拄着拐杖的羊奶奶，毛毛立刻站起来，拉着扶手说：“羊奶奶，您坐这里吧！”"
+          "下一站上来一位拄着拐杖的羊奶奶，毛毛立刻站起来，拉着扶手说：\"羊奶奶，您坐这里吧！\""
         ],
         qas: [
-          { icon: "🚌“, type: ”常识“, q: ”毛毛坐的是几路公交车？上车前做了什么？“, a: ”12 路；等车来、等乘客下完再上车" },
-          { icon: "📍“, type: ”方位“, q: ”毛毛坐在车厢的哪个位置？小书包放在哪里？“, a: ”车厢中部黄色座位；抱在胸前" },
-          { icon: "⚠️“, type: ”安全“, q: ”羊奶奶上车后，毛毛做了什么？为什么要这样做？“, a: ”给羊奶奶让座；因为羊奶奶年纪大、拄拐杖" },
-          { icon: "🔍“, type: ”找茬“, q: ”我刚才说毛毛等车还没停稳就冲上去了，对吗？“, a: ”错，要等车停稳、乘客下完再上车" }
+          { icon: "🚌", type: "常识", q: "毛毛坐的是几路公交车？上车前做了什么？", a: "12 路；等车来、等乘客下完再上车" },
+          { icon: "📍", type: "方位", q: "毛毛坐在车厢的哪个位置？小书包放在哪里？", a: "车厢中部黄色座位；抱在胸前" },
+          { icon: "⚠️", type: "安全", q: "羊奶奶上车后，毛毛做了什么？为什么要这样做？", a: "给羊奶奶让座；因为羊奶奶年纪大、拄拐杖" },
+          { icon: "🔍", type: "找茬", q: "我刚才说毛毛等车还没停稳就冲上去了，对吗？", a: "错，要等车停稳、乘客下完再上车" }
         ]
       },
       {
@@ -829,15 +816,15 @@
         goal: "安全 + 装备 + 顺序",
         content: [
           "小鳄鱼波波要去参加游泳比赛，他兴奋得尾巴直甩。",
-          "妈妈提醒他：“游泳前一定要做好准备工作。”",
+          "妈妈提醒他：\"游泳前一定要做好准备工作。\"",
           "波波先换上绿色的泳衣，然后戴上红色的泳帽，把游泳镜戴在眼睛上，最后套上黄色的浮板。",
-          "来到泳池边，波波先坐在池边，用小脚丫试了试水温，再把脚伸进水里拍打了几下，然后才“扑通”一声跳进水里，像一支箭一样游了出去。"
+          "来到泳池边，波波先坐在池边，用小脚丫试了试水温，再把脚伸进水里拍打了几下，然后才\"扑通\"一声跳进水里，像一支箭一样游了出去。"
         ],
         qas: [
-          { icon: "🎒“, type: ”装备“, q: ”波波游泳前穿戴了哪些装备？分别是什么颜色？“, a: ”绿色泳衣、红色泳帽、游泳镜、黄色浮板" },
-          { icon: "📋“, type: ”顺序“, q: ”波波下水前做了哪些准备动作？按顺序说。“, a: ”坐池边试水温 → 伸脚拍水 → 跳进水里" },
-          { icon: "⚠️“, type: ”安全“, q: ”妈妈为什么要波波做准备？如果不试水温直接跳会怎样？“, a: ”防止着凉或受伤" },
-          { icon: "🔍“, type: ”找茬“, q: ”我刚才说波波戴着泳帽戴在眼睛上，对吗？“, a: ”错，戴在眼睛上的是游泳镜，泳帽戴在头上" }
+          { icon: "🎒", type: "装备", q: "波波游泳前穿戴了哪些装备？分别是什么颜色？", a: "绿色泳衣、红色泳帽、游泳镜、黄色浮板" },
+          { icon: "📋", type: "顺序", q: "波波下水前做了哪些准备动作？按顺序说。", a: "坐池边试水温 → 伸脚拍水 → 跳进水里" },
+          { icon: "⚠️", type: "安全", q: "妈妈为什么要波波做准备？如果不试水温直接跳会怎样？", a: "防止着凉或受伤" },
+          { icon: "🔍", type: "找茬", q: "我刚才说波波戴着泳帽戴在眼睛上，对吗？", a: "错，戴在眼睛上的是游泳镜，泳帽戴在头上" }
         ]
       },
       {
@@ -853,10 +840,10 @@
           "上课铃响了，斑斑赶紧坐好，准备听山羊老师讲课。"
         ],
         qas: [
-          { icon: "⏰“, type: ”时间“, q: ”斑斑几点去上学？到学校后听到了什么声音？“, a: ”七点；上课铃声" },
-          { icon: "🎒“, type: ”物品“, q: ”斑斑书包里一共有几样东西？分别是什么？“, a: ”五样：语文书、数学书、蓝色铅笔盒、绿色橡皮、红色水壶" },
-          { icon: "📂“, type: ”分类“, q: ”斑斑把东西分别放在了哪里？“, a: ”抽屉里——两本书；桌面上——铅笔盒和橡皮；饮水架上——水壶" },
-          { icon: "🔍“, type: ”找茬“, q: ”我刚才说斑斑把水壶放进了抽屉里，对吗？“, a: ”错，水壶放到教室后面的饮水架上" }
+          { icon: "⏰", type: "时间", q: "斑斑几点去上学？到学校后听到了什么声音？", a: "七点；上课铃声" },
+          { icon: "🎒", type: "物品", q: "斑斑书包里一共有几样东西？分别是什么？", a: "五样：语文书、数学书、蓝色铅笔盒、绿色橡皮、红色水壶" },
+          { icon: "📂", type: "分类", q: "斑斑把东西分别放在了哪里？", a: "抽屉里——两本书；桌面上——铅笔盒和橡皮；饮水架上——水壶" },
+          { icon: "🔍", type: "找茬", q: "我刚才说斑斑把水壶放进了抽屉里，对吗？", a: "错，水壶放到教室后面的饮水架上" }
         ]
       },
       {
@@ -867,15 +854,15 @@
         goal: "工具 + 步骤 + 因果",
         content: [
           "春天到了，牧羊犬大叔要给小羊绵绵剪羊毛，因为天气越来越热，厚厚的羊毛会让绵绵出汗。",
-          "大叔先把绵绵牵到一张干干净净的木桌子上，然后用一把大大的剪刀，“咔嚓咔嚓”地剪下一团团雪白的羊毛。",
+          "大叔先把绵绵牵到一张干干净净的木桌子上，然后用一把大大的剪刀，\"咔嚓咔嚓\"地剪下一团团雪白的羊毛。",
           "剪完后，他用一把小刷子把绵绵身上残留的碎毛扫干净，最后给绵绵脖子上系了一条粉红色的新丝带。",
-          "绵绵觉得凉快多了，高兴地“咩咩”叫了两声。"
+          "绵绵觉得凉快多了，高兴地\"咩咩\"叫了两声。"
         ],
         qas: [
-          { icon: "🔧“, type: ”工具“, q: ”大叔剪羊毛用了什么工具？还用了什么清理碎毛？“, a: ”大剪刀；小刷子" },
-          { icon: "📋“, type: ”步骤“, q: ”剪羊毛的步骤是什么？按顺序说。“, a: ”牵到木桌上 → 用剪刀剪羊毛 → 用小刷子扫碎毛 → 系新丝带" },
-          { icon: "🔗“, type: ”因果“, q: ”为什么要给绵绵剪羊毛？“, a: ”春天天气变热，厚羊毛会让小羊出汗" },
-          { icon: "🔍“, type: ”找茬“, q: ”我刚才说大叔用剪刀把绵绵身上的碎毛扫干净，对吗？“, a: ”错，扫碎毛用的是小刷子，不是剪刀" }
+          { icon: "🔧", type: "工具", q: "大叔剪羊毛用了什么工具？还用了什么清理碎毛？", a: "大剪刀；小刷子" },
+          { icon: "📋", type: "步骤", q: "剪羊毛的步骤是什么？按顺序说。", a: "牵到木桌上 → 用剪刀剪羊毛 → 用小刷子扫碎毛 → 系新丝带" },
+          { icon: "🔗", type: "因果", q: "为什么要给绵绵剪羊毛？", a: "春天天气变热，厚羊毛会让小羊出汗" },
+          { icon: "🔍", type: "找茬", q: "我刚才说大叔用剪刀把绵绵身上的碎毛扫干净，对吗？", a: "错，扫碎毛用的是小刷子，不是剪刀" }
         ]
       },
       {
@@ -887,14 +874,14 @@
         content: [
           "新年快到了，小熊猫团团和妈妈一起包饺子。",
           "妈妈先拿出一张圆圆的饺子皮，用筷子夹起一小团肉馅放在皮中间，再用手指沾一点水抹在饺子皮边上，然后把皮对折，捏出一排小小的花边，一个胖乎乎的饺子就包好了。",
-          "团团学着妈妈的样子，也包了起来。他先包了三个，可是有两个馅放太多，“噗”地一下撑破了皮。第三个他少放了一点馅，终于成功了！",
-          "最后，妈妈把饺子放进锅里煮，团团数了数，锅里一共有十个饺子在“咕嘟咕嘟”地跳舞。"
+          "团团学着妈妈的样子，也包了起来。他先包了三个，可是有两个馅放太多，\"噗\"地一下撑破了皮。第三个他少放了一点馅，终于成功了！",
+          "最后，妈妈把饺子放进锅里煮，团团数了数，锅里一共有十个饺子在\"咕嘟咕嘟\"地跳舞。"
         ],
         qas: [
-          { icon: "🥟“, type: ”食材“, q: ”包饺子需要哪些材料？“, a: ”饺子皮、肉馅、水" },
-          { icon: "📋“, type: ”步骤“, q: ”妈妈包饺子的步骤是什么？按顺序说。“, a: ”拿饺子皮 → 放肉馅 → 抹水 → 对折 → 捏花边" },
-          { icon: "🔢“, type: ”数量“, q: ”团团包了三个饺子，成功几个？失败几个？锅里一共有几个饺子？“, a: ”成功 1 个，失败 2 个；锅里一共 10 个" },
-          { icon: "🔍“, type: ”找茬“, q: ”我刚才说团团第三个饺子放了满满一大勺馅，对吗？“, a: ”错，第三个少放了馅才成功" }
+          { icon: "🥟", type: "食材", q: "包饺子需要哪些材料？", a: "饺子皮、肉馅、水" },
+          { icon: "📋", type: "步骤", q: "妈妈包饺子的步骤是什么？按顺序说。", a: "拿饺子皮 → 放肉馅 → 抹水 → 对折 → 捏花边" },
+          { icon: "🔢", type: "数量", q: "团团包了三个饺子，成功几个？失败几个？锅里一共有几个饺子？", a: "成功 1 个，失败 2 个；锅里一共 10 个" },
+          { icon: "🔍", type: "找茬", q: "我刚才说团团第三个饺子放了满满一大勺馅，对吗？", a: "错，第三个少放了馅才成功" }
         ]
       }
     ];
@@ -919,45 +906,45 @@
     // 组件库
     const storyParts = {
       animals: [
-        { name: "小兔子跳跳“, emoji: ”🐰“, sound: ”蹦蹦跳“, call: ”不会叫" },
-        { name: "小松鼠吱吱“, emoji: ”🐿️“, sound: ”啃松果“, call: ”吱吱吱" },
-        { name: "小熊笨笨“, emoji: ”🐻“, sound: ”打呼噜“, call: ”呜呜呜" },
-        { name: "小鹿斑斑“, emoji: ”🦌“, sound: ”跺跺脚“, call: ”呦呦呦" },
-        { name: "小猴子皮皮“, emoji: ”🐵“, sound: ”荡秋千“, call: ”吱吱吱" },
-        { name: "小鸡叽叽“, emoji: ”🐤“, sound: ”啄米粒“, call: ”叽叽叽" },
-        { name: "小狗汪汪“, emoji: ”🐶“, sound: ”摇尾巴“, call: ”汪汪汪" },
-        { name: "小猫喵喵“, emoji: ”🐱“, sound: ”舔爪子“, call: ”喵喵喵" }
+        { name: "小兔子跳跳", emoji: "🐰", sound: "蹦蹦跳", call: "不会叫" },
+        { name: "小松鼠吱吱", emoji: "🐿️", sound: "啃松果", call: "吱吱吱" },
+        { name: "小熊笨笨", emoji: "🐻", sound: "打呼噜", call: "呜呜呜" },
+        { name: "小鹿斑斑", emoji: "🦌", sound: "跺跺脚", call: "呦呦呦" },
+        { name: "小猴子皮皮", emoji: "🐵", sound: "荡秋千", call: "吱吱吱" },
+        { name: "小鸡叽叽", emoji: "🐤", sound: "啄米粒", call: "叽叽叽" },
+        { name: "小狗汪汪", emoji: "🐶", sound: "摇尾巴", call: "汪汪汪" },
+        { name: "小猫喵喵", emoji: "🐱", sound: "舔爪子", call: "喵喵喵" }
       ],
-      places: ["森林里“, ”小河边“, ”草地上“, ”山坡上“, ”果园里“, ”花园里“, ”大树下“, ”小桥边"],
-      times: ["早上“, ”下午“, ”傍晚“, ”天气晴朗的早上“, ”温暖的下午“, ”凉快的傍晚"],
-      goals: ["去找朋友玩“, ”去采好吃的果子“, ”去参加森林运动会“, ”去给妈妈送生日礼物“, ”去帮奶奶送信"],
+      places: ["森林里", "小河边", "草地上", "山坡上", "果园里", "花园里", "大树下", "小桥边"],
+      times: ["早上", "下午", "傍晚", "天气晴朗的早上", "温暖的下午", "凉快的傍晚"],
+      goals: ["去找朋友玩", "去采好吃的果子", "去参加森林运动会", "去给妈妈送生日礼物", "去帮奶奶送信"],
       soundAnimals: [
-        { name: "小鸟“, call: ”叽叽喳喳" },
-        { name: "蜜蜂“, call: ”嗡嗡嗡" },
-        { name: "知了“, call: ”知了知了" }
+        { name: "小鸟", call: "叽叽喳喳" },
+        { name: "蜜蜂", call: "嗡嗡嗡" },
+        { name: "知了", call: "知了知了" }
       ],
       soundAnimals2: [
-        { name: "小鸭“, call: ”嘎嘎嘎" },
-        { name: "小青蛙“, call: ”呱呱" },
-        { name: "小羊“, call: ”咩咩咩" },
-        { name: "小牛“, call: ”哞哞哞" },
-        { name: "小猪“, call: ”哼哼哼" }
+        { name: "小鸭", call: "嘎嘎嘎" },
+        { name: "小青蛙", call: "呱呱" },
+        { name: "小羊", call: "咩咩咩" },
+        { name: "小牛", call: "哞哞哞" },
+        { name: "小猪", call: "哼哼哼" }
       ],
       items: [
-        { name: "红色的花“, unit: ”朵" },
-        { name: "黄色的果子“, unit: ”颗" },
-        { name: "圆圆的石头“, unit: ”块" },
-        { name: "绿色的叶子“, unit: ”片" },
-        { name: "紫色的葡萄“, unit: ”串" },
-        { name: "橙色的胡萝卜“, unit: ”根" }
+        { name: "红色的花", unit: "朵" },
+        { name: "黄色的果子", unit: "颗" },
+        { name: "圆圆的石头", unit: "块" },
+        { name: "绿色的叶子", unit: "片" },
+        { name: "紫色的葡萄", unit: "串" },
+        { name: "橙色的胡萝卜", unit: "根" }
       ],
-      colors: ["红色“, ”黄色“, ”蓝色“, ”绿色“, ”橙色“, ”紫色"],
-      actions: ["先看了看路“, ”然后拍了拍身上的土“, ”最后高高兴兴地继续走"],
+      colors: ["红色", "黄色", "蓝色", "绿色", "橙色", "紫色"],
+      actions: ["先看了看路", "然后拍了拍身上的土", "最后高高兴兴地继续走"],
       helpers: [
-        { name: "小蜜蜂“, feature: ”有两对翅膀，会采蜜" },
-        { name: "小蝴蝶“, feature: ”翅膀五颜六色的" },
-        { name: "小蚂蚁“, feature: ”个子小小的，力气很大" },
-        { name: "小刺猬“, feature: ”背上长满尖尖的刺" }
+        { name: "小蜜蜂", feature: "有两对翅膀，会采蜜" },
+        { name: "小蝴蝶", feature: "翅膀五颜六色的" },
+        { name: "小蚂蚁", feature: "个子小小的，力气很大" },
+        { name: "小刺猬", feature: "背上长满尖尖的刺" }
       ]
     };
 
@@ -975,7 +962,7 @@
     }
 
     function numberToChinese(n) {
-      const map = ["零“, ”一“, ”二“, ”三“, ”四“, ”五“, ”六“, ”七“, ”八“, ”九“, ”十"];
+      const map = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
       if (n <= 10) return map[n];
       if (n === 11) return "十一";
       if (n === 12) return "十二";
@@ -983,13 +970,6 @@
     }
 
     function generateDailyStory(forceNew = false) {
-      // 重新生成时停止朗读
-      if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel();
-        resetSpeakBtn();
-        resetDailySpeakBtn();
-      }
-
       const today = new Date();
       const dateStr = `${today.getFullYear()}/${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getDate()).padStart(2, '0')}`;
 
@@ -1052,13 +1032,13 @@
           icon: "🔊",
           type: "声音",
           q: `故事里先后出现了哪些声音？分别是谁发出的？`,
-          a: `${sound1.name}“${sound1.call}”、${sound2.name}“${sound2.call}”`
+          a: `${sound1.name}"${sound1.call}"、${sound2.name}"${sound2.call}"`
         },
         {
           icon: "🔍",
           type: "找茬",
           q: `我刚才说${sound2.name}是"${hero.call}"叫的，对吗？`,
-          a: `错，${sound2.name}是“${sound2.call}”叫的，${hero.name}才是“${hero.call}”叫的`
+          a: `错，${sound2.name}是"${sound2.call}"叫的，${hero.name}才是"${hero.call}"叫的`
         }
       ];
 
@@ -1088,8 +1068,8 @@
 
       const qaList = document.getElementById('dailyQaList');
       qaList.innerHTML = story.qas.map((qa, i) => `
-        <div class="qa-item“ data-daily=”true">
-          <button class="qa-question“ onclick=”toggleAnswer(this)">
+        <div class="qa-item\" data-daily=\"true">
+          <button class="qa-question\" onclick=\"toggleAnswer(this)">
             <span class="q-icon">${qa.icon}</span>
             <span class="q-text">${qa.q}</span>
             <span class="chevron">▼</span>
@@ -1108,50 +1088,6 @@
       items.forEach(i => i.classList.toggle('open', !allOpen));
     }
 
-    let dailyUtterance = null;
-    function speakDailyStory() {
-      if (!('speechSynthesis' in window)) {
-        alert('抱歉，您的浏览器不支持语音朗读功能。');
-        return;
-      }
-
-      const saved = localStorage.getItem(DAILY_KEY);
-      if (!saved) return;
-      const story = JSON.parse(saved);
-      const text = `${story.title}。${story.content.join('。')}`;
-
-      if (window.speechSynthesis.speaking && dailyUtterance) {
-        window.speechSynthesis.cancel();
-        resetDailySpeakBtn();
-        return;
-      }
-
-      window.speechSynthesis.cancel();
-      resetSpeakBtn();
-      resetDailySpeakBtn();
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'zh-CN';
-      utterance.rate = 0.88;
-      utterance.pitch = 1.05;
-      const btn = document.getElementById('dailySpeakBtn');
-
-      utterance.onend = () => resetDailySpeakBtn();
-      utterance.onerror = () => resetDailySpeakBtn();
-
-      dailyUtterance = utterance;
-      btn.textContent = '⏹ 停止朗读';
-      document.body.classList.add('speaking');
-      window.speechSynthesis.speak(utterance);
-    }
-
-    function resetDailySpeakBtn() {
-      const btn = document.getElementById('dailySpeakBtn');
-      if (btn) btn.textContent = '🔊 朗读故事';
-      dailyUtterance = null;
-      document.body.classList.remove('speaking');
-    }
-
     // ==================== 每日故事生成器结束 ====================
 
     // 渲染目录
@@ -1163,14 +1099,14 @@
 
       stories.forEach(s => {
         gridHtml += `
-          <a href="#${s.id}“ class=”toc-item“ onclick=”closeToc()">
+          <a href="#${s.id}\" class=\"toc-item\" onclick=\"closeToc()">
             <span class="toc-emoji">${s.emoji}</span>
             <span class="toc-name">故事${s.no}</span>
             <span class="toc-goal">${s.goal}</span>
           </a>
         `;
         panelHtml += `
-          <a href="#${s.id}“ class=”toc-panel-item“ onclick=”closeToc()">
+          <a href="#${s.id}\" class=\"toc-panel-item\" onclick=\"closeToc()">
             <span class="toc-panel-emoji">${s.emoji}</span>
             <div class="toc-panel-info">
               <div class="toc-panel-name">故事${s.no} · ${s.title}</div>
@@ -1188,7 +1124,7 @@
     function renderStories() {
       const container = document.getElementById('stories');
       container.innerHTML = stories.map(s => `
-        <article class="story-card“ id=”${s.id}">
+        <article class="story-card\" id=\"${s.id}">
           <div class="story-header">
             <h3 class="story-title"><span>${s.emoji}</span>故事${s.no}：${s.title}</h3>
             <span class="story-goal">🎯 ${s.goal}</span>
@@ -1197,10 +1133,7 @@
             ${s.content.map(p => `<p>${p.replace(/\n/g, '</p><p>')}</p>`).join('')}
           </div>
           <div class="story-actions">
-            <button class="btn btn-primary“ onclick=”speakStory('${s.id}', this)">
-              🔊 朗读故事
-            </button>
-            <button class="btn btn-accent“ onclick=”toggleAllAnswers('${s.id}')">
+            <button class="btn btn-accent\" onclick=\"toggleAllAnswers('${s.id}')">
               📋 展开全部答案
             </button>
           </div>
@@ -1208,8 +1141,8 @@
             <div class="qa-title">❓ 提问环节</div>
             <div class="qa-list">
               ${s.qas.map((qa, i) => `
-                <div class="qa-item“ data-story=”${s.id}">
-                  <button class="qa-question“ onclick=”toggleAnswer(this)">
+                <div class="qa-item\" data-story=\"${s.id}">
+                  <button class="qa-question\" onclick=\"toggleAnswer(this)">
                     <span class="q-icon">${qa.icon}</span>
                     <span class="q-text">${qa.q}</span>
                     <span class="chevron">▼</span>
@@ -1239,52 +1172,6 @@
       items.forEach(i => i.classList.toggle('open', !allOpen));
       const btn = document.querySelector(`#${storyId} .btn-accent`);
       if (btn) btn.textContent = allOpen ? '📋 展开全部答案' : '📋 收起全部答案';
-    }
-
-    // 朗读功能
-    let currentUtterance = null;
-    let currentSpeakBtn = null;
-
-    function speakStory(storyId, btn) {
-      if ('speechSynthesis' in window) {
-        // 如果正在朗读同一个故事，则停止
-        if (currentSpeakBtn === btn && window.speechSynthesis.speaking) {
-          window.speechSynthesis.cancel();
-          resetSpeakBtn();
-          return;
-        }
-
-        // 停止其他朗读
-        window.speechSynthesis.cancel();
-        resetSpeakBtn();
-        resetDailySpeakBtn();
-
-        const story = stories.find(s => s.id === storyId);
-        const text = `${story.title}。${story.content.join('。')}`;
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'zh-CN';
-        utterance.rate = 0.88;
-        utterance.pitch = 1.05;
-
-        utterance.onend = () => resetSpeakBtn();
-        utterance.onerror = () => resetSpeakBtn();
-
-        currentUtterance = utterance;
-        currentSpeakBtn = btn;
-        btn.textContent = '⏹ 停止朗读';
-        document.body.classList.add('speaking');
-        window.speechSynthesis.speak(utterance);
-      } else {
-        alert('抱歉，您的浏览器不支持语音朗读功能。');
-      }
-    }
-
-    function resetSpeakBtn() {
-      if (currentSpeakBtn) {
-        currentSpeakBtn.textContent = '🔊 朗读故事';
-        currentSpeakBtn = null;
-      }
-      document.body.classList.remove('speaking');
     }
 
     // 目录弹窗
