@@ -6,7 +6,7 @@
 // 常量
 // ========================
 const POET_BG_COLORS = ['#e8f4fd','#fdf2f0','#f0f9f0','#fdf8e8','#f3f0fb','#fdf0f5','#e8f8f5','#fef3e8','#f0f4ff','#fff8e1','#e0f7fa','#fce4ec','#f1f8e9','#e8eaf6','#fff3e0','#e0f2f1'];
-const TAB_NAMES = { notes: '注释', translation: '译文', analysis: '赏析' };
+const TAB_NAMES = { notes: '注释', translation: '译文', analysis: '赏析', story: '创作故事' };
 const VOICE_NAMES = { xiaoxiao: '女声温暖', xiaoyi: '女童活泼', yunxia: '少年可爱' };
 const STATUS_ICONS = {
   success: ['fa-check-circle', '#27ae60'],
@@ -833,7 +833,7 @@ function switchTab(tab) {
     pane.innerHTML = '<div class="tab-empty">请先选择一首诗歌</div>';
     return;
   }
-  const extra = poemExtras[currentPoem.title];
+  const extra = tab === 'story' ? poemStories[currentPoem.title] : poemExtras[currentPoem.title];
   if (!extra || !extra[tab]) {
     pane.innerHTML = '<div class="tab-empty">暂无' + TAB_NAMES[tab] + '</div>';
     return;
@@ -847,6 +847,10 @@ function switchTab(tab) {
     html = '<p>' + extra.translation + '</p>';
   } else if (tab === 'analysis') {
     html = '<p>' + extra.analysis + '</p>';
+  } else if (tab === 'story') {
+    extra.story.split('\n').filter(s => s.trim()).forEach(s => {
+      html += '<p>' + s.trim() + '</p>';
+    });
   }
   pane.innerHTML = html || '<div class="tab-empty">暂无内容</div>';
 }
